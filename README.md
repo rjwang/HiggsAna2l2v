@@ -6,8 +6,8 @@ git clone git@github.com:rjwang/HiggsAna2l2v.git
 
 
 ------------------------
-scramv1 project CMSSW CMSSW_5_3_14
-cd CMSSW_5_3_14/src
+scramv1 project CMSSW CMSSW_5_3_11
+cd CMSSW_5_3_11/src
 cmsenv
 
 git cms-addpkg DataFormats/ParticleFlowCandidate
