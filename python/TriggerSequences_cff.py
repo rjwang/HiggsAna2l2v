@@ -8,6 +8,9 @@ def getTriggerPaths(version=2012) :
 
     #################
     # 2012 triggers #
+    #
+    # Jan 29, 2014
+    # add HLT_Mu17_TkMu8_v, HLT_Ele27_WP80_v and HLT_IsoMu24_v 
     #################
     if(version==2012) :
         mcTrigs = []
@@ -15,14 +18,17 @@ def getTriggerPaths(version=2012) :
         DoubleElectron = ['HLT_Ele17_CaloIdT_CaloIsoVL_TrkIdVL_TrkIsoVL_Ele8_CaloIdT_CaloIsoVL_TrkIdVL_TrkIsoVL_v',
                           'HLT_DoubleEle33_CaloIdL_GsfTrkIdVL_v']
         
-        DoubleMu = ['HLT_Mu17_Mu8_v']
+        DoubleMu = ['HLT_Mu17_Mu8_v','HLT_Mu17_TkMu8_v']
 
         
         MuEG = ['HLT_Mu8_Ele17_CaloIdT_CaloIsoVL_TrkIdVL_TrkIsoVL_v',
                 'HLT_Mu17_Ele8_CaloIdT_CaloIsoVL_TrkIdVL_TrkIsoVL_v']
         
-        SingleMu = ['HLT_IsoMu24_eta2p1_v']
+        SingleMu = ['HLT_IsoMu24_eta2p1_v','HLT_IsoMu24_v']
+	
+	SingleElectron = ['HLT_Ele27_WP80_v']
         
+
         Photon = ['HLT_Photon22_R9Id90_HE10_Iso40_EBOnly_v',
                   'HLT_Photon36_R9Id90_HE10_Iso40_EBOnly_v',                  
                   'HLT_Photon50_R9Id90_HE10_Iso40_EBOnly_v',
@@ -64,6 +70,8 @@ def getTriggerPaths(version=2012) :
                     'HLT_IsoMu30_eta2p1_v',
                     'HLT_IsoMu34_eta2p1_v']
 
+	SingleElectron = ['HLT_Ele27_WP80_v']
+
         Photon=['HLT_Photon20_CaloIdVL_IsoL_v',
                 'HLT_Photon30_CaloIdVL_IsoL_v',
                 'HLT_Photon50_CaloIdVL_IsoL_v',
@@ -74,5 +82,5 @@ def getTriggerPaths(version=2012) :
                 'HLT_Photon135_v',
                 'HLT_Photon200_NoHE_v']
     
-    return DoubleElectron, DoubleMu, MuEG, Photon, SingleMu, mcTrigs
+    return DoubleElectron, DoubleMu, MuEG, Photon, SingleMu, SingleElectron, mcTrigs
 

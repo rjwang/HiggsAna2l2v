@@ -16,7 +16,7 @@ def getSelVersion():
 selVersion=getSelVersion()
 print 'CMSSW version %s - selection adapted for %d'%(os.environ['CMSSW_BASE'],selVersion)
 
-DoubleElectronTrigs, DoubleMuTrigs, MuEGTrigs, PhotonTrigs, SingleMuTrigs, mcTrigs = getTriggerPaths(version=selVersion)
+DoubleElectronTrigs, DoubleMuTrigs, MuEGTrigs, PhotonTrigs, SingleMuTrigs, SingleEleTrigs, mcTrigs = getTriggerPaths(version=selVersion)
 
 # base values for trigger event
 BaseTriggerSelection = cms.PSet( source = cms.InputTag("TriggerResults::HLT"),
@@ -24,7 +24,8 @@ BaseTriggerSelection = cms.PSet( source = cms.InputTag("TriggerResults::HLT"),
                                                           ee=cms.vstring(DoubleElectronTrigs),
                                                           mumu=cms.vstring(DoubleMuTrigs),
                                                           emu=cms.vstring(MuEGTrigs),
-                                                          singleMu=cms.vstring(SingleMuTrigs)
+                                                          singleMu=cms.vstring(SingleMuTrigs),
+							  singleEle=cms.vstring(SingleEleTrigs)
                                                           )
                                  )
 

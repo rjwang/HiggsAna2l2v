@@ -10,3 +10,7 @@ LSFJOB*
 *pyc
 # no python init file
 python/__init__.py
+
+# no private directory
+backup
+private
