@@ -1,8 +1,10 @@
 import FWCore.ParameterSet.Config as cms
 
 from CMGTools.HiggsAna2l2v.ClusteredPFMetProducer_cfi import ClusteredPFMetProducer
+from CMGTools.HiggsAna2l2v.StandardSelections_cfi import *
 from RecoJets.JetProducers.kt4PFJets_cfi import kt4PFJets
 from CommonTools.ParticleFlow.ParticleSelectors.pfAllNeutralHadronsAndPhotons_cfi import pfAllNeutralHadronsAndPhotons
+
 
 def defineAnalysis(process,castorDir="",reRunRho=False) :
 
@@ -42,7 +44,6 @@ def defineAnalysis(process,castorDir="",reRunRho=False) :
     from JetMETCorrections.Configuration.JetCorrectionProducers_cff import ak5PFJetsL1L2L3
     process.ak5PFJetsL1L2L3ForMVAMET=ak5PFJetsL1L2L3.clone()
     
-        
     #rho for muon isolation
     if(reRunRho) :
         process.pfAllNeutralHadronsAndPhotons = pfAllNeutralHadronsAndPhotons.clone( src=cms.InputTag("particleFlow") )

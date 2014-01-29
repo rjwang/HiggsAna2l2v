@@ -107,6 +107,7 @@ from PhysicsTools.PatAlgos.tools.pfTools import *
 usePF2PAT(process,runPF2PAT=True, jetAlgo='AK5', runOnMC=runOnMC, postfix="PFlow",typeIMetCorrections=True,jetCorrections=('AK5PFchs',jecLevels))
 if(getSelVersion()==2012) : useGsfElectrons(process,'PFlow',"04") # to change isolation cone size to 0.3 as it is recommended by EGM POG, use "04" for cone size 0.4
 
+
 #configure std pat to use pf jets/MET
 from PhysicsTools.PatAlgos.tools.metTools import *
 addPfMET(process, 'PF')
