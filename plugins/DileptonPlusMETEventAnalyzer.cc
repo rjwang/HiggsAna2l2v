@@ -502,7 +502,8 @@ void DileptonPlusMETEventAnalyzer::analyze(const edm::Event &event, const edm::E
 	  {
 	    if(ev.cat==EE   && triggerBits["singleEle"]==false && triggerBits["ee"]==false)   return;
 	    if(ev.cat==MUMU && triggerBits["singleMu"]==false && triggerBits["mumu"]==false) return;  
-	    if(ev.cat==EMU  && triggerBits["emu"]==false)  return;
+	    if(ev.cat==EMU  && triggerBits["emu"]==false)  return; //is this complete?
+	    if(ev.cat==EMU  && ( triggerBits["singleEle"]==false || triggerBits["singleMu"]==false) ) return; //need to be double-check
 	    
 	    ev.triggerType = (triggerBits["ee"] << 0 ) |
 	      (triggerBits["mumu"] << 1 ) |
