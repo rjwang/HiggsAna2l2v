@@ -313,21 +313,21 @@ void DileptonPlusMETEventAnalyzer::saveMCtruth(const edm::Event &event, const ed
 	{
 	  float vxMother = genpart->vx();
 	  float vyMother = genpart->vy();
-	  int dauId(0), gDauId(0);
+	  //int dauId(0), gDauId(0);
 	  float vxDaughter(0), vyDaughter(0);
 	  float vxGdaughter(0), vyGdaughter(0);
 	  const reco::Candidate *fsPart=getGeneratorFinalStateFor(genpart);
 	  if(fsPart && fsPart->numberOfDaughters()>0)
 	    {
-	      dauId      = fsPart->daughter(0)->pdgId();
+	      //dauId      = fsPart->daughter(0)->pdgId();
 	      vxDaughter = fsPart->daughter(0)->vx();
 	      vyDaughter = fsPart->daughter(0)->vy();
 	     
 	      const reco::Candidate *fsDauPart=getGeneratorFinalStateFor(fsPart);
-	      float vxGdaughter(0),vyGdaughter(0);
+	      //float vxGdaughter(0),vyGdaughter(0); //this is a bug, isn't it ??
 	      if(fsDauPart && fsDauPart->numberOfDaughters()>1)
 		{
-		  gDauId      = fsDauPart->daughter(1)->pdgId();
+		  //gDauId      = fsDauPart->daughter(1)->pdgId();
 		  vxGdaughter = fsDauPart->daughter(1)->vx();
 		  vyGdaughter = fsDauPart->daughter(1)->vy();
 		}
@@ -433,6 +433,7 @@ void DileptonPlusMETEventAnalyzer::analyze(const edm::Event &event, const edm::E
 	}
       }
     if(triggerBits["singleMu"]==true && triggerBits["mumu"]==true) triggerBits["singleMu"]=false;   //veto overlaps: single muon triggers should be used exclusively 
+    if(triggerBits["singleEle"]==true && triggerBits["ee"]==true) triggerBits["singleEle"]=false;   //veto overlaps: single electron triggers should be used exclusively 
 	    
     //
     // vertex and beam spot
@@ -499,14 +500,15 @@ void DileptonPlusMETEventAnalyzer::analyze(const edm::Event &event, const edm::E
 	ev.triggerType=0;
 	//if(event.isRealData())
 	  {
-	    if(ev.cat==EE   && triggerBits["ee"]==false)   return;
+	    if(ev.cat==EE   && triggerBits["singleEle"]==false && triggerBits["ee"]==false)   return;
 	    if(ev.cat==MUMU && triggerBits["singleMu"]==false && triggerBits["mumu"]==false) return;  
 	    if(ev.cat==EMU  && triggerBits["emu"]==false)  return;
 	    
 	    ev.triggerType = (triggerBits["ee"] << 0 ) |
 	      (triggerBits["mumu"] << 1 ) |
 	      (triggerBits["emu"] << 2 ) |
-	      (triggerBits["singleMu"] << 3 );
+	      (triggerBits["singleMu"] << 3 ) |
+	      (triggerBits["singleEle"] << 4 );
 	  }
 	  //ev.hasTrigger=true;
 
