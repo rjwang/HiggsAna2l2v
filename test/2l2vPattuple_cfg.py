@@ -12,7 +12,9 @@ process.options = cms.untracked.PSet( wantSummary = cms.untracked.bool(False),
 # event source
 process.source = cms.Source("PoolSource",fileNames = cms.untracked.vstring())
 process.source.fileNames=inputList
-process.maxEvents = cms.untracked.PSet( input = cms.untracked.int32(-1) )
+#process.maxEvents = cms.untracked.PSet( input = cms.untracked.int32(-1) )
+process.maxEvents = cms.untracked.PSet( input = cms.untracked.int32(200) ) ## for testing
+
 
 # global tag
 process.load('Configuration.StandardSequences.FrontierConditions_GlobalTag_cff')
@@ -21,29 +23,12 @@ from CMGTools.HiggsAna2l2v.StandardSelections_cfi import getSelVersion
 gt=''
 if(getSelVersion()==2012) :
     process.load("Configuration.Geometry.GeometryIdeal_cff")
-    if ( not runOnMC ):
-        gt='GR_P_V42_AN2::All'
-        try :
-            if(dataTag=='Aug24'):     gt='FT_53_V10_AN2::All'
-            elif(dataTag=='July13'):  gt='FT_53_V6_AN2::All'
-            elif(dataTag=='Aug06'):   gt='FT_53_V6C_AN2::All'
-            elif(dataTag=='2012Cv2'): gt='GR_P_V41_AN2::All'
-            elif(dataTag=='2012D'):   gt='GR_P_V42_AN2::All'
-            elif(dataTag=='2012Cv1'): gt='GR_P_V41_AN2::All'
-            else :                    gt='GR_P_V41_AN1::All'
-        except:
-            print 'Assuming nominal Global Tag for prompt preco'
-
+    if ( not runOnMC ): ##DATA
+	gt='FT_53_V21_AN4::All'
         #cf. https://twiki.cern.ch/twiki/bin/view/CMSPublic/SWGuideBTagJetProbabilityCalibration#Calibration_in_53x_Data_and_MC
-        process.GlobalTag.toGet = cms.VPSet( cms.PSet(record = cms.string("BTagTrackProbability2DRcd"),
-                                                      tag = cms.string("TrackProbabilityCalibration_2D_Data53X_v2"),
-                                                      connect = cms.untracked.string("frontier://FrontierPrep/CMS_COND_BTAU")),
-                                             cms.PSet(record = cms.string("BTagTrackProbability3DRcd"),
-                                                      tag = cms.string("TrackProbabilityCalibration_3D_Data53X_v2"),
-                                                      connect = cms.untracked.string("frontier://FrontierPrep/CMS_COND_BTAU"))
-                                             )
-    else :
-        gt = 'START53_V10::All'
+	#For 53x reprocessed Data from 22Jan2013, the default JP calibration used in the AOD (and RECO) productions is fine.
+    else : ## MC
+	gt = 'START53_V23::All'
         process.GlobalTag.toGet = cms.VPSet(cms.PSet(record = cms.string("BTagTrackProbability2DRcd"),
                                                      tag = cms.string("TrackProbabilityCalibration_2D_MC53X_v2"),
                                                      connect = cms.untracked.string("frontier://FrontierPrep/CMS_COND_BTAU")),
@@ -109,11 +94,9 @@ usePF2PAT(process,runPF2PAT=True, jetAlgo='AK5', runOnMC=runOnMC, postfix="PFlow
 
 
 #######################################
-##
-## to do trigger matching
-##
-#######################################
-
+#setup trigger matching
+from CMGTools.HiggsAna2l2v.triggerMatching_cfg import *
+addTriggerMatchingTo(process)
 
 
 if(getSelVersion()==2012) : useGsfElectrons(process,'PFlow',"04") # to change isolation cone size to 0.3 as it is recommended by EGM POG, use "04" for cone size 0.4
@@ -227,6 +210,8 @@ process.patSequence = cms.Sequence( process.startCounter
                                     + process.patDefaultSequence
                                     + process.btagging 
                                     + process.ivfSequence 
+				    + process.selectedPatElectronsWithTrigger 
+				    + process.selectedPatMuonsTriggerMatch
                                     )
 
 # define the paths
@@ -238,6 +223,14 @@ else:
     process.llPath = cms.Path(process.startCounter * process.preselection * process.llCandidateSequence * process.patSequence )
     process.photonPath = cms.Path(process.startCounter * process.preselection * process.photonCandidateSequence * process.patSequence )
 process.e = cms.EndPath( process.endCounter*process.out )
+
+
+
+
+
+
+
+
 
 ######################################
 # ANALYSIS                           #
