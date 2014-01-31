@@ -5,7 +5,7 @@ process = cms.Process("PAT")
 # global options
 process.load("FWCore.MessageLogger.MessageLogger_cfi")
 process.MessageLogger.cerr.FwkReport.reportEvery = 5000
-process.options = cms.untracked.PSet( wantSummary = cms.untracked.bool(False),
+process.options = cms.untracked.PSet( wantSummary = cms.untracked.bool(False),#True),
                                       SkipEvent = cms.untracked.vstring('ProductNotFound')
                                       )
 
@@ -13,7 +13,7 @@ process.options = cms.untracked.PSet( wantSummary = cms.untracked.bool(False),
 process.source = cms.Source("PoolSource",fileNames = cms.untracked.vstring())
 process.source.fileNames=inputList
 #process.maxEvents = cms.untracked.PSet( input = cms.untracked.int32(-1) )
-process.maxEvents = cms.untracked.PSet( input = cms.untracked.int32(200) ) ## for testing
+process.maxEvents = cms.untracked.PSet( input = cms.untracked.int32(100) ) ## for testing
 
 
 # global tag
@@ -24,7 +24,8 @@ gt=''
 if(getSelVersion()==2012) :
     process.load("Configuration.Geometry.GeometryIdeal_cff")
     if ( not runOnMC ): ##DATA
-	gt='FT_53_V21_AN4::All'
+	gt='FT_53_V21_AN4::All'# this is not working, ???
+        #gt='FT_53_V10_AN2::All' #for testing
         #cf. https://twiki.cern.ch/twiki/bin/view/CMSPublic/SWGuideBTagJetProbabilityCalibration#Calibration_in_53x_Data_and_MC
 	#For 53x reprocessed Data from 22Jan2013, the default JP calibration used in the AOD (and RECO) productions is fine.
     else : ## MC
@@ -52,7 +53,7 @@ else:
 print 'Using the following global tag %s'%gt
 process.GlobalTag.globaltag = gt
 
-process.load("Configuration.StandardSequences.MagneticField_cff")
+##-------------------- Import the JEC services -----------------------
 process.load('JetMETCorrections.Configuration.DefaultJEC_cff')
 
 ## Output Module Configuration
@@ -73,7 +74,8 @@ if(not runOnMC ):
     addPreselectionSequences(process)
     #addLumifilter(process,'/afs/cern.ch/cms/CAF/CMSCOMM/COMM_DQM/certification/Collisions12/8TeV/Prompt/Cert_190456-200601_8TeV_PromptReco_Collisions12_JSON_v2.txt')
     
-                      
+##okay                      
+
 from CMGTools.HiggsAna2l2v.SkimSequences_cff import addDileptonSkim, addPhotonSkim
 addDileptonSkim(process)
 addPhotonSkim(process,selVersion=getSelVersion())
@@ -81,6 +83,7 @@ addPhotonSkim(process,selVersion=getSelVersion())
 if runOnMC : jecLevels=['L1FastJet','L2Relative','L3Absolute']
 else       : jecLevels=['L1FastJet','L2Relative','L3Absolute','L2L3Residual']
 
+##okay
 #############################################
 #  DEFINITION OF THE PFBRECO+PAT SEQUENCES  #
 #############################################
@@ -89,17 +92,21 @@ process.load("PhysicsTools.PatAlgos.patSequences_cff")
 from PhysicsTools.PatAlgos.tools.pfTools import *
 
 #configure PF2PAT
-usePF2PAT(process,runPF2PAT=True, jetAlgo='AK5', runOnMC=runOnMC, postfix="PFlow",typeIMetCorrections=True,jetCorrections=('AK5PFchs',jecLevels))
+usePF2PAT(process,
+	  runPF2PAT=True, 
+	  jetAlgo='AK5', 
+	  runOnMC=runOnMC, 
+	  postfix="PFlow",
+	  typeIMetCorrections=True,
+	  jetCorrections=('AK5PFchs',jecLevels))
 
 
-
-#######################################
 #setup trigger matching
 from CMGTools.HiggsAna2l2v.triggerMatching_cfg import *
 addTriggerMatchingTo(process)
 
 
-if(getSelVersion()==2012) : useGsfElectrons(process,'PFlow',"04") # to change isolation cone size to 0.3 as it is recommended by EGM POG, use "04" for cone size 0.4
+if(getSelVersion()==2012) : useGsfElectrons(process,'PFlow',dR="03")
 
 
 #configure std pat to use pf jets/MET
@@ -195,7 +202,7 @@ for pf in ['PFlow','']:
 #####################
 #  PATH DEFINITION  #
 #####################
-print ' ******* Defining paths to be run'
+print '******* Defining paths to be run'
 
 # counters that can be used at analysis level to know the processed events
 process.startCounter = cms.EDProducer("EventCountProducer")

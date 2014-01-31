@@ -15,7 +15,7 @@ def defineAnalysis(process,castorDir="",reRunRho=False) :
     # configure the analyzer (cf. base values are in the StandardSelections_cfi)
     #
     process.evAnalyzer = cms.EDAnalyzer("DileptonPlusMETEventAnalyzer",
-                                        dtag=cms.string('h2zz'),
+                                        dtag=cms.string('llvv'),
                                         Trigger = BaseTriggerSelection.clone(),
                                         Generator = BaseGeneratorSelection.clone(),
                                         Vertices = BaseVertexSelection.clone(),
