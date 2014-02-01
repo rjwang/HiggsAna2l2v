@@ -13,10 +13,10 @@ process.options = cms.untracked.PSet( wantSummary = cms.untracked.bool(False),#T
 process.source = cms.Source("PoolSource",fileNames = cms.untracked.vstring())
 ##for testing
 if(len(inputList)==0) : 
-	if(runOnMC): 
-		inputList = cms.untracked.vstring('/store/relval/CMSSW_5_3_6-START53_V14/RelValTTbar/GEN-SIM-RECO/v2/00000/16D5D599-F129-E211-AB60-00261894390B.root')
-	else:
-		inputList = cms.untracked.vstring('/store/data//Run2012A/DoubleMu/AOD//22Jan2013-v1/20000/F4C34C30-B581-E211-8269-003048FFD7A2.root') 
+    if(runOnMC): 
+	inputList = cms.untracked.vstring('/store/mc/Summer12_DR53X/ZZJetsTo2L2Nu_TuneZ2star_8TeV-madgraph-tauola/AODSIM/PU_S10_START53_V7A-v3/0000/00277EBC-A2E0-E111-931D-00215E2223E2.root')
+    else:
+	inputList = cms.untracked.vstring('/store/data/Run2012D/DoubleMuParked/AOD/22Jan2013-v1/20000/002E1374-5F84-E211-83C4-20CF305616D0.root')
 print inputList
 process.source.fileNames=inputList
 
