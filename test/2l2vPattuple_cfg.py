@@ -11,7 +11,15 @@ process.options = cms.untracked.PSet( wantSummary = cms.untracked.bool(False),#T
 
 # event source
 process.source = cms.Source("PoolSource",fileNames = cms.untracked.vstring())
+##for testing
+if(len(inputList)==0) : 
+	if(runOnMC): 
+		inputList = cms.untracked.vstring('/store/relval/CMSSW_5_3_6-START53_V14/RelValTTbar/GEN-SIM-RECO/v2/00000/16D5D599-F129-E211-AB60-00261894390B.root')
+	else:
+		inputList = cms.untracked.vstring('/store/data//Run2012A/DoubleMu/AOD//22Jan2013-v1/20000/F4C34C30-B581-E211-8269-003048FFD7A2.root') 
+print inputList
 process.source.fileNames=inputList
+
 #process.maxEvents = cms.untracked.PSet( input = cms.untracked.int32(-1) )
 process.maxEvents = cms.untracked.PSet( input = cms.untracked.int32(100) ) ## for testing
 
@@ -24,8 +32,8 @@ gt=''
 if(getSelVersion()==2012) :
     process.load("Configuration.Geometry.GeometryIdeal_cff")
     if ( not runOnMC ): ##DATA
-	gt='FT_53_V21_AN4::All'# this is not working, ???
-        #gt='FT_53_V10_AN2::All' #for testing
+	#gt='FT_53_V21_AN6::All'# this is not working, ???
+        gt='FT_53_V10_AN2::All' #for testing
         #cf. https://twiki.cern.ch/twiki/bin/view/CMSPublic/SWGuideBTagJetProbabilityCalibration#Calibration_in_53x_Data_and_MC
 	#For 53x reprocessed Data from 22Jan2013, the default JP calibration used in the AOD (and RECO) productions is fine.
     else : ## MC
@@ -52,6 +60,8 @@ else:
 
 print 'Using the following global tag %s'%gt
 process.GlobalTag.globaltag = gt
+
+process.load("Configuration.StandardSequences.MagneticField_cff")
 
 ##-------------------- Import the JEC services -----------------------
 process.load('JetMETCorrections.Configuration.DefaultJEC_cff')
