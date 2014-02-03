@@ -84,32 +84,32 @@ process.noscraping = cms.EDFilter("FilterOutScraping",
 
 # optional MET filters
 # cf.https://twiki.cern.ch/twiki/bin/view/CMS/MissingETOptionalFilters
-#process.load('RecoMET.METFilters.metFilters_cff') ##missing package called RecoMET/METAnalyzer
-#process.hcalLaserEventFilter.taggingMode   = cms.bool(True)
-#process.EcalDeadCellTriggerPrimitiveFilter.taggingMode=cms.bool(True)
-#process.eeBadScFilter.taggingMode           = cms.bool(True)
-#process.ecalLaserCorrFilter.taggingMode     = cms.bool(True)
-#process.trackingFailureFilter.VertexSource  = cms.InputTag('goodOfflinePrimaryVertices')
-#process.trackingFailureFilter.taggingMode   = cms.bool(True)
-#process.manystripclus53X.taggedMode         = cms.untracked.bool(True)
-#process.manystripclus53X.forcedValue        = cms.untracked.bool(False)
-#process.toomanystripclus53X.taggedMode      = cms.untracked.bool(True)
-#process.toomanystripclus53X.forcedValue     = cms.untracked.bool(False)
-#process.logErrorTooManyClusters.taggedMode  = cms.untracked.bool(True)
-#process.logErrorTooManyClusters.forcedValue = cms.untracked.bool(False)
+process.load('RecoMET.METFilters.metFilters_cff') ##missing package called RecoMET/METAnalyzer
+process.hcalLaserEventFilter.taggingMode   = cms.bool(True)
+process.EcalDeadCellTriggerPrimitiveFilter.taggingMode=cms.bool(True)
+process.eeBadScFilter.taggingMode           = cms.bool(True)
+process.ecalLaserCorrFilter.taggingMode     = cms.bool(True)
+process.trackingFailureFilter.VertexSource  = cms.InputTag('goodOfflinePrimaryVertices')
+process.trackingFailureFilter.taggingMode   = cms.bool(True)
+process.manystripclus53X.taggedMode         = cms.untracked.bool(True)
+process.manystripclus53X.forcedValue        = cms.untracked.bool(False)
+process.toomanystripclus53X.taggedMode      = cms.untracked.bool(True)
+process.toomanystripclus53X.forcedValue     = cms.untracked.bool(False)
+process.logErrorTooManyClusters.taggedMode  = cms.untracked.bool(True)
+process.logErrorTooManyClusters.forcedValue = cms.untracked.bool(False)
 
-#process.metFilteringTaggers = cms.Sequence(process.HBHENoiseFilter*
-#                                           process.hcalLaserEventFilter *
-#                                           process.EcalDeadCellTriggerPrimitiveFilter *
-#                                           process.eeBadScFilter *
-#                                           process.ecalLaserCorrFilter *
-#                                           process.trackingFailureFilter *
-#                                           process.trkPOGFilters)
+process.metFilteringTaggers = cms.Sequence(process.HBHENoiseFilter*
+                                           process.hcalLaserEventFilter *
+                                           process.EcalDeadCellTriggerPrimitiveFilter *
+                                           process.eeBadScFilter *
+                                           process.ecalLaserCorrFilter *
+                                           process.trackingFailureFilter *
+                                           process.trkPOGFilters)
 
 # optional MET filters : should add more? should run in tagging mode?
 # cf.https://twiki.cern.ch/twiki/bin/view/CMS/MissingETOptionalFilters                                                                                              
-process.load('CommonTools.RecoAlgos.HBHENoiseFilter_cfi')                                                                                                           
-process.metFilteringTaggers = cms.Sequence(process.HBHENoiseFilter)  
+#process.load('CommonTools.RecoAlgos.HBHENoiseFilter_cfi')                                                                                                           
+#process.metFilteringTaggers = cms.Sequence(process.HBHENoiseFilter)  
 
 
 #PF2PAT
@@ -148,16 +148,16 @@ process.load('EGamma.EGammaAnalysisTools.electronIdMVAProducer_cfi')
 process.eidMVASequence = cms.Sequence(  process.mvaTrigV0 + process.mvaNonTrigV0 )
 process.patElectronsPFlow.electronIDSources.mvaTrigV0    = cms.InputTag("mvaTrigV0")
 process.patElectronsPFlow.electronIDSources.mvaNonTrigV0 = cms.InputTag("mvaNonTrigV0")
-#from SHarper.HEEPAnalyzer.HEEPSelectionCuts_cfi import *
-#process.selectedPatElectronsPFlowHeep = cms.EDProducer("HEEPAttStatusToPAT",
-#                                                       eleLabel = cms.InputTag("selectedPatElectronsWithTrigger"),
-#                                                       barrelCuts = cms.PSet(heepBarrelCuts),
-#                                                       endcapCuts = cms.PSet(heepEndcapCuts),
-#                                                       applyRhoCorrToEleIsol = cms.bool(True),
-#                                                       eleIsolEffectiveAreas = cms.PSet (heepEffectiveAreas),
-#                                                       eleRhoCorrLabel = cms.InputTag("kt6PFJets:rho"),
-#                                                       verticesLabel = cms.InputTag("goodOfflinePrimaryVertices"),
-#                                                       )
+from SHarper.HEEPAnalyzer.HEEPSelectionCuts_cfi import *
+process.selectedPatElectronsPFlowHeep = cms.EDProducer("HEEPAttStatusToPAT",
+                                                       eleLabel = cms.InputTag("selectedPatElectronsWithTrigger"),
+                                                       barrelCuts = cms.PSet(heepBarrelCuts),
+                                                       endcapCuts = cms.PSet(heepEndcapCuts),
+                                                       applyRhoCorrToEleIsol = cms.bool(True),
+                                                       eleIsolEffectiveAreas = cms.PSet (heepEffectiveAreas),
+                                                       eleRhoCorrLabel = cms.InputTag("kt6PFJets:rho"),
+                                                       verticesLabel = cms.InputTag("goodOfflinePrimaryVertices"),
+                                                       )
 
 #custom muons
 process.patMuonsPFlow.pfMuonSource = cms.InputTag("pfSelectedMuonsPFlow")
@@ -173,13 +173,13 @@ getattr(process,"pfNoTau"+postfix).enable = False      # to use tau-cleaned jet 
 getattr(process,"pfNoJet"+postfix).enable = True       # this i guess it's for photons...      
 
 #add q/g discriminator
-#process.load('QuarkGluonTagger.EightTeV.QGTagger_RecoJets_cff')
-#process.QGTagger.srcJets    = cms.InputTag("selectedPatJets"+postfix)
-#process.QGTagger.isPatJet  = cms.untracked.bool(True)
-#process.QGTagger.useCHS    = cms.untracked.bool(True)
-#process.QGTagger.srcRho    = cms.InputTag('kt6PFJets','rho')
-#process.QGTagger.srcRhoIso = cms.InputTag('kt6PFJetsCentral','rho')
-#process.qgSequence=cms.Sequence(process.goodOfflinePrimaryVerticesQG+process.QGTagger)
+process.load('QuarkGluonTagger.EightTeV.QGTagger_RecoJets_cff')
+process.QGTagger.srcJets    = cms.InputTag("selectedPatJets"+postfix)
+process.QGTagger.isPatJet  = cms.untracked.bool(True)
+process.QGTagger.useCHS    = cms.untracked.bool(True)
+process.QGTagger.srcRho    = cms.InputTag('kt6PFJets','rho')
+process.QGTagger.srcRhoIso = cms.InputTag('kt6PFJetsCentral','rho')
+process.qgSequence=cms.Sequence(process.goodOfflinePrimaryVerticesQG+process.QGTagger)
 
 #compute rho from central pf candidates only
 from RecoJets.JetProducers.kt4PFJets_cfi import kt4PFJets
@@ -189,8 +189,8 @@ process.kt6PFJetsCentral = kt4PFJets.clone( rParam = cms.double(0.6),
                                             Rho_EtaMax = cms.double(2.5),
                                             Ghost_EtaMax = cms.double(2.5) )
 
-#from CMGTools.HiggsAna2l2v.btvDefaultSequence_cff import *
-#btvDefaultSequence(process,isMC,"selectedPatJets"+postfix,"goodOfflinePrimaryVertices")
+from CMGTools.HiggsAna2l2v.btvDefaultSequence_cff import *
+btvDefaultSequence(process,isMC,"selectedPatJets"+postfix,"goodOfflinePrimaryVertices")
 
 # cf. https://twiki.cern.ch/twiki/bin/view/CMSPublic/WorkBookMetAnalysis
 process.load("JetMETCorrections.Type1MET.pfMETCorrections_cff")
@@ -233,11 +233,11 @@ process.p = cms.Path( process.startCounter
                       *process.metCounter
                       *process.eidMVASequence
                       *getattr(process,"patPF2PATSequence"+postfix)
-                      #*process.btvSequence
+                      *process.btvSequence
                       *process.kt6PFJetsCentral
-                      #*process.qgSequence
+                      *process.qgSequence
                       *process.type0PFMEtCorrection*process.producePFMETCorrections
-                      *process.selectedPatElectronsWithTrigger#*process.selectedPatElectronsPFlowHeep
+                      *process.selectedPatElectronsWithTrigger*process.selectedPatElectronsPFlowHeep
                       *process.selectedPatMuonsTriggerMatch
 		      #*process.analysis
                       #*process.dataAnalyzer
