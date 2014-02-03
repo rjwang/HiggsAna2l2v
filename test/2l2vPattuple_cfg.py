@@ -21,7 +21,7 @@ print inputList
 process.source.fileNames=inputList
 
 #process.maxEvents = cms.untracked.PSet( input = cms.untracked.int32(-1) )
-process.maxEvents = cms.untracked.PSet( input = cms.untracked.int32(100) ) ## for testing
+process.maxEvents = cms.untracked.PSet( input = cms.untracked.int32(50) ) ## for testing
 
 
 # global tag
@@ -32,8 +32,8 @@ gt=''
 if(getSelVersion()==2012) :
     process.load("Configuration.Geometry.GeometryIdeal_cff")
     if ( not runOnMC ): ##DATA
-	#gt='FT_53_V21_AN6::All'# this is not working, ???
-        gt='FT_53_V10_AN2::All' #for testing
+	#gt='FT_53_V21_AN4::All'# this is not working, ???
+        #gt='FT_53_V10_AN2::All' #for testing
         #cf. https://twiki.cern.ch/twiki/bin/view/CMSPublic/SWGuideBTagJetProbabilityCalibration#Calibration_in_53x_Data_and_MC
 	#For 53x reprocessed Data from 22Jan2013, the default JP calibration used in the AOD (and RECO) productions is fine.
     else : ## MC
@@ -108,7 +108,9 @@ usePF2PAT(process,
 	  runOnMC=runOnMC, 
 	  postfix="PFlow",
 	  typeIMetCorrections=True,
-	  jetCorrections=('AK5PFchs',jecLevels))
+	  jetCorrections=('AK5PFchs',jecLevels),
+	  pvCollection=cms.InputTag('goodOfflinePrimaryVertices')
+	 )
 
 
 #setup trigger matching
