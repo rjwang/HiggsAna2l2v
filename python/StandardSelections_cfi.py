@@ -38,7 +38,7 @@ if(selVersion==2011): BaseGeneratorSelection.genJets=cms.InputTag("ak5GenJets")
 
 
 # base values for the vertex selection ------------------------------------------
-BaseVertexSelection = cms.PSet( source = cms.InputTag("offlinePrimaryVertices"),
+BaseVertexSelection = cms.PSet( source = cms.InputTag("goodOfflinePrimaryVertices"),#offlinePrimaryVertices"),
                                 beamSpot = cms.InputTag("offlineBeamSpot"),
                                 maxZ = cms.double(24),
                                 maxRho = cms.double(2.0),
@@ -46,7 +46,7 @@ BaseVertexSelection = cms.PSet( source = cms.InputTag("offlinePrimaryVertices"),
                                 )
 
 # base values for muon selection ----------------------------------------------
-BaseMuonsSelection = cms.PSet( source = cms.InputTag("patMuons"), 
+BaseMuonsSelection = cms.PSet( source = cms.InputTag("selectedPatMuonsWithTriggerMatch"),#patMuons"), 
                                sourceIsPF = cms.bool(False),
                                rho25Neut = cms.InputTag("kt6PFJetsCentralNeutral:rho"),
                                minPt = cms.double(20),
@@ -123,7 +123,7 @@ if(selVersion==2011):
     BasePhotonsSelection.scCorrector = cms.string("${CMSSW_BASE}/src/CMGTools/HiggsAna2l2v/data/PhoEnRegress_2011.root")
 
 # base values for electron selection ----------------------------------------------
-BaseElectronsSelection = cms.PSet( source = cms.InputTag("selectedPatElectrons"),
+BaseElectronsSelection = cms.PSet( source = cms.InputTag("selectedPatElectronsWithTriggerMatch"),#selectedPatElectrons"),
                                    id=cms.string("veto"),
                                    #cf. https://twiki.cern.ch/twiki/bin/view/CMS/RegressionSCCorrections
                                    scCorrector = cms.string("${CMSSW_BASE}/src/CMGTools/HiggsAna2l2v/data/EleEnRegress.root"),
@@ -181,6 +181,7 @@ BaseDileptonSelection = cms.PSet( minDileptonMass = cms.double(0),
 # base values for met selection -----------------------------------------------------
 BaseMetSelection = cms.PSet( source = cms.InputTag("patMETsPFlow"),
                              trksource = cms.InputTag("trackMetProducer"),
+			     #hzzmetSources = cms.VInputTag("pfMETPFlow","pfMet","pfType1CorrectedMet","pfType1p2CorrectedMet"),
                              hzzmetSources = cms.VInputTag("ClusteredPFMetProducer:assoc",                #1
                                                            "ClusteredPFMetProducer:standard",             #2  
                                                            "ClusteredPFMetProducer:central",              #3

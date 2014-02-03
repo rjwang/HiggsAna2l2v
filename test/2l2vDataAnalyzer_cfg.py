@@ -43,7 +43,8 @@ process.out = cms.OutputModule("PoolOutputModule",
                                outputCommands = cms.untracked.vstring('keep *'))
 process.out.fileName = cms.untracked.string(outFile)
 
-
+if(isMC) : process.load("SimGeneral.HepPDTESSource.pythiapdt_cfi")
+process.TFileService = cms.Service("TFileService", fileName = cms.string(outFile))
 
 
 ##-------------------- Import the JEC services -----------------------
@@ -205,8 +206,8 @@ process.pfType1CorrectedMet.srcType1Corrections = cms.VInputTag( cms.InputTag('p
 ######################################
 # ANALYSIS                           #
 ######################################
-#from CMGTools.HiggsAna2l2v.Analysis_cff import defineAnalysis
-#defineAnalysis(process)
+from CMGTools.HiggsAna2l2v.DataAnalyzer_cff import defineAnalysis
+defineAnalysis(process)
 ###### need to find out more details
     
 
@@ -240,7 +241,7 @@ process.p = cms.Path( process.startCounter
                       *process.selectedPatElectronsWithTrigger*process.selectedPatElectronsPFlowHeep
                       *process.selectedPatMuonsTriggerMatch
 		      #*process.analysis
-                      #*process.dataAnalyzer
+                      *process.dataAnalyzer
 		      #*process.endCounter*process.out
                       )
 
