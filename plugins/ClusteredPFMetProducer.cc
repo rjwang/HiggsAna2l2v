@@ -156,8 +156,9 @@ ClusteredPFMetProducer::ClusteredPFMetProducer(const edm::ParameterSet& iConfig)
   if(mvaMet_) produces<reco::PFMET>("mvaMET");
   
   std::string objs[]={"Vertices", "Photons","Electrons", "Muons"};
-  for(size_t iobj=0; iobj<sizeof(objs)/sizeof(string); iobj++)
+  for(size_t iobj=0; iobj<sizeof(objs)/sizeof(string); iobj++){
     dilObjConfig_[ objs[iobj] ] = iConfig.getParameter<edm::ParameterSet>( objs[iobj] );
+  }
 }
 
 //

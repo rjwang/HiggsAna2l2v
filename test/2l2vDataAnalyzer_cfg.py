@@ -12,7 +12,7 @@ process.load("Configuration.Geometry.GeometryIdeal_cff")
 ## MessageLogger
 process.load("FWCore.MessageLogger.MessageLogger_cfi")
 process.MessageLogger.cerr.FwkReport.reportEvery = 5000
-process.options   = cms.untracked.PSet( wantSummary = cms.untracked.bool(False),#True),
+process.options   = cms.untracked.PSet( wantSummary = cms.untracked.bool(True),
                                         SkipEvent = cms.untracked.vstring('ProductNotFound')
                                         )
 
@@ -36,13 +36,26 @@ print 'Using the following global tag %s'%gtag
 
 
 ## Output Module Configuration
-from CMGTools.HiggsAna2l2v.OutputConfiguration_cff import configureOutput
-process.out = cms.OutputModule("PoolOutputModule",
-                               fileName = cms.untracked.string('patTuple.root'),
-                               SelectEvents   = cms.untracked.PSet( SelectEvents = cms.vstring('p') ),
-                               outputCommands = cms.untracked.vstring('keep *'))
-process.out.fileName = cms.untracked.string(outFile)
+#from CMGTools.HiggsAna2l2v.OutputConfiguration_cff import configureOutput
+#process.out = cms.OutputModule("PoolOutputModule",
+#                               fileName = cms.untracked.string('patTuple.root'),
+#                               SelectEvents   = cms.untracked.PSet( SelectEvents = cms.vstring('p') ),
+#                               outputCommands = cms.untracked.vstring('keep *')
+#			      )
 
+#output (we won't use it)
+#from PhysicsTools.PatAlgos.patEventContent_cff import patEventContent
+#process.out = cms.OutputModule("PoolOutputModule",
+#                               fileName = cms.untracked.string('patTuple.root'),
+#                               SelectEvents   = cms.untracked.PSet( SelectEvents = cms.vstring('p') ),
+#                               outputCommands = cms.untracked.vstring('drop *', *patEventContent )
+#                               )
+process.out = cms.OutputModule("PoolOutputModule",
+                               outputCommands = cms.untracked.vstring('keep *'),
+                               fileName = cms.untracked.string(outFile)
+                               )
+
+process.out.fileName = cms.untracked.string(outFile)
 if(isMC) : process.load("SimGeneral.HepPDTESSource.pythiapdt_cfi")
 process.TFileService = cms.Service("TFileService", fileName = cms.string(outFile))
 
@@ -85,7 +98,7 @@ process.noscraping = cms.EDFilter("FilterOutScraping",
 
 # optional MET filters
 # cf.https://twiki.cern.ch/twiki/bin/view/CMS/MissingETOptionalFilters
-process.load('RecoMET.METFilters.metFilters_cff') ##missing package called RecoMET/METAnalyzer
+process.load('RecoMET.METFilters.metFilters_cff')
 process.hcalLaserEventFilter.taggingMode   = cms.bool(True)
 process.EcalDeadCellTriggerPrimitiveFilter.taggingMode=cms.bool(True)
 process.eeBadScFilter.taggingMode           = cms.bool(True)
@@ -128,9 +141,9 @@ usePF2PAT(process,
           jetAlgo=jetAlgo,
           runOnMC=isMC,
           postfix=postfix,
-          jetCorrections=('AK5PFchs', jecLevels),
+          jetCorrections=('AK5PFchs', cms.vstring(jecLevels)),
           pvCollection=cms.InputTag('goodOfflinePrimaryVertices'),
-          typeIMetCorrections=False)
+          typeIMetCorrections=True)
 
 
 
@@ -193,6 +206,8 @@ process.kt6PFJetsCentral = kt4PFJets.clone( rParam = cms.double(0.6),
 from CMGTools.HiggsAna2l2v.btvDefaultSequence_cff import *
 btvDefaultSequence(process,isMC,"selectedPatJets"+postfix,"goodOfflinePrimaryVertices")
 
+
+
 # cf. https://twiki.cern.ch/twiki/bin/view/CMSPublic/WorkBookMetAnalysis
 process.load("JetMETCorrections.Type1MET.pfMETCorrections_cff")
 process.load("JetMETCorrections.Type1MET.pfMETCorrectionType0_cfi")
@@ -219,30 +234,32 @@ defineAnalysis(process)
 
 #counters for specific filters
 process.startCounter = cms.EDProducer("EventCountProducer")
-process.scrapCounter = process.startCounter.clone()
-process.vtxCounter   = process.startCounter.clone()
-process.metCounter   = process.startCounter.clone()
-process.endCounter = cms.EDProducer("EventCountProducer")
+#process.scrapCounter = process.startCounter.clone()
+#process.vtxCounter   = process.startCounter.clone()
+#process.metCounter   = process.startCounter.clone()
+#process.endCounter = cms.EDProducer("EventCountProducer")
 
 process.p = cms.Path( process.startCounter
                       *process.noscraping
-                      *process.scrapCounter
+                      #*process.scrapCounter
                       *process.goodOfflinePrimaryVertices
                       *process.goodVertexFilter
-                      *process.vtxCounter
+                      #*process.vtxCounter
                       *process.metFilteringTaggers
-                      *process.metCounter
-                      *process.eidMVASequence
+                      #*process.metCounter
+                      #*process.eidMVASequence
                       *getattr(process,"patPF2PATSequence"+postfix)
-                      *process.btvSequence
-                      *process.kt6PFJetsCentral
-                      *process.qgSequence
+                      #*process.btvSequence
+                      #*process.kt6PFJetsCentral
+                      #*process.qgSequence
                       *process.type0PFMEtCorrection*process.producePFMETCorrections
-                      *process.selectedPatElectronsWithTrigger*process.selectedPatElectronsPFlowHeep
-                      *process.selectedPatMuonsTriggerMatch
-		      #*process.analysis
-                      *process.dataAnalyzer
-		      #*process.endCounter*process.out
+                      ####*process.selectedPatElectronsWithTrigger*process.selectedPatElectronsPFlowHeep
+                      ####*process.selectedPatMuonsTriggerMatch
+		      ##*process.analysis
+		      #*process.ak5PFJetsL1L2L3ForMVAMET
+                      #*process.ClusteredPFMetProducer
+                      #*process.dataAnalyzer
+		      ##*process.endCounter*process.out
                       )
 
 

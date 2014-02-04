@@ -41,8 +41,8 @@ def defineAnalysis(process,castorDir="",reRunRho=False) :
     #process.load('EGamma.EGammaAnalysisTools.electronIdMVAProducer_cfi')
     #process.mvaIDs = cms.Sequence(  process.mvaTrigV0 + process.mvaNonTrigV0 )
     
-    #from JetMETCorrections.Configuration.JetCorrectionProducers_cff import ak5PFJetsL1L2L3
-    #process.ak5PFJetsL1L2L3ForMVAMET=ak5PFJetsL1L2L3.clone()
+    from JetMETCorrections.Configuration.JetCorrectionProducers_cff import ak5PFJetsL1L2L3
+    process.ak5PFJetsL1L2L3ForMVAMET=ak5PFJetsL1L2L3.clone()
     
     #rho for muon isolation
     #if(reRunRho) :
@@ -62,10 +62,10 @@ def defineAnalysis(process,castorDir="",reRunRho=False) :
     #        process.ClusteredPFMetProducer +
     #        process.evAnalyzer)
     #else :
-    #    process.analysis = cms.Path( #process.mvaIDs +
-    #        process.ak5PFJetsL1L2L3ForMVAMET +
-    #        process.ClusteredPFMetProducer +
-    #        process.evAnalyzer)
+    #process.dataAnalyzer = cms.Path( #process.mvaIDs +
+    #     process.ak5PFJetsL1L2L3ForMVAMET *
+    #     process.ClusteredPFMetProducer *
+    #     process.evAnalyzer)
         
      
 
