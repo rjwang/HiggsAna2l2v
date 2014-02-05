@@ -1,6 +1,6 @@
 #include "CMGTools/HiggsAna2l2v/interface/ObjectFilters.h"
 #include "RecoEgamma/EgammaTools/interface/ConversionTools.h"
-#include "EGamma/EGammaAnalysisTools/interface/EGammaCutBasedEleId.h"
+#include "EgammaAnalysis/ElectronTools/interface/EGammaCutBasedEleId.h"
 #include "TObjArray.h"
 #include "TObjString.h"
 #include "TString.h"
