@@ -18,7 +18,7 @@ def defineAnalysis(process,castorDir="",reRunRho=False) :
                                         dtag=cms.string('llvv'),
                                         Trigger = BaseTriggerSelection.clone(),
                                         Generator = BaseGeneratorSelection.clone(),
-                                        Vertices = BaseVertexSelection.clone(),
+                                        Vertices = BaseVertexSelection.clone(), #checked
                                         Photons = BasePhotonsSelection.clone(),
                                         LooseMuons = BaseLooseMuonsSelection.clone(),
                                         Muons = BaseMuonsSelection.clone(),

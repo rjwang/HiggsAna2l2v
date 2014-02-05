@@ -333,15 +333,15 @@ vector<CandidatePtr> getGoodElectrons(edm::Handle<edm::View<reco::Candidate> > &
     double maxEta = iConfig.getParameter<double>("maxEta");
     std::string id                    = iConfig.getParameter<std::string>("id");
     bool vetoTransitionElectrons      = iConfig.getParameter<bool>("vetoTransitionElectrons");
-    edm::ParameterSet vbtfCfg         = iConfig.getParameter<edm::ParameterSet>("vbtf2011");
-    std::vector<double> maxSihih      = vbtfCfg.getParameter<std::vector<double> >("maxSihih");
-    std::vector<double> maxDetaTrack  = vbtfCfg.getParameter<std::vector<double> >("maxDetaTrack");
-    std::vector<double> maxDphiTrack  = vbtfCfg.getParameter<std::vector<double> >("maxDphiTrack");
-    std::vector<double> maxHoE        = vbtfCfg.getParameter<std::vector<double> >("maxHoE");
-    std::vector<double> maxD0         = vbtfCfg.getParameter<std::vector<double> >("maxD0");
-    std::vector<double> maxDZ         = vbtfCfg.getParameter<std::vector<double> >("maxDz");
-    std::vector<int> maxTrackLostHits = vbtfCfg.getParameter<std::vector<int> >("maxTrackLostHits");
-    string vbtfConversionVetoSource   = vbtfCfg.getParameter<string>("applyConversionVetoFrom");
+    //edm::ParameterSet vbtfCfg         = iConfig.getParameter<edm::ParameterSet>("vbtf2011");
+    //std::vector<double> maxSihih      = vbtfCfg.getParameter<std::vector<double> >("maxSihih");
+    //std::vector<double> maxDetaTrack  = vbtfCfg.getParameter<std::vector<double> >("maxDetaTrack");
+    //std::vector<double> maxDphiTrack  = vbtfCfg.getParameter<std::vector<double> >("maxDphiTrack");
+    //std::vector<double> maxHoE        = vbtfCfg.getParameter<std::vector<double> >("maxHoE");
+    //std::vector<double> maxD0         = vbtfCfg.getParameter<std::vector<double> >("maxD0");
+    //std::vector<double> maxDZ         = vbtfCfg.getParameter<std::vector<double> >("maxDz");
+    //std::vector<int> maxTrackLostHits = vbtfCfg.getParameter<std::vector<int> >("maxTrackLostHits");
+    //string vbtfConversionVetoSource   = vbtfCfg.getParameter<string>("applyConversionVetoFrom");
     double maxRelIso                  = iConfig.getParameter<double>("maxRelIso");
     bool usePFIso                     = iConfig.getParameter<bool>("usePFIso");
     bool reComputePFIso                 = iConfig.getParameter<bool>("reComputePFIso");
@@ -465,6 +465,7 @@ vector<CandidatePtr> getGoodElectrons(edm::Handle<edm::View<reco::Candidate> > &
   
 
 	//2011 VBTF like id
+/*
 	bool isEE(ele->isEE());	
 	bool hasConversionTag(lepId.trkLostInnerHits>maxTrackLostHits[isEE]);
 	int vbtf2011value = (int) ele->electronID(vbtfConversionVetoSource);
@@ -476,7 +477,9 @@ vector<CandidatePtr> getGoodElectrons(edm::Handle<edm::View<reco::Candidate> > &
 			   && fabs(lepId.trkd0)<maxD0[isEE]
 			   && fabs(lepId.trkdZ)<maxDZ[isEE]
 			   && !hasConversionTag);
-	
+*/	
+	bool has2011Id = true; //just temporily
+
 	//2012 CUT BASED IDs
 	const reco::GsfElectron *gsfEle = dynamic_cast<const reco::GsfElectron *>(ele);
 	bool passconversionveto(true);

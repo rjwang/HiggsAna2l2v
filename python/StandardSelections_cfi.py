@@ -34,7 +34,7 @@ BaseGeneratorSelection = cms.PSet( source = cms.InputTag("genParticles"),
                                    filterId = cms.int32(25),
                                    genJets=cms.InputTag("selectedPatJets")
                                    )
-if(selVersion==2011): BaseGeneratorSelection.genJets=cms.InputTag("ak5GenJets")
+#if(selVersion==2011): BaseGeneratorSelection.genJets=cms.InputTag("ak5GenJets")
 
 
 # base values for the vertex selection ------------------------------------------
@@ -70,9 +70,9 @@ BaseMuonsSelection = cms.PSet( source = cms.InputTag("selectedPatMuonsTriggerMat
                                doDeltaBetaCorrection = cms.bool(False)
                                )
 
-if(selVersion==2011):
-    BaseMuonsSelection.usePFIso=cms.bool(True)
-    BaseMuonsSelection.reComputePFIso = cms.bool(True)
+#if(selVersion==2011):
+#    BaseMuonsSelection.usePFIso=cms.bool(True)
+#    BaseMuonsSelection.reComputePFIso = cms.bool(True)
 
 # base values for loose muon selection ----------------------------------------------
 BaseLooseMuonsSelection = BaseMuonsSelection.clone( minPt = cms.double(3),
@@ -118,9 +118,9 @@ BasePhotonsSelection = cms.PSet( source = cms.InputTag("photons"),
                                  trackSource = cms.InputTag("generalTracks"),
                                  gsfTrackSource = cms.InputTag("gsfElectronTracks")
                                  )
-if(selVersion==2011):
+#if(selVersion==2011):
     #    BasePhotonsSelection.rho25 = cms.InputTag("kt6PFJets25:rho")
-    BasePhotonsSelection.scCorrector = cms.string("${CMSSW_BASE}/src/CMGTools/HiggsAna2l2v/data/PhoEnRegress_2011.root")
+#    BasePhotonsSelection.scCorrector = cms.string("${CMSSW_BASE}/src/CMGTools/HiggsAna2l2v/data/PhoEnRegress_2011.root")
 
 # base values for electron selection ----------------------------------------------
 BaseElectronsSelection = cms.PSet( source = cms.InputTag("selectedPatElectronsPFlowHeep"),#selectedPatElectrons"),
@@ -131,29 +131,29 @@ BaseElectronsSelection = cms.PSet( source = cms.InputTag("selectedPatElectronsPF
                                    maxEta = cms.double(2.5),
                                    vetoTransitionElectrons = cms.bool(True),
                                    #these cuts correspond to VBTF80 https://twiki.cern.ch/twiki/bin/view/CMS/VbtfEleID2011 with tigher hoe for EE
-                                   vbtf2011 = cms.PSet( maxSihih     = cms.vdouble(0.01,  0.03),
-                                                        maxDphiTrack = cms.vdouble(0.06,  0.04),
-                                                        maxDetaTrack = cms.vdouble(0.004, 0.007),
-                                                        maxHoE       = cms.vdouble(0.04,  0.1),
-                                                        maxD0        = cms.vdouble(0.02,  0.02),
-                                                        maxDz        = cms.vdouble(0.1,   0.1),
-                                                        maxTrackLostHits = cms.vint32(0,  0),
-                                                        applyConversionVetoFrom = cms.string("simpleEleId80relIso")
-                                                        ),
+                                   #vbtf2011 = cms.PSet( maxSihih     = cms.vdouble(0.01,  0.03),
+                                   #                     maxDphiTrack = cms.vdouble(0.06,  0.04),
+                                   #                     maxDetaTrack = cms.vdouble(0.004, 0.007),
+                                   #                     maxHoE       = cms.vdouble(0.04,  0.1),
+                                   #                     maxD0        = cms.vdouble(0.02,  0.02),
+                                   #                     maxDz        = cms.vdouble(0.1,   0.1),
+                                   #                     maxTrackLostHits = cms.vint32(0,  0),
+                                   #                     applyConversionVetoFrom = cms.string("simpleEleId80relIso")
+                                   #                     ),
                                    maxRelIso    = cms.double(999999.), #0.1),
                                    minDeltaRtoMuons = cms.double(0.1),
                                    usePFIso = cms.bool(True),
                                    reComputePFIso = cms.bool(True),
                                    doDeltaBetaCorrection = cms.bool(False)
                                    )
-if(selVersion==2011):
-    BaseElectronsSelection.scCorrector = cms.string("${CMSSW_BASE}/src/CMGTools/HiggsAna2l2v/data/EleEnRegress_2011.root")
-    BaseElectronsSelection.usePFIso = cms.bool(True)
-    BaseElectronsSelection.reComputePFIso = cms.bool(True)
+#if(selVersion==2011):
+#    BaseElectronsSelection.scCorrector = cms.string("${CMSSW_BASE}/src/CMGTools/HiggsAna2l2v/data/EleEnRegress_2011.root")
+#    BaseElectronsSelection.usePFIso = cms.bool(True)
+#    BaseElectronsSelection.reComputePFIso = cms.bool(True)
     #BaseElectronsSelection.vbtf2011.applyConversionVetoFrom = cms.string('eidVBTF80')
     
 
-# base values for electron selection ----------------------------------------------
+# base values for loose electron selection ----------------------------------------------
 BaseLooseElectronsSelection = BaseElectronsSelection.clone(minPt = cms.double(10))
 
 #my base values for jet selection -------------------------------------------------
@@ -163,7 +163,7 @@ BaseJetSelection = cms.PSet( source = cms.InputTag("selectedPatJets"),
                              maxEta = cms.double(5.0),
                              minDeltaRtoLepton = cms.double(0.4),
                              puJetIds = pileupJetIdProducer.algos,
-                             jetTags = cms.VInputTag("mySimpleInclusiveSecondaryVertexHighEffBJetTags",
+                             jetTags = cms.VInputTag("simpleInclusiveSecondaryVertexHighEffBJetTags",# mySimpleInclusiveSecondaryVertexHighEffBJetTags",
                                                      "mySimpleInclusiveSecondaryVertexHighPurBJetTags",
                                                      "combinedInclusiveSecondaryVertexPositiveBJetTags")
                              )

@@ -136,7 +136,6 @@ addTriggerMatchingTo(process)
 #custom electrons
 useGsfElectrons(process,postfix=postfix,dR="03")
 process.load('EgammaAnalysis.ElectronTools.electronIdMVAProducer_cfi')
-#process.load('EGamma.EGammaAnalysisTools.electronIdMVAProducer_cfi')
 process.eidMVASequence = cms.Sequence(  process.mvaTrigV0 + process.mvaNonTrigV0 )
 process.patElectronsPFlow.electronIDSources.mvaTrigV0    = cms.InputTag("mvaTrigV0")
 process.patElectronsPFlow.electronIDSources.mvaNonTrigV0 = cms.InputTag("mvaNonTrigV0")
