@@ -12,10 +12,9 @@ process.load("Configuration.Geometry.GeometryIdeal_cff")
 ## MessageLogger
 process.load("FWCore.MessageLogger.MessageLogger_cfi")
 process.MessageLogger.cerr.FwkReport.reportEvery = 5000
-process.options   = cms.untracked.PSet( wantSummary = cms.untracked.bool(True),
+process.options   = cms.untracked.PSet( wantSummary = cms.untracked.bool(False),
                                         SkipEvent = cms.untracked.vstring('ProductNotFound')
                                         )
-
 
 ## Input Module Configuration
 process.source = cms.Source("PoolSource",fileNames = cms.untracked.vstring())
@@ -34,22 +33,7 @@ process.maxEvents = cms.untracked.PSet( input = cms.untracked.int32(50) ) ## for
 from CMGTools.HiggsAna2l2v.StandardSelections_cfi import getSelVersion
 print 'Using the following global tag %s'%gtag
 
-
 ## Output Module Configuration
-#from CMGTools.HiggsAna2l2v.OutputConfiguration_cff import configureOutput
-#process.out = cms.OutputModule("PoolOutputModule",
-#                               fileName = cms.untracked.string('patTuple.root'),
-#                               SelectEvents   = cms.untracked.PSet( SelectEvents = cms.vstring('p') ),
-#                               outputCommands = cms.untracked.vstring('keep *')
-#			      )
-
-#output (we won't use it)
-#from PhysicsTools.PatAlgos.patEventContent_cff import patEventContent
-#process.out = cms.OutputModule("PoolOutputModule",
-#                               fileName = cms.untracked.string('patTuple.root'),
-#                               SelectEvents   = cms.untracked.PSet( SelectEvents = cms.vstring('p') ),
-#                               outputCommands = cms.untracked.vstring('drop *', *patEventContent )
-#                               )
 process.out = cms.OutputModule("PoolOutputModule",
                                outputCommands = cms.untracked.vstring('keep *'),
                                fileName = cms.untracked.string(outFile)
@@ -120,11 +104,6 @@ process.metFilteringTaggers = cms.Sequence(process.HBHENoiseFilter*
                                            process.trackingFailureFilter *
                                            process.trkPOGFilters)
 
-# optional MET filters : should add more? should run in tagging mode?
-# cf.https://twiki.cern.ch/twiki/bin/view/CMS/MissingETOptionalFilters                                                                                              
-#process.load('CommonTools.RecoAlgos.HBHENoiseFilter_cfi')                                                                                                           
-#process.metFilteringTaggers = cms.Sequence(process.HBHENoiseFilter)  
-
 
 #PF2PAT
 process.load("PhysicsTools.PatAlgos.patSequences_cff")
@@ -147,7 +126,6 @@ usePF2PAT(process,
 
 
 
-
 #setup trigger matching
 from CMGTools.HiggsAna2l2v.triggerMatching_cfg import *
 addTriggerMatchingTo(process)
@@ -157,8 +135,8 @@ addTriggerMatchingTo(process)
 
 #custom electrons
 useGsfElectrons(process,postfix=postfix,dR="03")
-##process.load('EgammaAnalysis.ElectronTools.electronIdMVAProducer_cfi')
-process.load('EGamma.EGammaAnalysisTools.electronIdMVAProducer_cfi')
+process.load('EgammaAnalysis.ElectronTools.electronIdMVAProducer_cfi')
+#process.load('EGamma.EGammaAnalysisTools.electronIdMVAProducer_cfi')
 process.eidMVASequence = cms.Sequence(  process.mvaTrigV0 + process.mvaNonTrigV0 )
 process.patElectronsPFlow.electronIDSources.mvaTrigV0    = cms.InputTag("mvaTrigV0")
 process.patElectronsPFlow.electronIDSources.mvaNonTrigV0 = cms.InputTag("mvaNonTrigV0")
@@ -203,6 +181,22 @@ process.kt6PFJetsCentral = kt4PFJets.clone( rParam = cms.double(0.6),
                                             Rho_EtaMax = cms.double(2.5),
                                             Ghost_EtaMax = cms.double(2.5) )
 
+process.kt6PFJetsForIso = kt4PFJets.clone( rParam = cms.double(0.6),
+                                           doAreaFastjet = cms.bool(True),
+                                           doRhoFastjet = cms.bool(True),
+                                           Rho_EtaMax = cms.double(2.5),
+                                           Ghost_EtaMax = cms.double(2.5) )
+process.pfOnlyNeutrals = cms.EDFilter("PdgIdPFCandidateSelector",
+                                      src = cms.InputTag("particleFlow"),
+                                      pdgId = cms.vint32(22,111,130,310,2112)
+                                      )
+process.kt6PFJetsCentralNeutral = process.kt6PFJetsForIso.clone( src = cms.InputTag("pfOnlyNeutrals"),
+                                                                 Ghost_EtaMax = cms.double(3.1),
+                                                                 Rho_EtaMax = cms.double(2.5),
+                                                                 inputEtMin = cms.double(0.5)
+                                                                 )
+process.rhoSequence=cms.Sequence( process.kt6PFJetsForIso + process.pfOnlyNeutrals + process.kt6PFJetsCentralNeutral )
+
 from CMGTools.HiggsAna2l2v.btvDefaultSequence_cff import *
 btvDefaultSequence(process,isMC,"selectedPatJets"+postfix,"goodOfflinePrimaryVertices")
 
@@ -217,15 +211,12 @@ process.pfType1CorrectedMet.srcType1Corrections = cms.VInputTag( cms.InputTag('p
                                                                  )
 
 
-
 ######################################
 # ANALYSIS                           #
 ######################################
 from CMGTools.HiggsAna2l2v.DataAnalyzer_cff import defineAnalysis
 defineAnalysis(process)
-###### need to find out more details
     
-
 
 #####################
 #  PATH DEFINITION  #
@@ -247,18 +238,19 @@ process.p = cms.Path( process.startCounter
                       #*process.vtxCounter
                       *process.metFilteringTaggers
                       #*process.metCounter
-                      #*process.eidMVASequence
+                      *process.eidMVASequence
                       *getattr(process,"patPF2PATSequence"+postfix)
-                      #*process.btvSequence
-                      #*process.kt6PFJetsCentral
-                      #*process.qgSequence
+                      *process.btvSequence
+                      *process.kt6PFJetsCentral
+		      *process.rhoSequence
+                      *process.qgSequence
                       *process.type0PFMEtCorrection*process.producePFMETCorrections
-                      ####*process.selectedPatElectronsWithTrigger*process.selectedPatElectronsPFlowHeep
-                      ####*process.selectedPatMuonsTriggerMatch
-		      ##*process.analysis
+                      *process.selectedPatElectronsWithTrigger*process.selectedPatElectronsPFlowHeep
+                      *process.selectedPatMuonsTriggerMatch
+		      #*process.analysis
 		      #*process.ak5PFJetsL1L2L3ForMVAMET
                       #*process.ClusteredPFMetProducer
-                      #*process.dataAnalyzer
+                      *process.dataAnalyzer
 		      ##*process.endCounter*process.out
                       )
 
