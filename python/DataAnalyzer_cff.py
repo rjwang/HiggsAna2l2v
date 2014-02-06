@@ -17,6 +17,7 @@ def defineAnalysis(process,castorDir="",reRunRho=False) :
     process.dataAnalyzer = cms.EDAnalyzer("DileptonPlusMETEventAnalyzer",
                                         dtag=cms.string('llvv'),
                                         Trigger = BaseTriggerSelection.clone(),
+					MetFilter = BaseMetFilters.clone(),
                                         Generator = BaseGeneratorSelection.clone(),
                                         Vertices = BaseVertexSelection.clone(), #checked
                                         Photons = BasePhotonsSelection.clone(),

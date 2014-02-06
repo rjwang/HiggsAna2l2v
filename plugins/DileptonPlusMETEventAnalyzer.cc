@@ -95,7 +95,7 @@ DileptonPlusMETEventAnalyzer::DileptonPlusMETEventAnalyzer(const edm::ParameterS
     curAvgInstLumi_(0), curIntegLumi_(0),iErr_(0)
 {
   try{
-    std::string objs[]={"Generator", "Trigger", "Vertices", "Photons",
+    std::string objs[]={"Generator", "Trigger", "MetFilter","Vertices", "Photons",
 			"Electrons", "LooseElectrons", "Muons","LooseMuons", "Dileptons", "Jets", "AssocJets", "MET" };
     for(size_t iobj=0; iobj<sizeof(objs)/sizeof(string); iobj++)
       objConfig_[ objs[iobj] ] = iConfig.getParameter<edm::ParameterSet>( objs[iobj] );
@@ -405,6 +405,20 @@ void DileptonPlusMETEventAnalyzer::analyze(const edm::Event &event, const edm::E
     ev.event  = event.id().event();
     ev.curAvgInstLumi=curAvgInstLumi_;
     ev.curIntegLumi=curIntegLumi_;
+
+    //filter bits
+    ev.f_bits=0;
+    std::vector<std::string> filts=objConfig_["MetFilter"].getParameter<std::vector<string> >("metfilters");
+    //std::vector<string> filts=analysisCfg_.getParameter<std::vector<string> >("metFilters");
+    for(size_t ifilt=0; ifilt<filts.size(); ifilt++)
+    {
+      edm::Handle<bool> tagResultH;
+      event.getByLabel(filts[ifilt],tagResultH);
+      ev.f_bits |= tagResultH.isValid() ? ((*tagResultH) << ifilt) : 0;
+    }
+
+
+
 
     saveMCtruth(event, iSetup );    
 
@@ -720,15 +734,18 @@ void DileptonPlusMETEventAnalyzer::analyze(const edm::Event &event, const edm::E
 	ev.jn_en[ev.jn]          = selJetsId[ijet].p4.energy();
 	ev.jn_genid[ev.jn]       = selJetsId[ijet].genid;
 	ev.jn_genflav[ev.jn]     = selJetsId[ijet].genflav;
-	ev.jn_btag1[ev.jn]       = selJetsId[ijet].tche;
-	ev.jn_btag2[ev.jn]       = selJetsId[ijet].csv;
-	ev.jn_btag3[ev.jn]       = selJetsId[ijet].jp;
-	ev.jn_btag4[ev.jn]       = selJetsId[ijet].tchp;
-	if(selJetsId[ijet].customTaggers.size()>0) ev.jn_btag5[ev.jn] = selJetsId[ijet].customTaggers[0];
-	if(selJetsId[ijet].customTaggers.size()>1) ev.jn_btag6[ev.jn] = selJetsId[ijet].customTaggers[1];
-	if(selJetsId[ijet].customTaggers.size()>2) ev.jn_btag7[ev.jn] = selJetsId[ijet].customTaggers[2];
-	ev.jn_btag8[ev.jn]       = selJetsId[ijet].ssvhe;
-	ev.jn_btag9[ev.jn]       = selJetsId[ijet].ssvhp;
+	if(selJetsId[ijet].customTaggers.size()>0) ev.jn_btag1[ev.jn] = selJetsId[ijet].customTaggers[0];
+	if(selJetsId[ijet].customTaggers.size()>1) ev.jn_btag2[ev.jn] = selJetsId[ijet].customTaggers[1];
+	if(selJetsId[ijet].customTaggers.size()>2) ev.jn_btag3[ev.jn] = selJetsId[ijet].customTaggers[2];
+	if(selJetsId[ijet].customTaggers.size()>3) ev.jn_btag4[ev.jn] = selJetsId[ijet].customTaggers[3];
+	if(selJetsId[ijet].customTaggers.size()>4) ev.jn_btag5[ev.jn] = selJetsId[ijet].customTaggers[4];
+	if(selJetsId[ijet].customTaggers.size()>5) ev.jn_btag6[ev.jn] = selJetsId[ijet].customTaggers[5];
+	if(selJetsId[ijet].customTaggers.size()>6) ev.jn_btag7[ev.jn] = selJetsId[ijet].customTaggers[6];
+	if(selJetsId[ijet].customTaggers.size()>7) ev.jn_btag8[ev.jn] = selJetsId[ijet].customTaggers[7];
+	if(selJetsId[ijet].customTaggers.size()>8) ev.jn_btag9[ev.jn] = selJetsId[ijet].customTaggers[8];
+	if(selJetsId[ijet].customTaggers.size()>9) ev.jn_btag10[ev.jn] = selJetsId[ijet].customTaggers[9];
+	if(selJetsId[ijet].customTaggers.size()>10) ev.jn_btag11[ev.jn] = selJetsId[ijet].customTaggers[10];
+	if(selJetsId[ijet].customTaggers.size()>11) cout << "FIXME: jetTags more than 11, please add more trees for btag" << endl;
 	ev.jn_neutHadFrac[ev.jn] = selJetsId[ijet].neutHadFrac;
 	ev.jn_neutEmFrac[ev.jn]  = selJetsId[ijet].neutEmFrac;
 	ev.jn_chHadFrac[ev.jn]   = selJetsId[ijet].chHadFrac;
@@ -779,15 +796,18 @@ void DileptonPlusMETEventAnalyzer::analyze(const edm::Event &event, const edm::E
 	ev.ajn_rawsf[ev.ajn]       = selAJetsId[ijet].ensf;
 	ev.ajn_genid[ev.ajn]       = selAJetsId[ijet].genid;
 	ev.ajn_genflav[ev.ajn]     = selAJetsId[ijet].genflav;
-	ev.ajn_btag1[ev.ajn]       = selAJetsId[ijet].tche;
-	ev.ajn_btag2[ev.ajn]       = selAJetsId[ijet].csv;
-	ev.ajn_btag3[ev.ajn]       = selAJetsId[ijet].jp;
-	ev.ajn_btag4[ev.ajn]       = selAJetsId[ijet].tchp;
-	if(selAJetsId[ijet].customTaggers.size()>0) ev.ajn_btag5[ev.ajn] = selAJetsId[ijet].customTaggers[0];
-	if(selAJetsId[ijet].customTaggers.size()>1) ev.ajn_btag6[ev.ajn] = selAJetsId[ijet].customTaggers[1];
-	if(selAJetsId[ijet].customTaggers.size()>2) ev.ajn_btag7[ev.ajn] = selAJetsId[ijet].customTaggers[2];
-	ev.ajn_btag8[ev.ajn]       = selAJetsId[ijet].ssvhe;
-	ev.ajn_btag9[ev.ajn]       = selAJetsId[ijet].ssvhp;
+	if(selAJetsId[ijet].customTaggers.size()>0) ev.ajn_btag1[ev.ajn] = selAJetsId[ijet].customTaggers[0];
+	if(selAJetsId[ijet].customTaggers.size()>1) ev.ajn_btag2[ev.ajn] = selAJetsId[ijet].customTaggers[1];
+	if(selAJetsId[ijet].customTaggers.size()>2) ev.ajn_btag3[ev.ajn] = selAJetsId[ijet].customTaggers[2];
+	if(selAJetsId[ijet].customTaggers.size()>3) ev.ajn_btag4[ev.ajn] = selAJetsId[ijet].customTaggers[3];
+	if(selAJetsId[ijet].customTaggers.size()>4) ev.ajn_btag5[ev.ajn] = selAJetsId[ijet].customTaggers[4];
+	if(selAJetsId[ijet].customTaggers.size()>5) ev.ajn_btag6[ev.ajn] = selAJetsId[ijet].customTaggers[5];
+	if(selAJetsId[ijet].customTaggers.size()>6) ev.ajn_btag7[ev.ajn] = selAJetsId[ijet].customTaggers[6];
+	if(selAJetsId[ijet].customTaggers.size()>7) ev.ajn_btag8[ev.ajn] = selAJetsId[ijet].customTaggers[7];
+	if(selAJetsId[ijet].customTaggers.size()>8) ev.ajn_btag9[ev.ajn] = selAJetsId[ijet].customTaggers[8];
+	if(selAJetsId[ijet].customTaggers.size()>9) ev.ajn_btag10[ev.ajn] = selAJetsId[ijet].customTaggers[9];
+	if(selAJetsId[ijet].customTaggers.size()>10) ev.ajn_btag11[ev.ajn] = selAJetsId[ijet].customTaggers[10];
+	if(selAJetsId[ijet].customTaggers.size()>11) cout << "FIXME: jetTags more than 11, please add more trees for btag" << endl; 
 	ev.ajn_neutHadFrac[ev.ajn] = selAJetsId[ijet].neutHadFrac;
 	ev.ajn_neutEmFrac[ev.ajn]  = selAJetsId[ijet].neutEmFrac;
 	ev.ajn_chHadFrac[ev.ajn]   = selAJetsId[ijet].chHadFrac;

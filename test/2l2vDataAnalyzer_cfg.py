@@ -12,7 +12,7 @@ process.load("Configuration.Geometry.GeometryIdeal_cff")
 ## MessageLogger
 process.load("FWCore.MessageLogger.MessageLogger_cfi")
 process.MessageLogger.cerr.FwkReport.reportEvery = 5000
-process.options   = cms.untracked.PSet( wantSummary = cms.untracked.bool(False),
+process.options   = cms.untracked.PSet( wantSummary = cms.untracked.bool(True),
                                         SkipEvent = cms.untracked.vstring('ProductNotFound')
                                         )
 
@@ -126,6 +126,24 @@ usePF2PAT(process,
 
 
 
+##configure std pat to use pf jets/MET
+#from PhysicsTools.PatAlgos.tools.metTools import *
+#addPfMET(process, 'PF')
+#from PhysicsTools.PatAlgos.tools.jetTools import *
+#switchJetCollection(process,cms.InputTag('ak5PFJets'),
+#                    doJTA        = True,
+#                    doBTagging   = True,
+#                    jetCorrLabel = ('AK5PF',jecLevels),
+#                    doType1MET   = False,
+#                    genJetCollection=cms.InputTag("ak5GenJets"),
+#                    doJetID      = True
+#                    )
+#if not isMC:
+#    removeMCMatchingPF2PAT(process,'')
+#    process.patMETsPF.addGenMET=cms.bool(False)
+
+
+
 #setup trigger matching
 from CMGTools.HiggsAna2l2v.triggerMatching_cfg import *
 addTriggerMatchingTo(process)
@@ -204,9 +222,14 @@ btvDefaultSequence(process,isMC,"selectedPatJets"+postfix,"goodOfflinePrimaryVer
 # cf. https://twiki.cern.ch/twiki/bin/view/CMSPublic/WorkBookMetAnalysis
 process.load("JetMETCorrections.Type1MET.pfMETCorrections_cff")
 process.load("JetMETCorrections.Type1MET.pfMETCorrectionType0_cfi")
+##for met xy shift
+#process.load("JetMETCorrections.Type1MET.pfMETsysShiftCorrections_cfi")
+#if (not isMC): process.pfMEtSysShiftCorr.parameter = process.pfMEtSysShiftCorrParameters_2012runAvsNvtx_data
+#else:	       process.pfMEtSysShiftCorr.parameter = process.pfMEtSysShiftCorrParameters_2012runAvsNvtx_mc
 process.pfType1CorrectedMet.applyType0Corrections = cms.bool(False)
 process.pfType1CorrectedMet.srcType1Corrections = cms.VInputTag( cms.InputTag('pfMETcorrType0'),
                                                                  cms.InputTag('pfJetMETcorr', 'type1')
+								 #cms.InputTag('pfMEtSysShiftCorr')
                                                                  )
 
 
@@ -239,11 +262,12 @@ process.p = cms.Path( process.startCounter
                       #*process.metCounter
                       *process.eidMVASequence
                       *getattr(process,"patPF2PATSequence"+postfix)
+		         #*process.patDefaultSequence
                       *process.btvSequence
                       *process.kt6PFJetsCentral
 		      *process.rhoSequence
                       *process.qgSequence
-                      *process.type0PFMEtCorrection*process.producePFMETCorrections
+                      *process.type0PFMEtCorrection*process.producePFMETCorrections#*process.pfMEtSysShiftCorrSequence
                       *process.selectedPatElectronsWithTrigger*process.selectedPatElectronsPFlowHeep
                       *process.selectedPatMuonsTriggerMatch
 		      #*process.analysis

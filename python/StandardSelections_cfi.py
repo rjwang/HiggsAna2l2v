@@ -28,6 +28,14 @@ BaseTriggerSelection = cms.PSet( source = cms.InputTag("TriggerResults::HLT"),
 							  singleEle=cms.vstring(SingleEleTrigs)
                                                           )
                                  )
+#met filters
+BaseMetFilters = cms.PSet( metfilters=cms.vstring('HBHENoiseFilter',
+						  'hcalLaserEventFilter',
+						  'EcalDeadCellTriggerPrimitiveFilter',
+						  'eeBadScFilter',
+						  'ecalLaserCorrFilter',
+						  'trackingFailureFilter')
+			 )
 
 # base values for the vertex selection ------------------------------------------
 BaseGeneratorSelection = cms.PSet( source = cms.InputTag("genParticles"),
@@ -157,21 +165,33 @@ BaseElectronsSelection = cms.PSet( source = cms.InputTag("selectedPatElectronsPF
 BaseLooseElectronsSelection = BaseElectronsSelection.clone(minPt = cms.double(10))
 
 #my base values for jet selection -------------------------------------------------
-BaseJetSelection = cms.PSet( source = cms.InputTag("selectedPatJets"),
+BaseJetSelection = cms.PSet( source = cms.InputTag("selectedPatJetsPFlow"),
                              rho = cms.InputTag("kt6PFJets:rho"),
                              minPt = cms.double(10),
                              maxEta = cms.double(5.0),
                              minDeltaRtoLepton = cms.double(0.4),
                              puJetIds = pileupJetIdProducer.algos,
-                             jetTags = cms.VInputTag("simpleInclusiveSecondaryVertexHighEffBJetTags",# mySimpleInclusiveSecondaryVertexHighEffBJetTags",
-                                                     "mySimpleInclusiveSecondaryVertexHighPurBJetTags",
-                                                     "combinedInclusiveSecondaryVertexPositiveBJetTags")
+                             #jetTags = cms.VInputTag("simpleInclusiveSecondaryVertexHighEffBJetTags",# mySimpleInclusiveSecondaryVertexHighEffBJetTags",
+                             #                        "mySimpleInclusiveSecondaryVertexHighPurBJetTags",
+                             #                        "combinedInclusiveSecondaryVertexPositiveBJetTags")
+
+			     jetTags = cms.VInputTag( "trackCountingHighPurBJetTags",                  #1: tchp
+  						      "jetProbabilityBJetTags",                        #2: jp
+  						      "simpleSecondaryVertexHighEffBJetTags",          #3: ssvhe
+  						      "simpleInclusiveSecondaryVertexHighEffBJetTags", #4: ivf
+  						      "combinedSecondaryVertexBJetTags",               #5: origcsv
+						      "combinedSecondaryVertexRetrainedBJetTags",      #6: csv
+						      "combinedCSVJPBJetTags",                         #7: jpcsv
+						      "combinedCSVSLBJetTags",                         #8: slcsv
+						      "combinedCSVJPSLBJetTags",                       #9: supercsv
+						      "trackCountingHighEffBJetTags",		      #10: tche
+					       	      "simpleSecondaryVertexHighPurBJetTags"          #11: ssvhp
+						    )
                              )
+#CHS jets
 AssocJetSelection = BaseJetSelection.clone(source = cms.InputTag("selectedPatJetsPFlow"),
                                            puJetIds = pileupJetIdProducerChs.algos
                                            )
-#if(selVersion==2011): AssocJetSelection.source=cms.InputTag("selectedPatJets")
-
 # base values for the dilepton selection ------------------------------------------
 BaseDileptonSelection = cms.PSet( minDileptonMass = cms.double(0),
                                   maxDileptonMass = cms.double(7000),

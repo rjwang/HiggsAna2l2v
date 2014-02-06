@@ -34,6 +34,7 @@ struct ZZ2l2nuSummary_t
   enum JetInfo { TCHE, TCHP, SSVHE, SSVHP };
 
   Int_t run,lumi,event;
+  Bool_t f_bits;
   Float_t curAvgInstLumi,curIntegLumi;
   Int_t cat, mccat;
   Bool_t hasTrigger;
@@ -84,6 +85,7 @@ struct ZZ2l2nuSummary_t
   Float_t jn_neutHadFrac[MAXPARTICLES], jn_neutEmFrac[MAXPARTICLES], jn_chHadFrac[MAXPARTICLES];
   Float_t jn_btag1[MAXPARTICLES], jn_btag2[MAXPARTICLES],   jn_btag3[MAXPARTICLES], jn_btag4[MAXPARTICLES];
   Float_t jn_btag5[MAXPARTICLES], jn_btag6[MAXPARTICLES],   jn_btag7[MAXPARTICLES], jn_btag8[MAXPARTICLES], jn_btag9[MAXPARTICLES];
+  Float_t jn_btag10[MAXPARTICLES], jn_btag11[MAXPARTICLES];
   Float_t jn_lxy[MAXPARTICLES], jn_lxyErr[MAXPARTICLES], jn_svmass[MAXPARTICLES], jn_svpt[MAXPARTICLES], jn_svdr[MAXPARTICLES];
   Int_t   jn_genid[MAXPARTICLES], jn_genflav[MAXPARTICLES];
   Float_t jn_genpt[MAXPARTICLES], jn_pumva[MAXPARTICLES], jn_puminmva[MAXPARTICLES];
@@ -99,6 +101,7 @@ struct ZZ2l2nuSummary_t
   Float_t ajn_neutHadFrac[MAXPARTICLES], ajn_neutEmFrac[MAXPARTICLES], ajn_chHadFrac[MAXPARTICLES];
   Float_t ajn_btag1[MAXPARTICLES], ajn_btag2[MAXPARTICLES],   ajn_btag3[MAXPARTICLES], ajn_btag4[MAXPARTICLES];
   Float_t ajn_btag5[MAXPARTICLES], ajn_btag6[MAXPARTICLES],   ajn_btag7[MAXPARTICLES], ajn_btag8[MAXPARTICLES], ajn_btag9[MAXPARTICLES];
+  Float_t ajn_btag10[MAXPARTICLES], ajn_btag11[MAXPARTICLES];
   Float_t ajn_lxy[MAXPARTICLES], ajn_lxyErr[MAXPARTICLES], ajn_svmass[MAXPARTICLES], ajn_svpt[MAXPARTICLES], ajn_svdr[MAXPARTICLES];
   Int_t   ajn_genid[MAXPARTICLES], ajn_genflav[MAXPARTICLES];
   Float_t ajn_genpt[MAXPARTICLES], ajn_pumva[MAXPARTICLES], ajn_puminmva[MAXPARTICLES];

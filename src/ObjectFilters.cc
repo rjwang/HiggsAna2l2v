@@ -778,12 +778,12 @@ vector<CandidatePtr> getGoodJets(edm::Handle<edm::View<reco::Candidate> > &hJet,
 	jetId.charge = jet->charge();
 	jetId.ensf = jet->jecFactor("Uncorrected");
 	jetId.ensferr=0;
-	jetId.tche=jet->bDiscriminator("trackCountingHighEffBJetTags");
-	jetId.tchp=jet->bDiscriminator("trackCountingHighPurBJetTags");
-	jetId.csv=jet->bDiscriminator("combinedSecondaryVertexBJetTags");
-	jetId.ssvhe=jet->bDiscriminator("simpleSecondaryVertexHighEffBJetTags");
-	jetId.ssvhp=jet->bDiscriminator("simpleSecondaryVertexHighPurBJetTags");
-	jetId.jp=jet->bDiscriminator("jetProbabilityBJetTags");
+	//jetId.tche=jet->bDiscriminator("trackCountingHighEffBJetTags");
+	//jetId.tchp=jet->bDiscriminator("trackCountingHighPurBJetTags");
+	//jetId.csv=jet->bDiscriminator("combinedSecondaryVertexBJetTags");
+	//jetId.ssvhe=jet->bDiscriminator("simpleSecondaryVertexHighEffBJetTags");
+	//jetId.ssvhp=jet->bDiscriminator("simpleSecondaryVertexHighPurBJetTags");
+	//jetId.jp=jet->bDiscriminator("jetProbabilityBJetTags");
 	for(size_t ijt=0; ijt<jetTagsH.size(); ijt++)
 	  {
 	    int idx=getJetTag(jet,jetTagsH[ijt]);
