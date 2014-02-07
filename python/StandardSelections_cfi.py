@@ -113,14 +113,14 @@ BaseSoftMuonsSelection = BaseMuonsSelection.clone( minPt = cms.double(3),
                                                                          maxRelIso = cms.double(999999.),
                                                                          applySoftMuonIsolationVeto=cms.bool(True) )
                                                     )
-
-
-
-
-
-
-
-
+#  _____  __          _                
+# |  _  \| |         | |                    
+# | |_)  | |         | | 
+# | ____/| |___  ___ | |_ ___  _ __    
+# | |    |  _  |/ _ \| __/ _ \| '_ \  
+# | |    | | | | (_) | |_ (_) | | | |
+# |_|    |_| |_|\___/ \__\___/|_| |_|
+#  
 # base values for photon selection ----------------------------------------------
 BasePhotonsSelection = cms.PSet( source = cms.InputTag("photons"),
                                  conversions=cms.InputTag("allConversions"),
@@ -146,12 +146,6 @@ BasePhotonsSelection = cms.PSet( source = cms.InputTag("photons"),
                                  trackSource = cms.InputTag("generalTracks"),
                                  gsfTrackSource = cms.InputTag("gsfElectronTracks")
                                  )
-#if(selVersion==2011):
-    #    BasePhotonsSelection.rho25 = cms.InputTag("kt6PFJets25:rho")
-#    BasePhotonsSelection.scCorrector = cms.string("${CMSSW_BASE}/src/CMGTools/HiggsAna2l2v/data/PhoEnRegress_2011.root")
-
-
-
 
 #  ______ _           _                      
 # |  ____| |         | |                    
@@ -161,38 +155,22 @@ BasePhotonsSelection = cms.PSet( source = cms.InputTag("photons"),
 # |______|_|\___|\___|\__|_|  \___/|_| |_|
 #  
 # base values for electron selection ----------------------------------------------
-BaseElectronsSelection = cms.PSet( source = cms.InputTag("selectedPatElectronsPFlowHeep"),#selectedPatElectrons"),
+BaseElectronsSelection = cms.PSet( source = cms.InputTag("selectedPatElectronsPFlowHeep"),
                                    id=cms.string("veto"),
                                    #cf. https://twiki.cern.ch/twiki/bin/view/CMS/RegressionSCCorrections
                                    scCorrector = cms.string("${CMSSW_BASE}/src/CMGTools/HiggsAna2l2v/data/EleEnRegress.root"),
                                    minPt = cms.double(20),
                                    maxEta = cms.double(2.5),
                                    vetoTransitionElectrons = cms.bool(True),
-                                   #these cuts correspond to VBTF80 https://twiki.cern.ch/twiki/bin/view/CMS/VbtfEleID2011 with tigher hoe for EE
-                                   #vbtf2011 = cms.PSet( maxSihih     = cms.vdouble(0.01,  0.03),
-                                   #                     maxDphiTrack = cms.vdouble(0.06,  0.04),
-                                   #                     maxDetaTrack = cms.vdouble(0.004, 0.007),
-                                   #                     maxHoE       = cms.vdouble(0.04,  0.1),
-                                   #                     maxD0        = cms.vdouble(0.02,  0.02),
-                                   #                     maxDz        = cms.vdouble(0.1,   0.1),
-                                   #                     maxTrackLostHits = cms.vint32(0,  0),
-                                   #                     applyConversionVetoFrom = cms.string("simpleEleId80relIso")
-                                   #                     ),
                                    maxRelIso    = cms.double(999999.), #0.1),
                                    minDeltaRtoMuons = cms.double(0.1),
                                    usePFIso = cms.bool(True),
                                    reComputePFIso = cms.bool(True),
                                    doDeltaBetaCorrection = cms.bool(False)
                                    )
-#if(selVersion==2011):
-#    BaseElectronsSelection.scCorrector = cms.string("${CMSSW_BASE}/src/CMGTools/HiggsAna2l2v/data/EleEnRegress_2011.root")
-#    BaseElectronsSelection.usePFIso = cms.bool(True)
-#    BaseElectronsSelection.reComputePFIso = cms.bool(True)
-    #BaseElectronsSelection.vbtf2011.applyConversionVetoFrom = cms.string('eidVBTF80')
-    
 
 # base values for loose electron selection ----------------------------------------------
-BaseLooseElectronsSelection = BaseElectronsSelection.clone(minPt = cms.double(10))
+BaseLooseElectronsSelection = BaseElectronsSelection.clone(minPt = cms.double(8))
 
 
 
@@ -238,6 +216,15 @@ BaseDileptonSelection = cms.PSet( minDileptonMass = cms.double(0),
                                   maxDz = cms.double(1.0)
                                   )
 
+
+
+#  __  __ ______ _______ 
+# |  \/  |  ____|__   __|
+# | \  / | |__     | |   
+# | |\/| |  __|    | |   
+# | |  | | |____   | |   
+# |_|  |_|______|  |_|   
+#                                   
 # base values for met selection -----------------------------------------------------
 BaseMetSelection = cms.PSet( source = cms.InputTag("patMETsPFlow"),
                              trksource = cms.InputTag("trackMetProducer"),
