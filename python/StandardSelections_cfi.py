@@ -112,7 +112,43 @@ BaseSoftMuonsSelection = BaseMuonsSelection.clone( minPt = cms.double(3),
                                                                          maxDz=cms.double(0.2),
                                                                          maxRelIso = cms.double(999999.),
                                                                          applySoftMuonIsolationVeto=cms.bool(True) )
-                                                    )
+						 ) 
+
+
+
+
+
+#  ______ _           _                      
+# |  ____| |         | |                    
+# | |__  | | ___  ___| |_ _ __ ___  _ __   
+# |  __| | |/ _ \/ __| __| '__/ _ \| '_ \   
+# | |____| |  __/ (__| |_| | | (_) | | | |  
+# |______|_|\___|\___|\__|_|  \___/|_| |_|
+#  
+# base values for electron selection ----------------------------------------------
+BaseElectronsSelection = cms.PSet( source = cms.InputTag("selectedPatElectronsPFlowHeep"),
+                                   id=cms.string("veto"),
+                                   #cf. https://twiki.cern.ch/twiki/bin/view/CMS/RegressionSCCorrections
+                                   scCorrector = cms.string("${CMSSW_BASE}/src/CMGTools/HiggsAna2l2v/data/EleEnRegress.root"),
+                                   minPt = cms.double(20),
+                                   maxEta = cms.double(2.5),
+                                   vetoTransitionElectrons = cms.bool(True),
+                                   minDeltaRtoMuons = cms.double(0.1),
+                                   usePFIso = cms.bool(True),
+                                   reComputePFIso = cms.bool(True),
+				   #will do BetaCorrection at selection level
+                                   doDeltaBetaCorrection = cms.bool(False),
+				   maxRelIso    = cms.double(999999.)
+                                   )
+
+# base values for loose electron selection ----------------------------------------------
+BaseLooseElectronsSelection = BaseElectronsSelection.clone(minPt = cms.double(8))
+
+
+
+
+
+
 #  _____  __          _                
 # |  _  \| |         | |                    
 # | |_)  | |         | | 
@@ -146,32 +182,6 @@ BasePhotonsSelection = cms.PSet( source = cms.InputTag("photons"),
                                  trackSource = cms.InputTag("generalTracks"),
                                  gsfTrackSource = cms.InputTag("gsfElectronTracks")
                                  )
-
-#  ______ _           _                      
-# |  ____| |         | |                    
-# | |__  | | ___  ___| |_ _ __ ___  _ __   
-# |  __| | |/ _ \/ __| __| '__/ _ \| '_ \   
-# | |____| |  __/ (__| |_| | | (_) | | | |  
-# |______|_|\___|\___|\__|_|  \___/|_| |_|
-#  
-# base values for electron selection ----------------------------------------------
-BaseElectronsSelection = cms.PSet( source = cms.InputTag("selectedPatElectronsPFlowHeep"),
-                                   id=cms.string("veto"),
-                                   #cf. https://twiki.cern.ch/twiki/bin/view/CMS/RegressionSCCorrections
-                                   scCorrector = cms.string("${CMSSW_BASE}/src/CMGTools/HiggsAna2l2v/data/EleEnRegress.root"),
-                                   minPt = cms.double(20),
-                                   maxEta = cms.double(2.5),
-                                   vetoTransitionElectrons = cms.bool(True),
-                                   maxRelIso    = cms.double(999999.), #0.1),
-                                   minDeltaRtoMuons = cms.double(0.1),
-                                   usePFIso = cms.bool(True),
-                                   reComputePFIso = cms.bool(True),
-                                   doDeltaBetaCorrection = cms.bool(False)
-                                   )
-
-# base values for loose electron selection ----------------------------------------------
-BaseLooseElectronsSelection = BaseElectronsSelection.clone(minPt = cms.double(8))
-
 
 
 

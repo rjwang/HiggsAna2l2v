@@ -337,7 +337,8 @@ vector<CandidatePtr> getGoodElectrons(edm::Handle<edm::View<reco::Candidate> > &
 				      const double& rho, 
 				      const edm::ParameterSet &iConfig,
 				      const edm::EventSetup & iSetup,
-				      std::vector<ObjectIdSummary> &selElectronIds)
+				      std::vector<ObjectIdSummary> &selElectronIds,
+				      std::vector<std::string> &triggerPaths)
 {
   vector<CandidatePtr> selElectrons;
   selElectronIds.clear();
@@ -360,18 +361,29 @@ vector<CandidatePtr> getGoodElectrons(edm::Handle<edm::View<reco::Candidate> > &
       {
 	reco::CandidatePtr elePtr = hEle->ptrAt(iElec);
 	const pat::Electron *ele = dynamic_cast<const pat::Electron *>( elePtr.get() );
-
-        ////const reco::Candidate *genLep   = ele->genLepton();
-        ////const reco::GsfElectron *gsfEle = dynamic_cast<const reco::GsfElectron *>(ele);
-
+        const reco::GsfElectron *gsfEle = dynamic_cast<const reco::GsfElectron *>(ele);
 
         //pre-selection
-        ////if(ele->gsfTrack().isNull() || ele->superCluster().isNull() || gsfEle==0) continue;
-        ////if(ele->pt()<8  || !(ele->isEB() || ele->isEE()) )                        continue;
+        if(ele->gsfTrack().isNull() || ele->superCluster().isNull() || gsfEle==0) continue;
+        if(!(ele->isEB() || ele->isEE()) )                        continue;
+        //clean with overlapping muons
+        bool isOverLappingWithMuon(false);
+        for(size_t iMuon=0; iMuon<hMu.product()->size(); ++iMuon)
+          {
+            reco::CandidatePtr muPtr = hMu->ptrAt(iMuon);
+            const pat::Muon *muon = dynamic_cast<const pat::Muon *>( muPtr.get() );
 
+            if( !muon->isGlobalMuon() && !muon->isTrackerMuon() ) continue;
+            if( muon->innerTrack().isNull() ) continue;
+            if( muon->innerTrack()->numberOfValidHits() <=10 ) continue;
 
-	if(ele->gsfTrack().isNull()) continue;
-	if(ele->superCluster().isNull()) continue;
+            double dR = deltaR(*muon->innerTrack(),*ele->gsfTrack());
+            if(dR>minDeltaRtoMuons) continue;
+            isOverLappingWithMuon=true;
+            break;
+          }
+        if(isOverLappingWithMuon) continue;
+
 
 	std::pair<bool,Measurement1D> ip3dRes =getImpactParameter<reco::GsfTrackRef>(ele->gsfTrack(), primVtx, iSetup, true);
 
@@ -481,10 +493,8 @@ vector<CandidatePtr> getGoodElectrons(edm::Handle<edm::View<reco::Candidate> > &
 	lepId.kfhitsall         =  (validKF) ? myTrackRef->numberOfValidHits() : -1. ; 
   
 
-	bool has2011Id = true; //just temporily
 
 	//2012 CUT BASED IDs
-	const reco::GsfElectron *gsfEle = dynamic_cast<const reco::GsfElectron *>(ele);
 	bool passconversionveto(true);
 	if(hConversions.isValid()) passconversionveto = !ConversionTools::hasMatchedConversion(*gsfEle,hConversions,beamspot.position());
 	bool passEoP            = EgammaCutBasedEleId::PassEoverPCuts(lepId.sceta,lepId.eopin,lepId.fbrem);
@@ -500,19 +510,6 @@ vector<CandidatePtr> getGoodElectrons(edm::Handle<edm::View<reco::Candidate> > &
 							    0., 0., 0.,
 							    !passconversionveto, uint(lepId.trkLostInnerHits),
 							    rho);
-// 	    if(!hasCutBasedIds[iid] && lepId.genP4.pt()>0 && lepId.p4.pt()<30 && iid==2)
-// 	      {
-// 		int flag=EgammaCutBasedEleId::TestWP(EgammaCutBasedEleId::WorkingPoint(cutBasedIdsToTest[iid]),
-// 						     ele->isEB(),
-// 						     ele->pt(),ele->eta(),
-// 						     lepId.dEtaTrack, lepId.dPhiTrack, lepId.sihih, lepId.hoe,
-// 						     lepId.ooemoop, lepId.trkd0, lepId.trkdZ,
-// 						     0., 0., 0.,
-// 						     !passconversionveto, uint(lepId.trkLostInnerHits),
-// 						     rho);
-// 		cout << lepId.genP4.pt() << " " << lepId.p4.pt() << endl;
-// 		EgammaCutBasedEleId::PrintDebug(flag);
-// 	      }
 	  }
 	int triggerCutsToTest[] = {EgammaCutBasedEleId::TRIGGERTIGHT,EgammaCutBasedEleId::TRIGGERWP70};
 	bool passTriggerCut[]   = {false,                            false};
@@ -525,8 +522,13 @@ vector<CandidatePtr> getGoodElectrons(edm::Handle<edm::View<reco::Candidate> > &
 									lepId.isoVals[TRACKER_ISO],lepId.isoVals[ECAL_ISO],lepId.isoVals[HCAL_ISO]);
 	  }
 	
+
+        // add heep selector , they have quite a few 
+        bool boolHeep( ele -> userInt("HEEPId") < 1 ) ;
+
+
 	//build a summary of IDs
-	lepId.idBits = has2011Id << EID_VBTF2011 |
+	lepId.idBits = 
 	  hasCutBasedIds[0] << EID_VETO | 
 	  hasCutBasedIds[1] << EID_LOOSE | 
 	  hasCutBasedIds[2] << EID_MEDIUM | 
@@ -536,7 +538,17 @@ vector<CandidatePtr> getGoodElectrons(edm::Handle<edm::View<reco::Candidate> > &
 	  passTriggerCut[1] << EID_TRIGGER2011 |
 	  passTriggerCut[0] << EID_TIGHTTRIGGER |
 	  ele->ecalDrivenSeed() << EID_ECALDRIVEN |
-	  ele->trackerDrivenSeed() << EID_TRACKERDRIVEN;
+	  ele->trackerDrivenSeed() << EID_TRACKERDRIVEN |
+	  boolHeep << EID_HEEP; //new added
+
+          //add trigger match
+          int TrigSum(0);
+          for(size_t it=0; it<triggerPaths.size(); it++)
+            {
+              string tempTrigName = triggerPaths[it] + "*";
+              if ( ele->triggerObjectMatchesByPath(tempTrigName).size() > 0 ) TrigSum |= (1<<it);
+            }
+          lepId.Tbits = TrigSum;
 
 	//now do its selection
 	if(lepId.p4.pt()<minPt || fabs(lepId.p4.eta())>maxEta) continue; 
@@ -553,23 +565,6 @@ vector<CandidatePtr> getGoodElectrons(edm::Handle<edm::View<reco::Candidate> > &
 	if(usePFIso)  relIso = lepId.isoVals[ doDeltaBetaCorrection ? PFRELBETCORR_ISO : PFREL_ISO];
 	if(relIso>maxRelIso) continue;
 	
-	//final cross clean with overlapping muons
-	bool isOverLappingWithMuon(false);
-	for(size_t iMuon=0; iMuon<hMu.product()->size(); ++iMuon)
-	  {
-	    reco::CandidatePtr muPtr = hMu->ptrAt(iMuon);
-	    const pat::Muon *muon = dynamic_cast<const pat::Muon *>( muPtr.get() );
-	    
-	    if( !muon->isGlobalMuon() && !muon->isTrackerMuon() ) continue;
-	    if( muon->innerTrack().isNull() ) continue;
-	    if( muon->innerTrack()->numberOfValidHits() <=10 ) continue;
-	    
-	    double dR = deltaR(*muon->innerTrack(),*ele->gsfTrack());
-	    if(dR>minDeltaRtoMuons) continue;
-	    isOverLappingWithMuon=true;
-	    break;
-	  }
-	if(isOverLappingWithMuon) continue;
 	
 	//the electron is selected (add id summary)
 	selElectronIds.push_back(lepId);

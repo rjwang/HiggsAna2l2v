@@ -168,6 +168,9 @@ process.selectedPatElectronsPFlowHeep = cms.EDProducer("HEEPAttStatusToPAT",
                                                        verticesLabel = cms.InputTag("goodOfflinePrimaryVertices"),
                                                        )
 
+
+
+
 #custom muons
 process.patMuonsPFlow.pfMuonSource = cms.InputTag("pfSelectedMuonsPFlow")
 process.muonMatchPFlow.src = cms.InputTag("pfSelectedMuonsPFlow")
@@ -260,7 +263,7 @@ process.p = cms.Path( process.startCounter
                       #*process.vtxCounter
                       *process.metFilteringTaggers
                       #*process.metCounter
-                      *process.eidMVASequence
+                      *process.eidMVASequence 
                       *getattr(process,"patPF2PATSequence"+postfix)
 		         #*process.patDefaultSequence
                       *process.btvSequence

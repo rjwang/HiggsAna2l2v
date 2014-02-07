@@ -144,6 +144,7 @@ bool ZZ2l2nuSummaryHandler::initTree(TTree *t, bool needsToRecreate)
   //lepton id fields
   t_->Branch("en",         &evSummary_.en,         "en/I");
   t_->Branch("en_idbits",  evSummary_.en_idbits,   "en_idbits[en]/I");
+  t_->Branch("en_Tbits",   evSummary_.en_Tbits,         "en_Tbits[en]/I");
   t_->Branch("en_hoe",     evSummary_.en_hoe ,     "en_hoe[en]/F");
   t_->Branch("en_hoebc",     evSummary_.en_hoebc ,     "en_hoebc[en]/F");
   t_->Branch("en_dphiin",  evSummary_.en_dphiin ,  "en_dphiin[en]/F");
@@ -480,6 +481,7 @@ bool ZZ2l2nuSummaryHandler::attachToTree(TTree *t, bool full)
   //lepton id branches
   t_->SetBranchAddress("en"              ,&evSummary_.en);
   t_->SetBranchAddress("en_idbits"       ,evSummary_.en_idbits);
+  t_->SetBranchAddress("en_Tbits"        ,evSummary_.en_Tbits);
   t_->SetBranchAddress("en_hoe"          ,evSummary_.en_hoe);
   t_->SetBranchAddress("en_hoebc"        ,evSummary_.en_hoebc);
   t_->SetBranchAddress("en_dphiin"       ,evSummary_.en_dphiin);

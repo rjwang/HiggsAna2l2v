@@ -148,6 +148,7 @@ int DileptonPlusMETEventAnalyzer::addPidSummary(ObjectIdSummary &obj)
   else if(fabs(obj.id)==11)
     {
       ev.en_idbits[ev.en]=obj.idBits;
+      ev.en_Tbits[ev.en]= obj.Tbits;
       ev.en_hoe[ev.en]=obj.hoe;
       ev.en_hoebc[ev.en]=obj.hoebc;
       ev.en_dphiin[ev.en]=obj.dPhiTrack;
@@ -512,7 +513,7 @@ void DileptonPlusMETEventAnalyzer::analyze(const edm::Event &event, const edm::E
     edm::Handle<reco::PFCandidateCollection> hPFCands;
     event.getByLabel("particleFlow",hPFCands);
     std::vector<ObjectIdSummary> eleSummary;
-    std::vector<CandidatePtr> selElectrons   = getGoodElectrons(hEle, hMu, hVtx_, *beamSpot, hConversions, &ecorr_, lazyTool, &eIsolator, hPFCands, *rho, objConfig_["Electrons"], iSetup, eleSummary);
+    std::vector<CandidatePtr> selElectrons   = getGoodElectrons(hEle, hMu, hVtx_, *beamSpot, hConversions, &ecorr_, lazyTool, &eIsolator, hPFCands, *rho, objConfig_["Electrons"], iSetup, eleSummary, allTriggerNames);
 
     //build the dilepton candidate
     ev.cat = UNKNOWN;
@@ -609,7 +610,7 @@ void DileptonPlusMETEventAnalyzer::analyze(const edm::Event &event, const edm::E
     std::vector<ObjectIdSummary> looseMuonSummary;
     std::vector<CandidatePtr>    looseMuons = getGoodMuons(hMu, primVertex, *rho, objConfig_["SoftMuons"], iSetup, looseMuonSummary, allTriggerNames);
     std::vector<ObjectIdSummary> looseEleSummary;
-    std::vector<CandidatePtr>    looseElectrons = getGoodElectrons(hEle, hMu, hVtx_, *beamSpot, hConversions, &ecorr_,  lazyTool, &eIsolator, hPFCands, *rho, objConfig_["LooseElectrons"], iSetup, looseEleSummary);
+    std::vector<CandidatePtr>    looseElectrons = getGoodElectrons(hEle, hMu, hVtx_, *beamSpot, hConversions, &ecorr_,  lazyTool, &eIsolator, hPFCands, *rho, objConfig_["LooseElectrons"], iSetup, looseEleSummary, allTriggerNames);
     std::vector<ObjectIdSummary> selLooseLeptonsSummary = selLeptonsSummary;
     selLooseLeptonsSummary.insert( selLooseLeptonsSummary.end(), looseMuonSummary.begin(), looseMuonSummary.end() );
     selLooseLeptonsSummary.insert( selLooseLeptonsSummary.end(), looseEleSummary.begin(),  looseEleSummary.end() );

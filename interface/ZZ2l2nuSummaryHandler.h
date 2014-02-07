@@ -68,7 +68,7 @@ struct ZZ2l2nuSummary_t
   Int_t ln_id[MAXPARTICLES], ln_genid[MAXPARTICLES], ln_pid[MAXPARTICLES];
 
   //lepton id variables
-  Int_t en,en_idbits[MAXPARTICLES];
+  Int_t en,en_idbits[MAXPARTICLES], en_Tbits[MAXPARTICLES];
   Float_t en_hoe[MAXPARTICLES],en_hoebc[MAXPARTICLES],en_dphiin[MAXPARTICLES],en_detain[MAXPARTICLES],en_sihih[MAXPARTICLES],en_sipip[MAXPARTICLES],en_r9[MAXPARTICLES];
   Float_t en_sce[MAXPARTICLES],en_sceta[MAXPARTICLES],en_scphi[MAXPARTICLES],en_e2x5max[MAXPARTICLES],en_e1x5[MAXPARTICLES],en_e5x5[MAXPARTICLES];
   Float_t en_h2te[MAXPARTICLES],en_h2tebc[MAXPARTICLES],en_ooemoop[MAXPARTICLES],en_fbrem[MAXPARTICLES],en_eopin[MAXPARTICLES];
