@@ -179,6 +179,7 @@ bool ZZ2l2nuSummaryHandler::initTree(TTree *t, bool needsToRecreate)
 
   t_->Branch("mn",               &evSummary_.mn,              "mn/I");
   t_->Branch("mn_idbits",        evSummary_.mn_idbits,        "mn_idbits[mn]/I");
+  t_->Branch("mn_Tbits",         evSummary_.mn_Tbits,         "mn_Tbits[mn]/I");
   t_->Branch("mn_nMatches",      evSummary_.mn_nMatches ,     "mn_nMatches[mn]/F");
   t_->Branch("mn_nMatchedStations", evSummary_.mn_nMatchedStations ,     "mn_nMatchedStations[mn]/F");
   t_->Branch("mn_validMuonHits", evSummary_.mn_validMuonHits, "mn_validMuonHits[mn]/F");
@@ -513,6 +514,7 @@ bool ZZ2l2nuSummaryHandler::attachToTree(TTree *t, bool full)
   if(t_->GetBranch("en_mvanontrigv0")) t_->SetBranchAddress("en_mvanontrigv0",  evSummary_.en_mvanontrigv0);
   t_->SetBranchAddress("mn"              ,&evSummary_.mn);
   t_->SetBranchAddress("mn_idbits"       ,evSummary_.mn_idbits);
+  t_->SetBranchAddress("mn_Tbits"        ,evSummary_.mn_Tbits);
   t_->SetBranchAddress("mn_nMatches"     ,evSummary_.mn_nMatches);
   t_->SetBranchAddress("mn_nMatchedStations",evSummary_.mn_nMatchedStations);
   t_->SetBranchAddress("mn_validMuonHits",evSummary_.mn_validMuonHits);

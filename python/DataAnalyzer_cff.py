@@ -21,7 +21,7 @@ def defineAnalysis(process,castorDir="",reRunRho=False) :
                                         Generator = BaseGeneratorSelection.clone(),
                                         Vertices = BaseVertexSelection.clone(), #checked
                                         Photons = BasePhotonsSelection.clone(),
-                                        LooseMuons = BaseLooseMuonsSelection.clone(),
+                                        SoftMuons = BaseSoftMuonsSelection.clone(),
                                         Muons = BaseMuonsSelection.clone(),
                                         LooseElectrons = BaseLooseElectronsSelection.clone(),
                                         Electrons = BaseElectronsSelection.clone(),

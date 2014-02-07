@@ -16,6 +16,7 @@ ObjectIdSummary::ObjectIdSummary()
   p4=LorentzVector(0,0,0,0); id=0;    charge=0;
   genP4=p4;                  genid=0; genflav=0;
   idBits=0;
+  Tbits=0;
   for(size_t i=0; i<15; i++) isoVals[i]=0;
   for(size_t i=0; i<5; i++)  mva[i]=0; 
   ensf=0;                       ensferr=0;
@@ -52,6 +53,7 @@ ObjectIdSummary::ObjectIdSummary(ObjectIdSummary const&other)
   p4=other.p4;           id=other.id;       charge=other.charge;
   genP4=other.genP4;     genid=other.genid; genflav=other.genflav;
   idBits=other.idBits;
+  Tbits=other.Tbits;
   for(size_t i=0; i<15; i++) isoVals[i]=other.isoVals[i];
   for(size_t i=0; i<5; i++)  mva[i]=other.mva[i]; 
   ensf=other.ensf;ensferr=other.ensferr;
@@ -145,7 +147,8 @@ vector<reco::CandidatePtr> getGoodMuons(edm::Handle<edm::View<reco::Candidate> >
 					const double& rho, 
 					const edm::ParameterSet &iConfig,
 					const edm::EventSetup & iSetup,
-					std::vector<ObjectIdSummary> &selMuonIds)
+					std::vector<ObjectIdSummary> &selMuonIds,
+					std::vector<std::string> &triggerPaths)
 {
     vector<reco::CandidatePtr> selMuons;
     selMuonIds.clear();
@@ -236,6 +239,8 @@ vector<reco::CandidatePtr> getGoodMuons(edm::Handle<edm::View<reco::Candidate> >
 		       && fabs(lepId.trkdZ)<0.5
 		       && lepId.trkValidPixelHits>0
 		       && lepId.trkLayersWithMeasurement>5);
+	  bool isHighPt = muon::isHighPtMuon(dynamic_cast<const reco::Muon &>(*muon), dynamic_cast<const reco::Vertex &> (*primVertex)); //New Version (recommended) 
+	  /*
 	  bool isHighPt(isGlobal
 			&& lepId.trkMatchedStations>1
 			&& lepId.trkValidMuonHits>0
@@ -243,7 +248,7 @@ vector<reco::CandidatePtr> getGoodMuons(edm::Handle<edm::View<reco::Candidate> >
 			&& fabs(lepId.trkdZ)<0.5
 			&& lepId.trkValidPixelHits>0
 			&& lepId.trkLayersWithMeasurement>8);
-	  
+	  */	  
 	  bool isSoftVBTF2011(false);
 	  bool isVBTF2011(true);
 	  if(fabs(lepId.ensferr)  > vbtf2011.getParameter<double>("maxRelPtUncertainty") )             isVBTF2011=false;
@@ -282,12 +287,23 @@ vector<reco::CandidatePtr> getGoodMuons(edm::Handle<edm::View<reco::Candidate> >
 	    | isVBTF2011 << MID_VBTF2011
 	    | isSoftVBTF2011 << MID_SOFT2011;
 
+
+      	  //add trigger match
+          int TrigSum(0);
+      	  for(size_t it=0; it<triggerPaths.size(); it++)
+            {
+              string tempTrigName = triggerPaths[it] + "*";
+              if ( muon->triggerObjectMatchesByPath(tempTrigName).size() > 0 ) TrigSum |= (1<<it);
+            }
+      	  lepId.Tbits = TrigSum;
+
+
 	  //select the muon
 	  if( lepId.p4.pt()<minPt || fabs(lepId.p4.eta())>maxEta) continue; 
 	  if(!id.empty())
 	    {
 	      if(id=="loose" && !isLoose) continue;
-	      if(id=="soft" && !isSoft) continue;
+	      if(id=="soft" &&  !isSoft) continue;
 	      if(id=="tight" && !isTight) continue;
 	      if(id=="highpt" && !isHighPt) continue;
 	    }
@@ -301,7 +317,7 @@ vector<reco::CandidatePtr> getGoodMuons(edm::Handle<edm::View<reco::Candidate> >
 	  selMuonIds.push_back(lepId);
 	}  
     }catch(exception &e){
-      cout << "[muon::filter] failed with : " << e.what() << endl;
+      cout << "@[muon::filter] failed with : " << e.what() << endl;
     }    
  
     return selMuons;

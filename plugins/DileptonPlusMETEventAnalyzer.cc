@@ -96,7 +96,7 @@ DileptonPlusMETEventAnalyzer::DileptonPlusMETEventAnalyzer(const edm::ParameterS
 {
   try{
     std::string objs[]={"Generator", "Trigger", "MetFilter","Vertices", "Photons",
-			"Electrons", "LooseElectrons", "Muons","LooseMuons", "Dileptons", "Jets", "AssocJets", "MET" };
+			"Electrons", "LooseElectrons", "Muons","SoftMuons", "Dileptons", "Jets", "AssocJets", "MET" };
     for(size_t iobj=0; iobj<sizeof(objs)/sizeof(string); iobj++)
       objConfig_[ objs[iobj] ] = iConfig.getParameter<edm::ParameterSet>( objs[iobj] );
 
@@ -186,6 +186,7 @@ int DileptonPlusMETEventAnalyzer::addPidSummary(ObjectIdSummary &obj)
   else if(fabs(obj.id)==13)
     {
       ev.mn_idbits[ev.mn]                     = obj.idBits;
+      ev.mn_Tbits[ev.mn]		      = obj.Tbits;
       ev.mn_nMatches[ev.mn]                   = obj.trkMatches; 
       ev.mn_nMatchedStations[ev.mn]           = obj.trkMatchedStations;
       ev.mn_validMuonHits[ev.mn]              = obj.trkValidMuonHits;
@@ -430,12 +431,17 @@ void DileptonPlusMETEventAnalyzer::analyze(const edm::Event &event, const edm::E
     event.getByLabel( trigSource, triggerBitsH);
     const edm::TriggerNames &triggerNames = event.triggerNames( *triggerBitsH );
     std::vector<std::string> triggerPaths=objConfig_["Trigger"].getParameterSet("triggerPaths").getParameterNames();
+    std::vector<std::string> allTriggerNames;
     std::map<std::string,bool> triggerBits; 
     std::pair<std::string,double> photonTrig;
     ev.hasTrigger=false;
     for(size_t it=0; it<triggerPaths.size(); it++)
       {
 	std::vector<std::string> itriggers=objConfig_["Trigger"].getParameterSet("triggerPaths").getParameter<std::vector<std::string> >( triggerPaths[it] );
+	//test
+	for(unsigned int isize = 0; isize<itriggers.size(); isize++){
+	  allTriggerNames.push_back(itriggers[isize]);
+	}
 	triggerBits[ triggerPaths[it] ] = checkIfTriggerFired( triggerBitsH, triggerNames,itriggers);
 	ev.hasTrigger |= triggerBits[ triggerPaths[it] ];
 	if(triggerPaths[it]!="gamma") continue;
@@ -495,7 +501,7 @@ void DileptonPlusMETEventAnalyzer::analyze(const edm::Event &event, const edm::E
     edm::Handle<View<Candidate> > hMu;
     event.getByLabel(objConfig_["Muons"].getParameter<edm::InputTag>("source"), hMu);
     std::vector<ObjectIdSummary> muonSummary;
-    std::vector<CandidatePtr> selMuons      = getGoodMuons(hMu, primVertex, *rho, objConfig_["Muons"], iSetup, muonSummary);
+    std::vector<CandidatePtr> selMuons      = getGoodMuons(hMu, primVertex, *rho, objConfig_["Muons"], iSetup, muonSummary, allTriggerNames);
     
     //electron selection
     Handle<View<Candidate> > hEle;
@@ -601,7 +607,7 @@ void DileptonPlusMETEventAnalyzer::analyze(const edm::Event &event, const edm::E
     
     //save extra leptons (including softer ones)
     std::vector<ObjectIdSummary> looseMuonSummary;
-    std::vector<CandidatePtr>    looseMuons = getGoodMuons(hMu, primVertex, *rho, objConfig_["LooseMuons"], iSetup, looseMuonSummary);
+    std::vector<CandidatePtr>    looseMuons = getGoodMuons(hMu, primVertex, *rho, objConfig_["SoftMuons"], iSetup, looseMuonSummary, allTriggerNames);
     std::vector<ObjectIdSummary> looseEleSummary;
     std::vector<CandidatePtr>    looseElectrons = getGoodElectrons(hEle, hMu, hVtx_, *beamSpot, hConversions, &ecorr_,  lazyTool, &eIsolator, hPFCands, *rho, objConfig_["LooseElectrons"], iSetup, looseEleSummary);
     std::vector<ObjectIdSummary> selLooseLeptonsSummary = selLeptonsSummary;

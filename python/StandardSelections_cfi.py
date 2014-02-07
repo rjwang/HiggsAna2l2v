@@ -16,6 +16,17 @@ def getSelVersion():
 selVersion=getSelVersion()
 print 'CMSSW version %s - selection adapted for %d'%(os.environ['CMSSW_BASE'],selVersion)
 
+
+
+#  _______   _                                
+# |__   __| (_)                       
+#    | |_ __ _  __ _  __ _  ___ _ __   
+#    | | '__| |/ _` |/ _` |/ _ \ '__|  
+#    | | |  | | (_| | (_| |  __/ |     
+#    |_|_|  |_|\__, |\__, |\___|_|  
+#               __/ | __/ |                                    
+#              |___/ |___/                                  
+# 
 DoubleElectronTrigs, DoubleMuTrigs, MuEGTrigs, PhotonTrigs, SingleMuTrigs, SingleEleTrigs, mcTrigs = getTriggerPaths(version=selVersion)
 
 # base values for trigger event
@@ -53,12 +64,20 @@ BaseVertexSelection = cms.PSet( source = cms.InputTag("goodOfflinePrimaryVertice
                                 minNDOF = cms.int32(4)
                                 )
 
-# base values for muon selection ----------------------------------------------
-BaseMuonsSelection = cms.PSet( source = cms.InputTag("selectedPatMuonsTriggerMatch"),#patMuons"), 
+
+#  __  __                    
+# |  \/  |                  
+# | \  / |_   _  ___  _ __  
+# | |\/| | | | |/ _ \| '_ \
+# | |  | | |_| | (_) | | | |
+# |_|  |_|\__,_|\___/|_| |_|
+#
+# base values for loose muon selection ----------------------------------------------
+BaseMuonsSelection = cms.PSet( source = cms.InputTag("selectedPatMuonsTriggerMatch"), 
                                sourceIsPF = cms.bool(False),
-                               rho25Neut = cms.InputTag("kt6PFJetsCentralNeutral:rho"),
-                               minPt = cms.double(20),
-                               maxEta = cms.double(2.4),
+                               rho25Neut = cms.InputTag("kt6PFJetsCentralNeutral:rho"), #but using BaseJetSelection:rho
+                               minPt = cms.double(3),
+                               maxEta = cms.double(2.5),
                                id = cms.string("loose"),
                                vbtf2011 = cms.PSet( id = cms.string(""),
                                                     minValidMuonHits=cms.int32(1),
@@ -72,18 +91,15 @@ BaseMuonsSelection = cms.PSet( source = cms.InputTag("selectedPatMuonsTriggerMat
                                                     maxRelIso = cms.double(0.15),
                                                     applySoftMuonIsolationVeto=cms.bool(False)
                                                     ),
-                               maxRelIso = cms.double(999999.),
                                usePFIso = cms.bool(True),
-                               reComputePFIso = cms.bool(True), #False),
+                               reComputePFIso = cms.bool(True),
+			       #will do BetaCorrection at selection level
+                               maxRelIso = cms.double(999999.),
                                doDeltaBetaCorrection = cms.bool(False)
                                )
 
-#if(selVersion==2011):
-#    BaseMuonsSelection.usePFIso=cms.bool(True)
-#    BaseMuonsSelection.reComputePFIso = cms.bool(True)
-
-# base values for loose muon selection ----------------------------------------------
-BaseLooseMuonsSelection = BaseMuonsSelection.clone( minPt = cms.double(3),
+# base values for soft muon selection ----------------------------------------------
+BaseSoftMuonsSelection = BaseMuonsSelection.clone( minPt = cms.double(3),
                                                     id=cms.string("soft"),
                                                     vbtf2011 = cms.PSet( id = cms.string("TMLastStationAngTight"),
                                                                          minValidMuonHits=cms.int32(0),
@@ -95,11 +111,15 @@ BaseLooseMuonsSelection = BaseMuonsSelection.clone( minPt = cms.double(3),
                                                                          maxD0=cms.double(0.2),
                                                                          maxDz=cms.double(0.2),
                                                                          maxRelIso = cms.double(999999.),
-                                                                         applySoftMuonIsolationVeto=cms.bool(True) ),
-                                                    maxRelIso = cms.double(999999.),
-                                                    usePFIso = cms.bool(True),
-                                                    doDeltaBetaCorrection = cms.bool(False)
+                                                                         applySoftMuonIsolationVeto=cms.bool(True) )
                                                     )
+
+
+
+
+
+
+
 
 # base values for photon selection ----------------------------------------------
 BasePhotonsSelection = cms.PSet( source = cms.InputTag("photons"),
@@ -130,6 +150,16 @@ BasePhotonsSelection = cms.PSet( source = cms.InputTag("photons"),
     #    BasePhotonsSelection.rho25 = cms.InputTag("kt6PFJets25:rho")
 #    BasePhotonsSelection.scCorrector = cms.string("${CMSSW_BASE}/src/CMGTools/HiggsAna2l2v/data/PhoEnRegress_2011.root")
 
+
+
+
+#  ______ _           _                      
+# |  ____| |         | |                    
+# | |__  | | ___  ___| |_ _ __ ___  _ __   
+# |  __| | |/ _ \/ __| __| '__/ _ \| '_ \   
+# | |____| |  __/ (__| |_| | | (_) | | | |  
+# |______|_|\___|\___|\__|_|  \___/|_| |_|
+#  
 # base values for electron selection ----------------------------------------------
 BaseElectronsSelection = cms.PSet( source = cms.InputTag("selectedPatElectronsPFlowHeep"),#selectedPatElectrons"),
                                    id=cms.string("veto"),
@@ -164,6 +194,16 @@ BaseElectronsSelection = cms.PSet( source = cms.InputTag("selectedPatElectronsPF
 # base values for loose electron selection ----------------------------------------------
 BaseLooseElectronsSelection = BaseElectronsSelection.clone(minPt = cms.double(10))
 
+
+
+
+#      _      _                                
+#     | |    | |   
+#     | | ___| |_   
+# _   | |/ _ \ __|   
+#| |__| |  __/ |_   
+# \____/ \___|\__|  
+#                                        
 #my base values for jet selection -------------------------------------------------
 BaseJetSelection = cms.PSet( source = cms.InputTag("selectedPatJetsPFlow"),
                              rho = cms.InputTag("kt6PFJets:rho"),

@@ -62,6 +62,7 @@ class ObjectIdSummary
   int id,genid,genflav;
   double charge;
   int idBits;
+  int Tbits;
   double isoVals[15], mva[5];
   double ensf,ensferr;
   double trkd0,trkdZ,trkip3d,trkip3dsig,trkpt,trketa,trkphi,trkchi2,trkValidPixelHits,trkValidTrackerHits,trkLostInnerHits;
@@ -120,7 +121,8 @@ std::vector<reco::CandidatePtr> getGoodMuons(edm::Handle<edm::View<reco::Candida
 					     const double& rho, 
 					     const edm::ParameterSet &iConfig,
 					     const edm::EventSetup & iSetup,
-					     std::vector<ObjectIdSummary> &selMuonIds);
+					     std::vector<ObjectIdSummary> &selMuonIds,
+					     std::vector<std::string> &triggerPaths);
 std::vector<reco::CandidatePtr> getGoodElectrons(edm::Handle<edm::View<reco::Candidate> > &hEle, 
 						 edm::Handle<edm::View<reco::Candidate> > &hMu, 
 						 edm::Handle<reco::VertexCollection> &hVtx,

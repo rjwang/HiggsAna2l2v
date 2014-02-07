@@ -75,7 +75,7 @@ struct ZZ2l2nuSummary_t
   Float_t en_mvatrigv0[MAXPARTICLES], en_mvanontrigv0[MAXPARTICLES];
   Float_t en_dEtaCalo[MAXPARTICLES], en_dPhiCalo[MAXPARTICLES], en_kfchi2[MAXPARTICLES], en_kfhits[MAXPARTICLES], en_kfhitsall[MAXPARTICLES], en_sihip[MAXPARTICLES], en_nbrems[MAXPARTICLES], en_etawidth[MAXPARTICLES], en_phiwidth[MAXPARTICLES], en_e1x5e5x5[MAXPARTICLES], en_preShowerOverRaw[MAXPARTICLES], en_eopout[MAXPARTICLES];
 
-  Int_t mn,mn_idbits[MAXPARTICLES];
+  Int_t mn,mn_idbits[MAXPARTICLES],mn_Tbits[MAXPARTICLES];
   Float_t mn_nMatches[MAXPARTICLES],mn_nMatchedStations[MAXPARTICLES],mn_validMuonHits[MAXPARTICLES],mn_innerTrackChi2[MAXPARTICLES],mn_trkLayersWithMeasurement[MAXPARTICLES],mn_pixelLayersWithMeasurement[MAXPARTICLES];
 
   //jets
