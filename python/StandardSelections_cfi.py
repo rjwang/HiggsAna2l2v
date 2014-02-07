@@ -76,7 +76,7 @@ BaseVertexSelection = cms.PSet( source = cms.InputTag("goodOfflinePrimaryVertice
 BaseMuonsSelection = cms.PSet( source = cms.InputTag("selectedPatMuonsTriggerMatch"), 
                                sourceIsPF = cms.bool(False),
                                rho25Neut = cms.InputTag("kt6PFJetsCentralNeutral:rho"), #but using BaseJetSelection:rho
-                               minPt = cms.double(3),
+                               minPt = cms.double(10),
                                maxEta = cms.double(2.5),
                                id = cms.string("loose"),
                                vbtf2011 = cms.PSet( id = cms.string(""),
@@ -147,6 +147,11 @@ BaseLooseElectronsSelection = BaseElectronsSelection.clone(minPt = cms.double(8)
 
 
 
+# base values for the dilepton System selection ------------------------------------------
+BaseDileptonSelection = cms.PSet( minDileptonMass = cms.double(0),
+                                  maxDileptonMass = cms.double(7000),
+                                  maxDz = cms.double(1.0)
+                                  )
 
 
 #  _____  __          _                
@@ -220,11 +225,6 @@ BaseJetSelection = cms.PSet( source = cms.InputTag("selectedPatJetsPFlow"),
 AssocJetSelection = BaseJetSelection.clone(source = cms.InputTag("selectedPatJetsPFlow"),
                                            puJetIds = pileupJetIdProducerChs.algos
                                            )
-# base values for the dilepton selection ------------------------------------------
-BaseDileptonSelection = cms.PSet( minDileptonMass = cms.double(0),
-                                  maxDileptonMass = cms.double(7000),
-                                  maxDz = cms.double(1.0)
-                                  )
 
 
 
