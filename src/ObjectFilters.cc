@@ -1111,7 +1111,7 @@ vector<CandidatePtr> getGoodPhotons(edm::Handle<edm::View<reco::Candidate> > &hP
 	selPhotonIds.push_back( phoId );
       }
   }catch(exception &e){
-    cout << "[photon] failed with " << e.what() << endl;
+    cout << "@[photon] failed with " << e.what() << endl;
   }
   
   return selPhotons;

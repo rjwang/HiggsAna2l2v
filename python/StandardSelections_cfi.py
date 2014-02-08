@@ -189,7 +189,6 @@ BasePhotonsSelection = cms.PSet( source = cms.InputTag("photons"),
                                  )
 
 
-
 #      _      _                                
 #     | |    | |   
 #     | | ___| |_   
