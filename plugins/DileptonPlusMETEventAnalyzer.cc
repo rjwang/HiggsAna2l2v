@@ -397,9 +397,9 @@ void DileptonPlusMETEventAnalyzer::analyze(const edm::Event &event, const edm::E
     ZZ2l2nuSummary_t &ev = summaryHandler_.getEvent();
 
     //pfmet
-    Handle<View<Candidate> > hMET;
-    event.getByLabel(objConfig_["MET"].getParameter<edm::InputTag>("source"), hMET);
-    CandidatePtr pfmet = hMET->ptrAt(0);
+    //Handle<View<Candidate> > hMET;
+    //event.getByLabel(objConfig_["MET"].getParameter<edm::InputTag>("source"), hMET);
+    //CandidatePtr pfmet = hMET->ptrAt(0);
    
     //event header
     ev.run    = event.id().run();
@@ -843,6 +843,12 @@ void DileptonPlusMETEventAnalyzer::analyze(const edm::Event &event, const edm::E
     //
     // MET SELECTION
     //
+
+    //pfmet
+    Handle<View<Candidate> > hMET;
+    event.getByLabel(objConfig_["MET"].getParameter<edm::InputTag>("source"), hMET);
+    CandidatePtr pfmet = hMET->ptrAt(0);
+
     ev.nmet=0;
     std::vector<edm::InputTag> clusteredMetSources = objConfig_["MET"].getParameter<std::vector<edm::InputTag> >("hzzmetSources");
     ev.nmet=clusteredMetSources.size()+1;
@@ -852,7 +858,7 @@ void DileptonPlusMETEventAnalyzer::analyze(const edm::Event &event, const edm::E
  
     //pseudo-mets
     std::vector<double> sumEts; 
-    std::vector<LorentzVector>  clusteredMets;
+    //std::vector<LorentzVector>  clusteredMets;
 
     try{
       edm::Handle< std::vector<double> > sumEtsH;
@@ -874,11 +880,14 @@ void DileptonPlusMETEventAnalyzer::analyze(const edm::Event &event, const edm::E
 	  if(clustMetH.isValid())
 	    {
 	      LorentzVector iclustMet(clustMetH->px(),clustMetH->py(),0,clustMetH->pt());
-	      ev.met_phi[i+1]  = iclustMet.phi();   ev.met_pt[i+1]  = iclustMet.pt();
+	      ev.met_phi[i+1]  = iclustMet.phi();   
+	      ev.met_pt[i+1]  = iclustMet.pt();
 	    }
 	  else
 	    {
-	      ev.met_phi[i+1]  = 0;    ev.met_pt[i+1]  = -1;
+              cout << "[Warning]: clustMetH is not Valid! " << endl;
+	      ev.met_phi[i+1]  = 0;    
+	      ev.met_pt[i+1]  = -1;
 	    }
 	}
 

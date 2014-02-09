@@ -65,7 +65,7 @@ def defineAnalysis(process,castorDir="",reRunRho=False) :
     #else :
     #process.dataAnalyzer = cms.Path( #process.mvaIDs +
     #     process.ak5PFJetsL1L2L3ForMVAMET *
-    #     process.ClusteredPFMetProducer *
+    #     process.ClusteredPFMetProducer +
     #     process.evAnalyzer)
         
      

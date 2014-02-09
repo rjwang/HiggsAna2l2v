@@ -123,6 +123,7 @@ std::vector<reco::CandidatePtr> getGoodMuons(edm::Handle<edm::View<reco::Candida
 					     const edm::EventSetup & iSetup,
 					     std::vector<ObjectIdSummary> &selMuonIds,
 					     std::vector<std::string> &triggerPaths);
+
 std::vector<reco::CandidatePtr> getGoodElectrons(edm::Handle<edm::View<reco::Candidate> > &hEle, 
 						 edm::Handle<edm::View<reco::Candidate> > &hMu, 
 						 edm::Handle<reco::VertexCollection> &hVtx,

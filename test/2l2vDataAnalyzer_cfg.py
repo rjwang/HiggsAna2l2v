@@ -274,8 +274,8 @@ process.p = cms.Path( process.startCounter
                       *process.selectedPatElectronsWithTrigger*process.selectedPatElectronsPFlowHeep
                       *process.selectedPatMuonsTriggerMatch
 		      #*process.analysis
-		      #*process.ak5PFJetsL1L2L3ForMVAMET
-                      #*process.ClusteredPFMetProducer
+		      ####*process.ak5PFJetsL1L2L3ForMVAMET
+                      ####*process.ClusteredPFMetProducer
                       *process.dataAnalyzer
 		      ##*process.endCounter*process.out
                       )

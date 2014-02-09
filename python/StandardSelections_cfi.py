@@ -236,22 +236,24 @@ AssocJetSelection = BaseJetSelection.clone(source = cms.InputTag("selectedPatJet
 #                                   
 # base values for met selection -----------------------------------------------------
 BaseMetSelection = cms.PSet( source = cms.InputTag("patMETsPFlow"),
-                             trksource = cms.InputTag("trackMetProducer"),
-			     #hzzmetSources = cms.VInputTag("pfMETPFlow","pfMet","pfType1CorrectedMet","pfType1p2CorrectedMet"),
-                             hzzmetSources = cms.VInputTag("ClusteredPFMetProducer:assoc",                #1
-                                                           "ClusteredPFMetProducer:standard",             #2  
-                                                           "ClusteredPFMetProducer:central",              #3
-                                                           "ClusteredPFMetProducer:cleaned",              #4 
-                                                           "ClusteredPFMetProducer:assocCharged",         #5 
-                                                           "ClusteredPFMetProducer:assocWithFwd",         #6
-                                                           "ClusteredPFMetProducer:mvaMET",               #7
-                                                           "ClusteredPFMetProducer:assocWithFwd",      #8  //to be replaced by something else
-                                                           "ClusteredPFMetProducer:assoc",             #9  //to be replaced by something else
-                                                           "ClusteredPFMetProducer:assocWithFwd",      #10 //to be replaced by something else
-                                                           "ClusteredPFMetProducer:assocBeta",            #11
-                                                           "ClusteredPFMetProducer:assocWithFwdBeta"),    #12
-                             pfCands = cms.InputTag("particleFlow"),
-                             pvAssocCandidatesSource = cms.InputTag("ClusteredPFMetProducer:pvAssocCandidates"),
+                             #trksource = cms.InputTag("trackMetProducer"),
+			     #metSources = cms.VInputTag("pfMETPFlow","pfMETcorrType0","pfType1CorrectedMet","pfType1p2CorrectedMet"),
+                             hzzmetSources = cms.VInputTag("pfMETPFlow","pfMETcorrType0","pfType1CorrectedMet","pfType1p2CorrectedMet"
+							   #"ClusteredPFMetProducer:assoc",                #1
+                                                           #"ClusteredPFMetProducer:standard",             #2  
+                                                           #"ClusteredPFMetProducer:central",              #3
+                                                           #"ClusteredPFMetProducer:cleaned",              #4 
+                                                           #"ClusteredPFMetProducer:assocCharged",         #5 
+                                                           #"ClusteredPFMetProducer:assocWithFwd",         #6
+                                                           #"ClusteredPFMetProducer:mvaMET",               #7
+                                                           #"ClusteredPFMetProducer:assocWithFwd",      #8  //to be replaced by something else
+                                                           #"ClusteredPFMetProducer:assoc",             #9  //to be replaced by something else
+                                                           #"ClusteredPFMetProducer:assocWithFwd",      #10 //to be replaced by something else
+                                                           #"ClusteredPFMetProducer:assocBeta",            #11
+                                                           #"ClusteredPFMetProducer:assocWithFwdBeta",    #12
+							  ),
+                             #pfCands = cms.InputTag("particleFlow"),
+                             #pvAssocCandidatesSource = cms.InputTag("ClusteredPFMetProducer:pvAssocCandidates"),
                              sumEtSources = cms.InputTag("ClusteredPFMetProducer:globalPfMetSums")
                              )
 
