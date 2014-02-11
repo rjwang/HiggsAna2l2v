@@ -114,7 +114,8 @@ struct ZZ2l2nuSummary_t
   
   //met types
   Int_t nmet;
-  Float_t met_phi[MAXPARTICLES] ,met_pt[MAXPARTICLES];
+  Float_t met_phi[MAXPARTICLES] ,met_pt[MAXPARTICLES], met_sig[MAXPARTICLES];
+  Float_t met_sigx2[MAXPARTICLES], met_sigxy[MAXPARTICLES], met_sigy2[MAXPARTICLES];
   Float_t sumEt,     sumEtcentral,     primVertexSumEt,     otherVertexSumEt;
   Float_t chsumEt,   chsumEtcentral,   primVertexChSumEt,   otherVertexChSumEt;
   Float_t neutsumEt, neutsumEtcentral, primVertexNeutSumEt, otherVertexNeutSumEt;

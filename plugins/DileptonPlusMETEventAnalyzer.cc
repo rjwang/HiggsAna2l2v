@@ -536,7 +536,7 @@ void DileptonPlusMETEventAnalyzer::analyze(const edm::Event &event, const edm::E
 	    if(ev.cat==MUMU && triggerBits["singleMu"]==false && triggerBits["mumu"]==false) return;  
 	    //if(ev.cat==EMU  && triggerBits["emu"]==false)  return; //is this complete?
 	    if(ev.cat==EMU  && triggerBits["emu"]==false && (triggerBits["singleEle"]==false || triggerBits["singleMu"]==false) )  return; // add singleElectron and singleMuon, although no big changes
-	    
+	    //if(ev.cat!=EE && ev.cat!=MUMU && ev.cat!=EMU) return; //get ride of trash 
 	    ev.triggerType = (triggerBits["ee"] << 0 ) |
 	      (triggerBits["mumu"] << 1 ) |
 	      (triggerBits["emu"] << 2 ) |
@@ -850,19 +850,17 @@ void DileptonPlusMETEventAnalyzer::analyze(const edm::Event &event, const edm::E
     CandidatePtr pfmet = hMET->ptrAt(0);
 
     ev.nmet=0;
-    std::vector<edm::InputTag> clusteredMetSources = objConfig_["MET"].getParameter<std::vector<edm::InputTag> >("hzzmetSources");
-    ev.nmet=clusteredMetSources.size()+1;
+    std::vector<edm::InputTag> mainMetSources = objConfig_["MET"].getParameter<std::vector<edm::InputTag> >("mainSources");
+    ev.nmet=mainMetSources.size()+1;
+
+    edm::Handle< std::vector<double> > sumEtsH;
+    event.getByLabel(objConfig_["MET"].getParameter<edm::InputTag>("sumEtSources"),sumEtsH);
+
 
     //pf-met
-    ev.met_phi[0] = pfmet->phi();    ev.met_pt[0] =  pfmet->pt();
- 
-    //pseudo-mets
-    std::vector<double> sumEts; 
-    //std::vector<LorentzVector>  clusteredMets;
+    ev.met_phi[0] = pfmet->phi(); ev.met_pt[0] = pfmet->pt();
 
     try{
-      edm::Handle< std::vector<double> > sumEtsH;
-      event.getByLabel(objConfig_["MET"].getParameter<edm::InputTag>("sumEtSources"),sumEtsH);
 
       if(sumEtsH.isValid())
 	{
@@ -872,28 +870,29 @@ void DileptonPlusMETEventAnalyzer::analyze(const edm::Event &event, const edm::E
 	  ev.primVertexSumEt = (*sumEtsH)[6];    ev.primVertexChSumEt = (*sumEtsH)[7];    ev.primVertexNeutSumEt = (*sumEtsH)[8];
 	  ev.otherVertexSumEt = (*sumEtsH)[9];   ev.otherVertexChSumEt = (*sumEtsH)[10];  ev.otherVertexNeutSumEt = (*sumEtsH)[11];
 	}
+      else 
+	cout << "sumEtsH is inValid!" << endl;
 
-      for(size_t i=0; i<clusteredMetSources.size(); i++)
+      for(size_t i=0; i<mainMetSources.size(); i++)
 	{
-	  edm::Handle< reco::PFMET > clustMetH;
-	  event.getByLabel(clusteredMetSources[i],clustMetH); 
-	  if(clustMetH.isValid())
-	    {
-	      LorentzVector iclustMet(clustMetH->px(),clustMetH->py(),0,clustMetH->pt());
-	      ev.met_phi[i+1]  = iclustMet.phi();   
-	      ev.met_pt[i+1]  = iclustMet.pt();
-	    }
-	  else
-	    {
-              cout << "[Warning]: clustMetH is not Valid! " << endl;
-	      ev.met_phi[i+1]  = 0;    
-	      ev.met_pt[i+1]  = -1;
-	    }
+	  edm::Handle<View<reco::PFMET> > metH;
+	  event.getByLabel(mainMetSources[i],metH); 
+
+          ev.met_pt[i+1]    = metH.isValid() ? metH->ptrAt(0)->pt() : -1;
+	  ev.met_phi[i+1]   = metH.isValid() ? metH->ptrAt(0)->phi():  0;
+	  ev.met_sigx2[i+1] = metH.isValid() ? metH->ptrAt(0)->getSignificanceMatrix()(0,0) : 0;
+	  ev.met_sigxy[i+1] = metH.isValid() ? metH->ptrAt(0)->getSignificanceMatrix()(0,1) : 0;
+  	  ev.met_sigy2[i+1] = metH.isValid() ? metH->ptrAt(0)->getSignificanceMatrix()(1,1) : 0;
+	  double significance(0.);
+      	  if(metH.isValid() && ev.met_sigx2[i+1]<1.e10 && ev.met_sigy2[i+1]<1.e10) significance = metH->ptrAt(0)->significance();
+      	  ev.met_sig[i+1]   = significance;
 	}
 
     }catch(std::exception &e){
       cout << e.what() << endl;
     }
+
+
 
     // finish event summary
     ev.nmeasurements=0;

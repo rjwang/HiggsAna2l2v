@@ -18,7 +18,7 @@ def getTriggerPaths(version=2012) :
 		   'HLT_Mu17_Mu8_v','HLT_Mu17_TkMu8_v',
 		   'HLT_Mu8_Ele17_CaloIdT_CaloIsoVL_TrkIdVL_TrkIsoVL_v',
 		   'HLT_Mu17_Ele8_CaloIdT_CaloIsoVL_TrkIdVL_TrkIsoVL_v',
-		   'HLT_IsoMu24_eta2p1_v','HLT_IsoMu24_v',
+		   'HLT_IsoMu24_eta2p1_v','HLT_IsoMu24_v',#'HLT_Mu17_v',
 		   'HLT_Ele27_WP80_v'
 		   ]
         
@@ -26,12 +26,11 @@ def getTriggerPaths(version=2012) :
                           'HLT_DoubleEle33_CaloIdL_GsfTrkIdVL_v']
         
         DoubleMu = ['HLT_Mu17_Mu8_v','HLT_Mu17_TkMu8_v']
-
         
         MuEG = ['HLT_Mu8_Ele17_CaloIdT_CaloIsoVL_TrkIdVL_TrkIsoVL_v',
                 'HLT_Mu17_Ele8_CaloIdT_CaloIsoVL_TrkIdVL_TrkIsoVL_v']
         
-        SingleMu = ['HLT_IsoMu24_eta2p1_v','HLT_IsoMu24_v']
+        SingleMu = ['HLT_IsoMu24_eta2p1_v','HLT_IsoMu24_v']#,'HLT_Mu17_v']
 	
 	SingleElectron = ['HLT_Ele27_WP80_v']
         

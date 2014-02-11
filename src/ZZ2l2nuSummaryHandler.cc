@@ -290,6 +290,10 @@ bool ZZ2l2nuSummaryHandler::initTree(TTree *t, bool needsToRecreate)
   t_->Branch("nmet",  &evSummary_.nmet, "nmet/I");
   t_->Branch("met_phi",     evSummary_.met_phi,    "met_phi[nmet]/F");
   t_->Branch("met_pt",      evSummary_.met_pt,     "met_pt[nmet]/F");
+  t_->Branch("met_sig",     evSummary_.met_sig,     "met_pt[nmet]/F");
+  t_->Branch("met_sigx2",   evSummary_.met_sigx2,   "met_sigx2[nmet]/F");
+  t_->Branch("met_sigxy",   evSummary_.met_sigxy,   "met_sigxy[nmet]/F");
+  t_->Branch("met_sigy2",   evSummary_.met_sigy2,   "met_sigy2[nmet]/F");
 
   t_->Branch("sumEt",               &evSummary_.sumEt,            "sumEt/F");
   t_->Branch("sumEtcentral",        &evSummary_.sumEtcentral,     "sumEtcentral/F");
@@ -622,6 +626,10 @@ bool ZZ2l2nuSummaryHandler::attachToTree(TTree *t, bool full)
   t_->SetBranchAddress("nmet",     &evSummary_.nmet);
   t_->SetBranchAddress("met_phi",  evSummary_.met_phi);
   t_->SetBranchAddress("met_pt",   evSummary_.met_pt);
+  t_->SetBranchAddress("met_sig",   evSummary_.met_sig);
+  t_->SetBranchAddress("met_sigx2",   evSummary_.met_sigx2);
+  t_->SetBranchAddress("met_sigxy",   evSummary_.met_sigxy);
+  t_->SetBranchAddress("met_sigy2",   evSummary_.met_sigy2);
 
   t_->SetBranchAddress("sumEt",&evSummary_.sumEt);
   t_->SetBranchAddress("sumEtcentral",&evSummary_.sumEtcentral);

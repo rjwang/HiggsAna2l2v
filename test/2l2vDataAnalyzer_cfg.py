@@ -157,6 +157,7 @@ process.load('EgammaAnalysis.ElectronTools.electronIdMVAProducer_cfi')
 process.eidMVASequence = cms.Sequence(  process.mvaTrigV0 + process.mvaNonTrigV0 )
 process.patElectronsPFlow.electronIDSources.mvaTrigV0    = cms.InputTag("mvaTrigV0")
 process.patElectronsPFlow.electronIDSources.mvaNonTrigV0 = cms.InputTag("mvaNonTrigV0")
+
 from SHarper.HEEPAnalyzer.HEEPSelectionCuts_cfi import *
 process.selectedPatElectronsPFlowHeep = cms.EDProducer("HEEPAttStatusToPAT",
                                                        eleLabel = cms.InputTag("selectedPatElectronsWithTrigger"),
@@ -240,6 +241,7 @@ process.pfType1CorrectedMet.srcType1Corrections = cms.VInputTag( cms.InputTag('p
 # ANALYSIS                           #
 ######################################
 from CMGTools.HiggsAna2l2v.DataAnalyzer_cff import defineAnalysis
+#from CMGTools.HiggsAna2l2v.tagprobeanalyzer_cfg import defineAnalysis #for tag and probe
 defineAnalysis(process)
     
 

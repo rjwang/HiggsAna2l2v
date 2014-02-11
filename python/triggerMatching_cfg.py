@@ -16,6 +16,7 @@ def addTriggerMatchingTo(process) :
     #triggers of interest
     pathTrigger_MuSingle_1  = 'path("HLT_IsoMu24_eta2p1_v*")'
     pathTrigger_MuSingle_2  = 'path("HLT_IsoMu24_v*")'
+    #pathTrigger_MuSingle_3  = 'path("HLT_Mu17_v*")'
 
     pathTrigger_MuDouble_1  = 'path("HLT_Mu17_Mu8_v*",0,1)'
     pathTrigger_MuDouble_2  = 'path("HLT_Mu17_TkMu8_v*",0,1)'
@@ -39,6 +40,7 @@ def addTriggerMatchingTo(process) :
                                                             resolveByMatchQuality = cms.bool( True ) 
                                                             )
     process.muonTriggerMatchHLTMuSingle2  = process.muonTriggerMatchHLTMuSingle1.clone( matchedCuts = cms.string( pathTrigger_MuSingle_2 ) )
+    ##process.muonTriggerMatchHLTMuSingle3  = process.muonTriggerMatchHLTMuSingle1.clone( matchedCuts = cms.string( pathTrigger_MuSingle_3 ) )
     process.muonTriggerMatchHLTMuDouble1  = process.muonTriggerMatchHLTMuSingle1.clone( matchedCuts = cms.string( pathTrigger_MuDouble_1 ) )
     process.muonTriggerMatchHLTMuDouble2  = process.muonTriggerMatchHLTMuSingle1.clone( matchedCuts = cms.string( pathTrigger_MuDouble_2 ) )
     process.muonTriggerMatchHLTMuEle1     = process.muonTriggerMatchHLTMuSingle1.clone( matchedCuts = cms.string( pathTrigger_MuEle_1 ) )
@@ -46,13 +48,13 @@ def addTriggerMatchingTo(process) :
 
     process.selectedPatMuonsTriggerMatch = cms.EDProducer( "PATTriggerMatchMuonEmbedder",
                                                            src     = cms.InputTag( "selectedPatMuonsPFlow" ),
-                                                           matches = cms.VInputTag('muonTriggerMatchHLTMuSingle1', 'muonTriggerMatchHLTMuSingle2',
+                                                           matches = cms.VInputTag('muonTriggerMatchHLTMuSingle1', 'muonTriggerMatchHLTMuSingle2',#'muonTriggerMatchHLTMuSingle3',
                                                                                    'muonTriggerMatchHLTMuDouble1', 'muonTriggerMatchHLTMuDouble2',
                                                                                    'muonTriggerMatchHLTMuEle1',    'muonTriggerMatchHLTMuEle2'
                                                                                    )
                                                            )
     switchOnTriggerMatchEmbedding(process,
-                                  triggerMatchers = [ 'muonTriggerMatchHLTMuSingle1', 'muonTriggerMatchHLTMuSingle2',
+                                  triggerMatchers = [ 'muonTriggerMatchHLTMuSingle1', 'muonTriggerMatchHLTMuSingle2',#'muonTriggerMatchHLTMuSingle3',
                                                       'muonTriggerMatchHLTMuDouble1', 'muonTriggerMatchHLTMuDouble2',
                                                       'muonTriggerMatchHLTMuEle1',    'muonTriggerMatchHLTMuEle2'],
                                   sequence='patDefaultSequencePFlow')

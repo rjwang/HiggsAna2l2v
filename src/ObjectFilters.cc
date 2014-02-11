@@ -172,7 +172,7 @@ vector<reco::CandidatePtr> getGoodMuons(edm::Handle<edm::View<reco::Candidate> >
 	  
 	  ObjectIdSummary lepId;
 	  lepId.p4 = LorentzVector(muon->px(),muon->py(),muon->pz(),muon->energy());
-	  lepId.id=13;
+	  lepId.id = 13;
 	  const reco::Candidate *genLep = muon->genLepton();
 	  lepId.genid   = genLep ? genLep->pdgId() : -9999;
 	  lepId.genflav = lepId.genid;
@@ -395,7 +395,7 @@ vector<CandidatePtr> getGoodElectrons(edm::Handle<edm::View<reco::Candidate> > &
 	//build a summary of this object
 	ObjectIdSummary lepId;
 	lepId.p4 = LorentzVector(ele->px(),ele->py(),ele->pz(),ele->energy());
-	lepId.id=11;
+	lepId.id = 11;
 	const reco::Candidate *genLep = ele->genLepton();
         lepId.genid   = genLep ? genLep->pdgId() : -9999;
         lepId.genflav = lepId.genid;
@@ -1362,3 +1362,24 @@ bool checkIfTriggerFired(edm::Handle<edm::TriggerResults> &allTriggerBits, const
     }
   return false;
 }
+
+
+//
+std::map<std::string,bool> getTriggerFired(edm::Handle<edm::TriggerResults> &allTriggerBits, const edm::TriggerNames &triggerNames, std::vector<std::string> &triggerPaths)
+{
+  std::map<std::string,bool> itrigger;
+  for (size_t itrig = 0; itrig != allTriggerBits->size(); ++itrig)
+    {
+      std::string trigName = triggerNames.triggerName(itrig);
+      if( !allTriggerBits->wasrun(itrig) ) continue;
+      if( allTriggerBits->error(itrig) ) continue;
+      if( !allTriggerBits->accept(itrig) ) continue;
+      for(size_t ip=0; ip<triggerPaths.size(); ip++)
+        {
+          if(trigName.find(triggerPaths[ip])!= std::string::npos)
+		itrigger[triggerPaths[ip]]=true;
+        }
+    }
+  return itrigger;
+}
+

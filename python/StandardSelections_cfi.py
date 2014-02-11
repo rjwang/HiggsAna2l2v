@@ -238,7 +238,7 @@ AssocJetSelection = BaseJetSelection.clone(source = cms.InputTag("selectedPatJet
 BaseMetSelection = cms.PSet( source = cms.InputTag("patMETsPFlow"),
                              #trksource = cms.InputTag("trackMetProducer"),
 			     #metSources = cms.VInputTag("pfMETPFlow","pfMETcorrType0","pfType1CorrectedMet","pfType1p2CorrectedMet"),
-                             hzzmetSources = cms.VInputTag("pfMETPFlow","pfMETcorrType0","pfType1CorrectedMet","pfType1p2CorrectedMet"
+                             mainSources = cms.VInputTag("pfMETPFlow","pfType1CorrectedMet","pfType1p2CorrectedMet"
 							   #"ClusteredPFMetProducer:assoc",                #1
                                                            #"ClusteredPFMetProducer:standard",             #2  
                                                            #"ClusteredPFMetProducer:central",              #3

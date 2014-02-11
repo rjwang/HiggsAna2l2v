@@ -194,6 +194,6 @@ std::pair<std::string,double> getHighestPhotonTrigThreshold(edm::Handle<edm::Tri
 							    std::vector<std::string> &gammaTriggers,
 							    unsigned int &gammaTriggerWord);
 bool checkIfTriggerFired(edm::Handle<edm::TriggerResults> &allTriggerBis, const edm::TriggerNames &triggerNames, std::vector<std::string> &trigList); 
-
+std::map<std::string,bool> getTriggerFired(edm::Handle<edm::TriggerResults> &allTriggerBits, const edm::TriggerNames &triggerNames, std::vector<std::string> &triggerPaths);
 
 #endif
