@@ -197,7 +197,7 @@ BasePhotonsSelection = cms.PSet( source = cms.InputTag("photons"),
 # \____/ \___|\__|  
 #                                        
 #my base values for jet selection -------------------------------------------------
-BaseJetSelection = cms.PSet( source = cms.InputTag("selectedPatJetsPFlow"),
+BaseJetSelection = cms.PSet( source = cms.InputTag("selectedPatJets"),#selectedPatJetsPFlow"), #should be normal PFlow 
                              rho = cms.InputTag("kt6PFJets:rho"),
                              minPt = cms.double(10),
                              maxEta = cms.double(5.0),
@@ -237,7 +237,6 @@ AssocJetSelection = BaseJetSelection.clone(source = cms.InputTag("selectedPatJet
 # base values for met selection -----------------------------------------------------
 BaseMetSelection = cms.PSet( source = cms.InputTag("patMETsPFlow"),
                              #trksource = cms.InputTag("trackMetProducer"),
-			     #metSources = cms.VInputTag("pfMETPFlow","pfMETcorrType0","pfType1CorrectedMet","pfType1p2CorrectedMet"),
                              mainSources = cms.VInputTag("pfMETPFlow","pfType1CorrectedMet","pfType1p2CorrectedMet"
 							   #"ClusteredPFMetProducer:assoc",                #1
                                                            #"ClusteredPFMetProducer:standard",             #2  

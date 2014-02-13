@@ -127,20 +127,21 @@ usePF2PAT(process,
 
 
 ##configure std pat to use pf jets/MET
-#from PhysicsTools.PatAlgos.tools.metTools import *
-#addPfMET(process, 'PF')
-#from PhysicsTools.PatAlgos.tools.jetTools import *
-#switchJetCollection(process,cms.InputTag('ak5PFJets'),
-#                    doJTA        = True,
-#                    doBTagging   = True,
-#                    jetCorrLabel = ('AK5PF',jecLevels),
-#                    doType1MET   = False,
-#                    genJetCollection=cms.InputTag("ak5GenJets"),
-#                    doJetID      = True
-#                    )
-#if not isMC:
-#    removeMCMatchingPF2PAT(process,'')
-#    process.patMETsPF.addGenMET=cms.bool(False)
+from PhysicsTools.PatAlgos.tools.metTools import *
+addPfMET(process, 'PF')
+from PhysicsTools.PatAlgos.tools.jetTools import *
+switchJetCollection(process,cms.InputTag('ak5PFJets'),
+                    doJTA        = True,
+                    doBTagging   = True,
+                    jetCorrLabel = ('AK5PF',jecLevels),
+                    doType1MET   = False,
+                    genJetCollection=cms.InputTag("ak5GenJets"),
+                    doJetID      = True
+                    )
+if not isMC:
+    removeMCMatchingPF2PAT(process,'')
+    process.patMETsPF.addGenMET=cms.bool(False)
+
 
 
 
@@ -272,6 +273,7 @@ process.p = cms.Path( process.startCounter
 		      *process.rhoSequence
                       *process.qgSequence
                       *process.type0PFMEtCorrection*process.producePFMETCorrections#*process.pfMEtSysShiftCorrSequence
+			*process.patDefaultSequence
                       *process.selectedPatElectronsWithTrigger*process.selectedPatElectronsPFlowHeep
                       *process.selectedPatMuonsTriggerMatch
 		      #*process.analysis
