@@ -241,7 +241,6 @@ process.pfType1CorrectedMet.srcType1Corrections = cms.VInputTag( cms.InputTag('p
 # ANALYSIS                           #
 ######################################
 from CMGTools.HiggsAna2l2v.DataAnalyzer_cff import defineAnalysis
-#from CMGTools.HiggsAna2l2v.tagprobeanalyzer_cfg import defineAnalysis #for tag and probe
 defineAnalysis(process)
     
 
