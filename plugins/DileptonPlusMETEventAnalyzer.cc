@@ -536,14 +536,14 @@ void DileptonPlusMETEventAnalyzer::analyze(const edm::Event &event, const edm::E
 	    if(ev.cat==MUMU && triggerBits["singleMu"]==false && triggerBits["mumu"]==false) return;  
 	    //if(ev.cat==EMU  && triggerBits["emu"]==false)  return; //is this complete?
 	    if(ev.cat==EMU  && triggerBits["emu"]==false && (triggerBits["singleEle"]==false || triggerBits["singleMu"]==false) )  return; // add singleElectron and singleMuon, although no big changes
-	    //if(ev.cat!=EE && ev.cat!=MUMU && ev.cat!=EMU) return; //get ride of trash 
+
 	    ev.triggerType = (triggerBits["ee"] << 0 ) |
 	      (triggerBits["mumu"] << 1 ) |
 	      (triggerBits["emu"] << 2 ) |
 	      (triggerBits["singleMu"] << 3 ) |
 	      (triggerBits["singleEle"] << 4 );
+
 	  }
-	  //ev.hasTrigger=true;
 
 	//leading lepton
 	ev.l1_px                   = selLeptonsSummary[l1idx].p4.px();
@@ -605,6 +605,9 @@ void DileptonPlusMETEventAnalyzer::analyze(const edm::Event &event, const edm::E
 	ev.l2_ensferr              = selLeptonsSummary[l2idx].ensferr;
 	ev.l2_pid                  = addPidSummary( selLeptonsSummary[l2idx] );
       }
+    else{
+	return; //clean trashes of dileptonIdx.size() == 0 case
+    }
     
     //save extra leptons (including softer ones)
     std::vector<ObjectIdSummary> looseMuonSummary;
