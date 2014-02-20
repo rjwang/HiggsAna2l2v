@@ -691,7 +691,7 @@ std::vector<int> getDileptonCandidate(vector<CandidatePtr> &selLeptons,  const e
 	    if(mass<minDileptonMass || mass >maxDileptonMass) continue;
 	      
 	    //build the dilepton candidate
-	    double candsumpt=lep1Ptr->pt()+lep2Ptr->pt(); //is this correct?
+	    double candsumpt=lep1Ptr->pt()+lep2Ptr->pt(); //this is correct
 	    
 	    //if a candidate is already available take this if leading in sum pT
 	    if(selDilepton.size()>0)
