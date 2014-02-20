@@ -4,7 +4,7 @@ from CMGTools.External.puJetIDAlgo_cff import *
 
 ClusteredPFMetProducer = cms.EDProducer('ClusteredPFMetProducer',
                                         collectionTag = cms.InputTag("particleFlow"),
-                                        vertexTag = cms.InputTag("offlinePrimaryVertices"),
+                                        vertexTag = cms.InputTag("goodOfflinePrimaryVertices"),#offlinePrimaryVertices"),
                                         produceSummary = cms.bool(False),
                                         minBiasMode = cms.bool(False),
                                         minJetPt = cms.double(2.0),
@@ -23,6 +23,7 @@ ClusteredPFMetProducer = cms.EDProducer('ClusteredPFMetProducer',
 
                                         #stuff for MVA met
                                         Vertices = BaseVertexSelection.clone(),
+					#Trigger = BaseTriggerSelection.clone(),
                                         Muons = BaseMuonsSelection.clone(id=cms.string("medium")),
                                         Electrons = BaseElectronsSelection.clone(id=cms.string("medium")),
                                         Photons = BasePhotonsSelection.clone(),

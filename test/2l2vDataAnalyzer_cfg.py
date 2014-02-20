@@ -235,7 +235,7 @@ process.pfType1CorrectedMet.applyType0Corrections = cms.bool(False)
 process.pfType1CorrectedMet.srcType1Corrections = cms.VInputTag( cms.InputTag('pfMETcorrType0'),
                                                                  cms.InputTag('pfJetMETcorr', 'type1')
 								 #cms.InputTag('pfMEtSysShiftCorr')
-                                                                 )
+                                                                )
 
 
 ######################################
@@ -273,12 +273,12 @@ process.p = cms.Path( process.startCounter
 		      *process.rhoSequence
                       *process.qgSequence
                       *process.type0PFMEtCorrection*process.producePFMETCorrections#*process.pfMEtSysShiftCorrSequence
-			*process.patDefaultSequence
+		      	*process.patDefaultSequence
                       *process.selectedPatElectronsWithTrigger*process.selectedPatElectronsPFlowHeep
                       *process.selectedPatMuonsTriggerMatch
-		      #*process.analysis
-		      ####*process.ak5PFJetsL1L2L3ForMVAMET
-                      ####*process.ClusteredPFMetProducer
+		      ######
+		      #*process.ak5PFJetsL1L2L3ForMVAMET
+                      #*process.ClusteredPFMetProducer
                       *process.dataAnalyzer
 		      ##*process.endCounter*process.out
                       )

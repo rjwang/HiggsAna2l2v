@@ -9,7 +9,7 @@ from CommonTools.ParticleFlow.ParticleSelectors.pfAllNeutralHadronsAndPhotons_cf
 def defineAnalysis(process,castorDir="",reRunRho=False) :
 
     # our MET producer
-    #process.ClusteredPFMetProducer = ClusteredPFMetProducer.clone()
+    process.ClusteredPFMetProducer = ClusteredPFMetProducer.clone()
 
     #
     # configure the analyzer (cf. base values are in the StandardSelections_cfi)
@@ -42,8 +42,8 @@ def defineAnalysis(process,castorDir="",reRunRho=False) :
     #process.load('EGamma.EGammaAnalysisTools.electronIdMVAProducer_cfi')
     #process.mvaIDs = cms.Sequence(  process.mvaTrigV0 + process.mvaNonTrigV0 )
     
-    #from JetMETCorrections.Configuration.JetCorrectionProducers_cff import ak5PFJetsL1L2L3
-    #process.ak5PFJetsL1L2L3ForMVAMET=ak5PFJetsL1L2L3.clone()
+    from JetMETCorrections.Configuration.JetCorrectionProducers_cff import ak5PFJetsL1L2L3
+    process.ak5PFJetsL1L2L3ForMVAMET=ak5PFJetsL1L2L3.clone()
     
     #rho for muon isolation
     #if(reRunRho) :
@@ -64,7 +64,7 @@ def defineAnalysis(process,castorDir="",reRunRho=False) :
     #        process.evAnalyzer)
     #else :
     #process.dataAnalyzer = cms.Path( #process.mvaIDs +
-    #     process.ak5PFJetsL1L2L3ForMVAMET *
+    #     process.ak5PFJetsL1L2L3ForMVAMET +
     #     process.ClusteredPFMetProducer +
     #     process.evAnalyzer)
         

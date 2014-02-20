@@ -57,7 +57,7 @@ BaseGeneratorSelection = cms.PSet( source = cms.InputTag("genParticles"),
 
 
 # base values for the vertex selection ------------------------------------------
-BaseVertexSelection = cms.PSet( source = cms.InputTag("goodOfflinePrimaryVertices"),#offlinePrimaryVertices"),
+BaseVertexSelection = cms.PSet( source = cms.InputTag("goodOfflinePrimaryVertices"),
                                 beamSpot = cms.InputTag("offlineBeamSpot"),
                                 maxZ = cms.double(24),
                                 maxRho = cms.double(2.0),
@@ -154,11 +154,11 @@ BaseDileptonSelection = cms.PSet( minDileptonMass = cms.double(0),
                                   )
 
 
-#  _____  __          _                
-# |  _  \| |         | |                    
+#  ____   _                
+# |  _  \| |          _ 
 # | |_)  | |         | | 
-# | ____/| |___  ___ | |_ ___  _ __    
-# | |    |  _  |/ _ \| __/ _ \| '_ \  
+# | ____/| |__   ___ | |_ ___  _ __    
+# | |    |  _ \ / _ \| __/ _ \| '_ \  
 # | |    | | | | (_) | |_ (_) | | | |
 # |_|    |_| |_|\___/ \__\___/|_| |_|
 #  
@@ -253,6 +253,6 @@ BaseMetSelection = cms.PSet( source = cms.InputTag("patMETsPFlow"),
 							  ),
                              #pfCands = cms.InputTag("particleFlow"),
                              #pvAssocCandidatesSource = cms.InputTag("ClusteredPFMetProducer:pvAssocCandidates"),
-                             sumEtSources = cms.InputTag("ClusteredPFMetProducer:globalPfMetSums")
+                             #sumEtSources = cms.InputTag("ClusteredPFMetProducer:globalPfMetSums")
                              )
 

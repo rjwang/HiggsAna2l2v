@@ -115,31 +115,25 @@ DileptonPlusMETEventAnalyzer::DileptonPlusMETEventAnalyzer(const edm::ParameterS
     for(size_t istep=0; istep<nselFilters; istep++) h->GetXaxis()->SetBinLabel(istep+1,selFilters[istep]);
 
 
-    cout << ">>>>>>>>>>>>>>>> Debug [DileptonPlusMETEventAnalyzer] 1 " << endl;
-
     controlHistos_.addHistogram("pileup", ";Pileup; Events",100,-0.5,99.5);
     controlHistos_.addHistogram("integlumi", ";Integrated luminosity ; Events",100,0,1e5);
     controlHistos_.addHistogram("instlumi", ";Max average inst. luminosity; Events",100,0,1e5);
     controlHistos_.addHistogram("pileuptrue", ";True pileup; Events",100,-0.5,99.5);
 
-    cout << ">>>>>>>>>>>>>>>> Debug [DileptonPlusMETEventAnalyzer] 2 " << endl;
 
     //configure PF isolation cone size=0.4 
     eIsolator.initializeElectronIsolation(kTRUE);
     eIsolator.setConeSize(0.4); 
-    cout << ">>>>>>>>>>>>>>>> Debug [DileptonPlusMETEventAnalyzer] 3 " << endl;
   }
   catch(std::exception &e){
     cout << e.what() << endl;
   }  
-  cout << ">>>>>>>>>>>>>>>> Debug [DileptonPlusMETEventAnalyzer] 4 " << endl;
 }
 
 
 //
 int DileptonPlusMETEventAnalyzer::addPidSummary(ObjectIdSummary &obj)
 {
-  cout << ">>>>>>>>>>>>>>>> Debug [addPidSummary] 0" << endl;
   ZZ2l2nuSummary_t &ev = summaryHandler_.getEvent();
   int index(0);
   if(fabs(obj.id)==1)
@@ -200,14 +194,12 @@ int DileptonPlusMETEventAnalyzer::addPidSummary(ObjectIdSummary &obj)
   else if(fabs(obj.id)==22)
     {
     }
-  cout << ">>>>>>>>>>>>>>>> Debug [addPidSummary] 1" << endl;
   return index;
 }
 
 //
 void DileptonPlusMETEventAnalyzer::saveMCtruth(const edm::Event &event, const edm::EventSetup &iSetup)
 {
-  cout << ">>>>>>>>>>>>>>>> Debug [saveMCtruth] 0" << endl;
   ZZ2l2nuSummary_t &ev = summaryHandler_.getEvent();
   ev.nmcparticles=0;
 
@@ -381,14 +373,12 @@ void DileptonPlusMETEventAnalyzer::saveMCtruth(const edm::Event &event, const ed
       ev.mc_id[ev.nmcparticles]=1;
       ev.nmcparticles++;
     }
-    cout << ">>>>>>>>>>>>>>>> Debug [saveMCtruth] 1" << endl;
 }
 
 
 //
 void DileptonPlusMETEventAnalyzer::analyze(const edm::Event &event, const edm::EventSetup &iSetup) 
 {
-  cout << ">>>>>>>>>>>>>>>> Debug [analyze] 0" << endl;
   try{
     //event summary to be filled
 
@@ -785,7 +775,7 @@ void DileptonPlusMETEventAnalyzer::analyze(const edm::Event &event, const edm::E
     ev.htvec_pz = jetSum.pz();
     ev.htvec_en = jetSum.energy();
 
-    // JET SELECTION
+    // CHS JET SELECTION
     //
     ev.ajn=0;
     //Handle<std::vector<PFJet> > haJet;
@@ -856,8 +846,8 @@ void DileptonPlusMETEventAnalyzer::analyze(const edm::Event &event, const edm::E
     std::vector<edm::InputTag> mainMetSources = objConfig_["MET"].getParameter<std::vector<edm::InputTag> >("mainSources");
     ev.nmet=mainMetSources.size()+1;
 
-    edm::Handle< std::vector<double> > sumEtsH;
-    event.getByLabel(objConfig_["MET"].getParameter<edm::InputTag>("sumEtSources"),sumEtsH);
+    //edm::Handle< std::vector<double> > sumEtsH;
+    //event.getByLabel(objConfig_["MET"].getParameter<edm::InputTag>("sumEtSources"),sumEtsH);
 
 
     //pf-met
@@ -865,6 +855,7 @@ void DileptonPlusMETEventAnalyzer::analyze(const edm::Event &event, const edm::E
 
     try{
 
+/*
       if(sumEtsH.isValid())
 	{
 	  ev.sumEt = (*sumEtsH)[0];              ev.sumEtcentral = (*sumEtsH)[3];
@@ -875,7 +866,7 @@ void DileptonPlusMETEventAnalyzer::analyze(const edm::Event &event, const edm::E
 	}
       else 
 	cout << "sumEtsH is inValid!" << endl;
-
+*/
       for(size_t i=0; i<mainMetSources.size(); i++)
 	{
 	  edm::Handle<View<reco::PFMET> > metH;
@@ -906,13 +897,11 @@ void DileptonPlusMETEventAnalyzer::analyze(const edm::Event &event, const edm::E
     iErr_++;
   }
 
-  cout << ">>>>>>>>>>>>>>>> Debug [analyze] 1" << endl;
 }
 
 //
 void DileptonPlusMETEventAnalyzer::beginLuminosityBlock(const edm::LuminosityBlock&lumi, const edm::EventSetup & setup ) 
 {
-  cout << ">>>>>>>>>>>>>>>> Debug [beginLuminosityBlock] 0" << endl;
   edm::Handle<LumiSummary> l;
   lumi.getByLabel("lumiProducer", l); 
   if (!l.isValid())  return;
@@ -920,13 +909,11 @@ void DileptonPlusMETEventAnalyzer::beginLuminosityBlock(const edm::LuminosityBlo
   curIntegLumi_   = l->intgDelLumi();
   controlHistos_.fillHisto("instlumi","all",curAvgInstLumi_);
   controlHistos_.fillHisto("integlumi","all",curIntegLumi_);
-  cout << ">>>>>>>>>>>>>>>> Debug [beginLuminosityBlock] 1" << endl;
 }
 
 //
 void DileptonPlusMETEventAnalyzer::endLuminosityBlock(const edm::LuminosityBlock & iLumi, const edm::EventSetup & iSetup)
 {
-  cout << ">>>>>>>>>>>>>>>> Debug [endLuminosityBlock] 0" << endl;
   TString filterCtrs[]={"startCounter","noScrapCounter","goodVertexCounter","noHBHEnoiseCounter","nobeamHaloCounter"};
   const size_t nselFilters=sizeof(filterCtrs)/sizeof(TString);
   for(size_t istep=0; istep<nselFilters; istep++)
@@ -941,16 +928,13 @@ void DileptonPlusMETEventAnalyzer::endLuminosityBlock(const edm::LuminosityBlock
 	controlHistos_.fillHisto("cutflow","all",istep);
       }
     }
-  cout << ">>>>>>>>>>>>>>>> Debug [endLuminosityBlock] 1" << endl;
 }
 
 //
 void DileptonPlusMETEventAnalyzer::beginRun(const edm::Run & iRun, const edm::EventSetup & iSetup) 
 {
-  cout << ">>>>>>>>>>>>>>>> Debug [beginRun] 0" << endl;
   bool changed(true);
   hltConfig_.init(iRun, iSetup,"HLT",changed);
-  cout << ">>>>>>>>>>>>>>>> Debug [beginRun] 1" << endl;
 }
 
 

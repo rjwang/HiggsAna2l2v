@@ -759,6 +759,7 @@ vector<CandidatePtr> getGoodJets(edm::Handle<edm::View<reco::Candidate> > &hJet,
     pat::strbitset hasLooseId = looseJetIdSelector.getBitTemplate();
     pat::strbitset hasTightId = tightJetIdSelector.getBitTemplate();
 
+
     //iterate over the jets
     for(size_t iJet=0; iJet< hJet.product()->size(); ++iJet)
       {
@@ -800,7 +801,6 @@ vector<CandidatePtr> getGoodJets(edm::Handle<edm::View<reco::Candidate> > &hJet,
 		jetId.svmass=svTagInfos->secondaryVertex(0).p4().mass();
 		jetId.svpt=svTagInfos->secondaryVertex(0).p4().pt();
 		jetId.svdr=deltaR(svTagInfos->secondaryVertex(0).p4(),jet->p4());
-
 	      }
 	  }
 	jetId.neutHadFrac = jet->neutralHadronEnergyFraction();
