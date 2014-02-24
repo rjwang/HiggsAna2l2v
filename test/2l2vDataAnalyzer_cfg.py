@@ -18,16 +18,16 @@ process.options   = cms.untracked.PSet( wantSummary = cms.untracked.bool(True),
 
 ## Input Module Configuration
 process.source = cms.Source("PoolSource",fileNames = cms.untracked.vstring())
-if(len(inputList)==0) : 
-    if(isMC): 
-	inputList = cms.untracked.vstring('/store/mc/Summer12_DR53X/ZZJetsTo2L2Nu_TuneZ2star_8TeV-madgraph-tauola/AODSIM/PU_S10_START53_V7A-v3/0000/00277EBC-A2E0-E111-931D-00215E2223E2.root')
-    else:
-	inputList = cms.untracked.vstring('/store/data/Run2012D/DoubleMuParked/AOD/22Jan2013-v1/20000/002E1374-5F84-E211-83C4-20CF305616D0.root')
-print inputList
+#if(len(inputList)==0) : 
+#    if(isMC): 
+#	inputList = cms.untracked.vstring('/store/mc/Summer12_DR53X/ZZJetsTo2L2Nu_TuneZ2star_8TeV-madgraph-tauola/AODSIM/PU_S10_START53_V7A-v3/0000/00277EBC-A2E0-E111-931D-00215E2223E2.root')
+#    else:
+#	inputList = cms.untracked.vstring('/store/data/Run2012D/DoubleMuParked/AOD/22Jan2013-v1/20000/002E1374-5F84-E211-83C4-20CF305616D0.root')
+#print inputList
 process.source.fileNames=inputList
 
-#process.maxEvents = cms.untracked.PSet( input = cms.untracked.int32(-1) )
-process.maxEvents = cms.untracked.PSet( input = cms.untracked.int32(50) ) ## for testing
+process.maxEvents = cms.untracked.PSet( input = cms.untracked.int32(-1) )
+#process.maxEvents = cms.untracked.PSet( input = cms.untracked.int32(50) ) ## for testing
 
 
 from CMGTools.HiggsAna2l2v.StandardSelections_cfi import getSelVersion
