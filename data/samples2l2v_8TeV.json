@@ -199,6 +199,55 @@
           ]
         },
 	{
+	"tag":"Tri-Boson"
+	"isdata":false,
+	"color":"901",
+	"lcolor":1,
+	"mctruthmode":1,
+	"data":[
+	    {
+	     "dtag":"MC8TeV_WWWJets",
+	     "split":1,
+	     "xsec":
+	    },
+            {
+             "dtag":"MC8TeV_WWZNoGstarJets",
+             "split":1,
+             "xsec":
+            },
+            {
+             "dtag":"MC8TeV_WZZNoGstarJets",
+             "split":1,
+             "xsec":
+            },
+            {
+             "dtag":"MC8TeV_ZZZNoGstarJets",
+             "split":1,
+             "xsec":
+            },
+            {
+             "dtag":"MC8TeV_TTZJets",
+             "split":1,
+             "xsec":
+            },	
+            {
+             "dtag":"MC8TeV_TTWJets",
+             "split":1,
+             "xsec":
+            },
+            {
+             "dtag":"MC8TeV_TTWWJets",
+             "split":1,
+             "xsec":
+            },
+            {
+             "dtag":"MC8TeV_TTGJet",
+             "split":1,
+             "xsec":
+            }
+	  ]
+	},
+	{
 	"tag":"ZH(105)",
         "isdata":false,
 	"issignal":true,

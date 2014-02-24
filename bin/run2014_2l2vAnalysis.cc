@@ -90,7 +90,9 @@ int main(int argc, char* argv[])
     if(url.Contains("DoubleMu"))  fType=MUMU;
     if(url.Contains("MuEG"))      fType=EMU;
     if(url.Contains("SingleMu"))  fType=MUMU;
+    if(url.Contains("SingleEle")) fType=EE;
     bool isSingleMuPD(!isMC && url.Contains("SingleMu"));
+    bool isSingleElePD(!isMC && url.Contains("SingleEle"));
 
 
     // print out event information
@@ -117,7 +119,6 @@ int main(int argc, char* argv[])
     TString uncFile = runProcess.getParameter<std::string>("jesUncFileName");
     gSystem->ExpandPathName(uncFile);
     JetCorrectionUncertainty jecUnc(uncFile.Data());
-
 
     //ZHinvisible reweighting file input
     ZHUtils myZHUtils(runProcess);
@@ -535,7 +536,7 @@ int main(int argc, char* argv[])
     //MC normalization (to 1/pb)
     float cnorm=1.0;
     if(isMC) {
-        TH1F* cutflowH = (TH1F *) file->Get("evAnalyzer/h2zz/cutflow");
+        TH1F* cutflowH = (TH1F *) file->Get("dataAnalyzer/llvv/cutflow");
         if(cutflowH) cnorm=cutflowH->GetBinContent(1);
         if(rescaleFactor>0) cnorm /= rescaleFactor;
         printf("cnorm = %f\n",cnorm);
@@ -554,8 +555,8 @@ int main(int argc, char* argv[])
     //bool useObservedPU(use2011Id);
     if(!use2011Id && url.Contains("toZZto2L")) useObservedPU=true;
     if(isMC) {
-        TString puDist("evAnalyzer/h2zz/pileuptrue");
-        if(useObservedPU) puDist="evAnalyzer/h2zz/pileup";
+        TString puDist("dataAnalyzer/llvv/pileuptrue");
+        if(useObservedPU) puDist="dataAnalyzer/llvv/pileup";
         TH1F* histo = (TH1F *) file->Get(puDist);
         if(!histo)std::cout<<"pileup histogram is null!!!\n";
         for(int i=1; i<=histo->GetNbinsX(); i++) {
@@ -634,12 +635,14 @@ int main(int argc, char* argv[])
         bool hasMMtrigger = (ev.triggerType >> 1 ) & 0x1;
         bool hasEMtrigger = (ev.triggerType >> 2 ) & 0x1;
         bool hasMtrigger  = (ev.triggerType >> 3 ) & 0x1;
+	bool hasEtrigger  = (ev.triggerType >> 4 ) & 0x1;
         if(!isMC) {
             if(ev.cat!=fType) continue;
 
-            if(ev.cat==EE   && !hasEEtrigger) continue;
+            if(ev.cat==EE   && !(hasEEtrigger||hasEtrigger) ) continue;
             if(ev.cat==MUMU && !(hasMMtrigger||hasMtrigger) ) continue;
-            if(ev.cat==EMU  && !hasEMtrigger) continue;
+            //if(ev.cat==EMU  && !hasEMtrigger) continue;
+	    if(ev.cat==EMU  && !hasEMtrigger && !(hasEtrigger && hasMtrigger) ) continue;
 
             //this is a safety veto for the single mu PD
             if(isSingleMuPD) {
@@ -647,12 +650,18 @@ int main(int argc, char* argv[])
                 if(hasMtrigger && hasMMtrigger) continue;
             }
 
+            //this is a safety veto for the single Ele PD
+            if(isSingleElePD) {
+                if(!hasEtrigger) continue;
+                if(hasEtrigger && hasEEtrigger) continue;
+            }
+
             hasTrigger=true;
         } else {
-            if(ev.cat==EE   && hasEEtrigger) hasTrigger=true;
+            if(ev.cat==EE   && (hasEEtrigger || hasEtrigger) ) hasTrigger=true;
             if(ev.cat==MUMU && (hasMMtrigger || hasMtrigger) ) hasTrigger=true;
-            if(ev.cat==EMU  && hasEMtrigger) hasTrigger=true;
-            if(use2011Id) hasTrigger = true;
+            if(ev.cat==EMU  && (hasEMtrigger || (hasEtrigger && hasMtrigger)) ) hasTrigger=true;
+            if(use2011Id) hasTrigger = true; //for 2011
         }
 
         //prepare the tag's vectors for histo filling
