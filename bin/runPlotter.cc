@@ -30,6 +30,10 @@
 #include "Rtypes.h"
 #include "TList.h"
 
+#include "TLatex.h"
+#include "TPad.h"
+
+
 #include "../src/tdrstyle.C"
 #include "../src/JSONWrapper.cc"
 
@@ -218,7 +222,6 @@ void GetInitialNumberOfEvents(JSONWrapper::Object& Root, std::string RootDir, Na
          if(!tmphist)continue;
          
 	 bool isMC( !Process[i]["isdata"].toBool() && !Process[i]["isdatadriven"].toBool() );
-
 
          stSampleInfo& sampleInfo = sampleInfoMap[(Samples[j])["dtag"].toString()];
 
@@ -489,12 +492,13 @@ void Draw2DHistogramSplitCanvas(JSONWrapper::Object& Root, std::string RootDir, 
           if(SaveName.find("eeeq1jets") != string::npos)        sprintf(Buffer2,"#it{ee channel, 1 jets}");
           if(SaveName.find("mumueq0jets") != string::npos)      sprintf(Buffer2,"#it{#mu#mu channel, 0 jets}");
           if(SaveName.find("mumueq1jets") != string::npos)      sprintf(Buffer2,"#it{#mu#mu channel, 1 jets}");
-          if(SaveName.find("emu") != string::npos)     sprintf(Buffer2,"#it{e#mu channel}");
+          if(SaveName.find("emueq0jets") != string::npos)       sprintf(Buffer2,"#it{e#mu channel, 0 jets}");
+	  if(SaveName.find("emueq1jets") != string::npos)       sprintf(Buffer2,"#it{e#mu channel, 1 jets}");
           T2->AddText(Buffer2);
 
           if(SaveName.find("eeeq0jets") != string::npos || SaveName.find("eeeq1jets") != string::npos ||
                 SaveName.find("mumueq0jets") != string::npos || SaveName.find("mumueq1jets") != string::npos ||
-                SaveName.find("emu") != string::npos)
+                SaveName.find("emueq0jets") != string::npos || SaveName.find("emueq1jets") != string::npos )
           {
                 T2->Draw("same");
           }
@@ -776,8 +780,6 @@ void Draw1DHistogram(JSONWrapper::Object& Root, std::string RootDir, NameAndType
 
       ObjectToDelete.push_back(hist);
       if(Process[i].isTag("normto")) hist->Scale( Process[i]["normto"].toDouble()/hist->Integral() );
-      
-      
       if((!Process[i].isTag("spimpose") || !Process[i]["spimpose"].toBool()) && !Process[i]["isdata"].toBool()){
          //Add to Stack
 	//cout << "------------" << endl;
@@ -1009,6 +1011,7 @@ void Draw1DHistogram(JSONWrapper::Object& Root, std::string RootDir, NameAndType
   }
 
    
+   
    legA->SetFillColor(0); legA->SetFillStyle(0); legA->SetLineColor(0);
    legA->SetHeader("");
    legA->Draw("same");
@@ -1107,6 +1110,8 @@ void Draw1DHistogram(JSONWrapper::Object& Root, std::string RootDir, NameAndType
        c1->SetWindowSize(600,400);
        c1->SetCanvasSize(600,400);
        t1->SetPad(0,0,1,1);
+       t1->SetBottomMargin(0.1);
+       stack->GetXaxis()->SetTitle(name_denRelUncH); //RJ
      }
 
    c1->Modified();
@@ -1416,20 +1421,23 @@ int main(int argc, char* argv[]){
    histlist.sort();
    histlist.unique();   
 
+
    TFile* OutputFile = NULL;
    if(StoreInFile) OutputFile = new TFile(outFile.c_str(),"RECREATE");
-   printf("Progressing Bar              :0%%       20%%       40%%       60%%       80%%       100%%\n");
-   printf("                             :");
+   if(!doPlot){
+   	printf("Progressing Bar              :0%%       20%%       40%%       60%%       80%%       100%%\n");
+  	printf("                             :");
+   }
    int TreeStep = histlist.size()/50;if(TreeStep==0)TreeStep=1;
    string csvFile(outDir +"/histlist.csv");
    system(("echo \"\" > " + csvFile).c_str());
 
-//   SavingTreeToFile(Root,inDir, OutputFile); //RJ, runMVAtree
+   //SavingTreeToFile(Root,inDir, OutputFile); //RJ, runMVAtree
 
    int ictr(0);
    for(std::list<NameAndType>::iterator it= histlist.begin(); it!= histlist.end(); it++,ictr++)
      {
-       if(ictr%TreeStep==0){printf(".");fflush(stdout);}
+       if(!doPlot){ if(ictr%TreeStep==0){printf(".");fflush(stdout);} }
        bool passMasking(false);
        for(unsigned int i=0;i<histoNameMask.size();i++){
 
@@ -1461,21 +1469,29 @@ int main(int argc, char* argv[]){
 
        system(("echo \"" + it->name + "\" >> " + csvFile).c_str());
        //RJ, do not convert to Tex files
-       //if(doTex && (it->name.find("eventflow")!=std::string::npos || it->name.find("evtflow")!=std::string::npos) && it->name.find("optim_eventflow")==std::string::npos){    ConvertToTex(Root,inDir,*it); }
+/*
+       if(doTex && (it->name.find("eventflow")!=std::string::npos || it->name.find("evtflow")!=std::string::npos) 
+       		&& it->name.find("optim_eventflow")==std::string::npos)
+	{
+		ConvertToTex(Root,inDir,*it); 
+	}
+*/
+
        if(doPlot && do2D  && !it->type){                      if(!splitCanvas){ Draw2DHistogram(Root,inDir,*it);}else{Draw2DHistogramSplitCanvas(Root,inDir,*it);}}
-       if(doPlot && do1D  &&  it->type){                                       Draw1DHistogram(Root,inDir,*it); }
-      
+       if(doPlot && do1D  &&  it->type){                                        Draw1DHistogram(Root,inDir,*it); }	
+
        if(StoreInFile && do2D  && !it->type){                                  	SavingToFile(Root,inDir,*it, OutputFile); }
        if(StoreInFile && do1D  &&  it->type){					SavingToFile(Root,inDir,*it, OutputFile); }
+
      }
 
 
    printf("\n");
    if(StoreInFile) OutputFile->Close();
    
-   system(("python ${CMSSW_BASE}/src/CMGTools/HtoZZ2l2nu/data/html/generateJSONplotterFromList.py -i " + csvFile + " -o "+outDir+"/plotter.json").c_str());
-   system(("rm " + csvFile).c_str());
-   system(("cp ${CMSSW_BASE}/src/CMGTools/HtoZZ2l2nu/data/html/index.html " + outDir).c_str());
-   printf("You can browse the results using %s/index.html\n",outDir.c_str());
+   system(("python ${CMSSW_BASE}/src/CMGTools/HiggsAna2l2v/data/html/generateJSONplotterFromList.py -i " + csvFile + " -o "+outDir+"/plotter.json").c_str());
+   //system(("rm " + csvFile).c_str());
+   system(("cp ${CMSSW_BASE}/src/CMGTools/HiggsAna2l2v/data/html/index.html " + outDir).c_str());
+   printf("You can browse the results using %sindex.html\n",outDir.c_str());
 }
 

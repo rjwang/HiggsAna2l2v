@@ -150,6 +150,7 @@ BaseLooseElectronsSelection = BaseElectronsSelection.clone(minPt = cms.double(8)
 # base values for the dilepton System selection ------------------------------------------
 BaseDileptonSelection = cms.PSet( minDileptonMass = cms.double(0),
                                   maxDileptonMass = cms.double(7000),
+				  minLegPt = cms.double(20),
                                   maxDz = cms.double(1.0)
                                   )
 

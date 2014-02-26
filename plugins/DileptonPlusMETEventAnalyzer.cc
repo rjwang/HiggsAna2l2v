@@ -399,7 +399,7 @@ void DileptonPlusMETEventAnalyzer::analyze(const edm::Event &event, const edm::E
     ev.curIntegLumi=curIntegLumi_;
 
     //filter bits
-    ev.f_bits=0;
+    ev.f_bits=false;
     std::vector<std::string> filts=objConfig_["MetFilter"].getParameter<std::vector<string> >("metfilters");
     //std::vector<string> filts=analysisCfg_.getParameter<std::vector<string> >("metFilters");
     for(size_t ifilt=0; ifilt<filts.size(); ifilt++)

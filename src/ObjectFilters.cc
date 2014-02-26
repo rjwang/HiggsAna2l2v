@@ -675,6 +675,7 @@ std::vector<int> getDileptonCandidate(vector<CandidatePtr> &selLeptons,  const e
     //config parameters
     double minDileptonMass = iConfig.getParameter<double>("minDileptonMass");
     double maxDileptonMass = iConfig.getParameter<double>("maxDileptonMass");
+    double minLegPt 	   = iConfig.getParameter<double>("minLegPt"); 
     double leadSumPt(0);
     for(size_t ilep=0; ilep<selLeptons.size(); ilep++)
       {
@@ -691,6 +692,8 @@ std::vector<int> getDileptonCandidate(vector<CandidatePtr> &selLeptons,  const e
 	    if(mass<minDileptonMass || mass >maxDileptonMass) continue;
 	      
 	    //build the dilepton candidate
+	    if(lep1Ptr->pt() < minLegPt) continue;
+	    if(lep2Ptr->pt() < minLegPt) continue;
 	    double candsumpt=lep1Ptr->pt()+lep2Ptr->pt(); //this is correct
 	    
 	    //if a candidate is already available take this if leading in sum pT

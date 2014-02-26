@@ -141,7 +141,7 @@ int main(int argc, char* argv[])
     }
 
     // Muon scale/resolution corrections
-    TString fitParametersFile = "/afs/cern.ch/work/r/rewang/Zhllnunu/CMSSW_5_3_3_patch2/src/CMGTools/HiggsAna2l2v/src/MuScleFitCorrector_v4_1/";
+    TString fitParametersFile = "/afs/cern.ch/work/r/rewang/HiggsZZd/HZZ/CMSSW_5_3_11/src/CMGTools/HiggsAna2l2v/src/MuScleFitCorrector_v4_1/";
     if(use2011Id) {
         if(isMC) fitParametersFile += "MuScleFit_2011_MC_44X.txt";
         else     fitParametersFile += "MuScleFit_2011_DATA_44X.txt";
@@ -171,6 +171,10 @@ int main(int argc, char* argv[])
     mon.addHistogram( new TH1F( "nvtx_dy_rebin",";Vertices;Events",28,VTXaxis) );
     mon.addHistogram( new TH1F("npfjets_dy",  ";Jet multiplicity (p_{T}>30 GeV);Events",5,0,5) );
 
+    //for MC normalization (to 1/pb)
+    TH1F* Hcutflow  = (TH1F*) mon.addHistogram(  new TH1F ("cutflow"    , "cutflow"    ,6,0,6) ) ;
+
+
     Double_t qtaxis[100];
     for(size_t i=0; i<40; i++)  qtaxis[i]=2.5*i;       //0-97.5
     for(size_t i=0; i<20; i++)  qtaxis[40+i]=100+5*i;  //100-195
@@ -181,12 +185,12 @@ int main(int argc, char* argv[])
     double Qtaxis[15]= {0,50,55,60,65,70,75,80,85,90,100,125,150,200,1000};
     mon.addHistogram( new TH1D( "qt_rebin_new",  ";#it{q}_{T} [GeV];Events",14,Qtaxis));
     mon.addHistogram( new TH1F( "qt",";p_{T}^{#gamma} [GeV];Events",1000,0,1000));
-    mon.addHistogram( new TH1F( "qmass", ";M^{ll};Events", 15,76,106) );
+    mon.addHistogram( new TH1F( "qmass", ";#it{m}_{ll} [GeV];Events", 15,76,106) );
 
 
 
     //reweigting pt of DY MC samples
-    mon.addHistogram( new TH2F( "MllvsPt", "; p_{T}^{ll} [GeV]; M^{ll} [GeV]; Events", 50,0,500, 100,40,250) );
+    mon.addHistogram( new TH2F( "MllvsPt", "; p_{T}^{ll} [GeV]; #it{m}_{ll} [GeV]; Events", 50,0,500, 100,40,250) );
 
     //for testing ABCD method
     mon.addHistogram( new TH2F( "dPhivsMET_ABCD", "; E_{T}^{miss} [GeV]; #Delta#phi(Z,E_{T}^{miss}) [rad]; Events", 500,0,500, 50,0,TMath::Pi()) );
@@ -207,8 +211,8 @@ int main(int argc, char* argv[])
     double zpt_bins[] = {0., 20., 40., 60., 80., 100., 200., 400., 800.};
     const int n_zpt_bins = sizeof(zpt_bins)/sizeof(double) - 1;
     mon.addHistogram( new TH1F( "zpt_rebin", ";p_{T}^{ll} [GeV];Events", n_zpt_bins, zpt_bins) );
-    mon.addHistogram( new TH1F( "zmass_raw", ";M^{ll} [GeV];Events", 100,40,250) );
-    mon.addHistogram( new TH1F( "zmass", ";M^{ll} [GeV];Events", 100,40,250) );
+    mon.addHistogram( new TH1F( "zmass_raw", ";#it{m}_{ll} [GeV];Events", 100,40,250) );
+    mon.addHistogram( new TH1F( "zmass", ";#it{m}_{ll} [GeV];Events", 100,40,250) );
 
 
     TH1F* h = (TH1F*) mon.addHistogram( new TH1F( "nleptons", ";Lepton multiplicity;Events", 3,2,4) );
@@ -541,7 +545,7 @@ int main(int argc, char* argv[])
         if(rescaleFactor>0) cnorm /= rescaleFactor;
         printf("cnorm = %f\n",cnorm);
     }
-    //Hcutflow->SetBinContent(1,cnorm);
+    Hcutflow->SetBinContent(1,cnorm);
 
 
     //pileup weighting: based on vtx for now...
@@ -676,10 +680,10 @@ int main(int argc, char* argv[])
             TotalWeight_plus  = PuShifters[PUUP]->Eval(useObservedPU ? ev.ngenITpu : ev.ngenTruepu);
             TotalWeight_minus = PuShifters[PUDOWN]->Eval(useObservedPU ? ev.ngenITpu : ev.ngenTruepu);
         }
-        //Hcutflow->Fill(1,1);
-        //Hcutflow->Fill(2,weight);
-        //Hcutflow->Fill(3,weight*TotalWeight_minus);
-        //Hcutflow->Fill(4,weight*TotalWeight_plus);
+        Hcutflow->Fill(1,1);
+        Hcutflow->Fill(2,weight);
+        Hcutflow->Fill(3,weight*TotalWeight_minus);
+        Hcutflow->Fill(4,weight*TotalWeight_plus);
 
 
         //#################################
