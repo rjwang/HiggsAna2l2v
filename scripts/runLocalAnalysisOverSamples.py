@@ -144,8 +144,10 @@ for proc in procList :
             	if(not subtoBatch) :
                 	os.system(theExecutable + ' ' + cfgfile)
             	else :
-			print('submit2batch.sh -q' + queue + ' -G' + queuelog + ' -R"' + requirementtoBatch + '" -J' + dtag + str(segment) + ' ${CMSSW_BASE}/bin/${SCRAM_ARCH}/wrapLocalAnalysisRun.sh ' + theExecutable + ' ' + cfgfile)
-			os.system('submit2batch.sh -q' + queue + ' -G' + queuelog + ' -R"' + requirementtoBatch + '" -J' + dtag + str(segment) + ' ${CMSSW_BASE}/bin/${SCRAM_ARCH}/wrapLocalAnalysisRun.sh ' + theExecutable + ' ' + cfgfile)
+			os.system('mkdir -p ' + queuelog)
+			print('submit2batch.sh -q'+queue+' -G'+queuelog+'/'+dtag+str(segment)+'.log'+' -R"' + requirementtoBatch + '" -J' + dtag + str(segment) + ' ${CMSSW_BASE}/bin/${SCRAM_ARCH}/wrapLocalAnalysisRun.sh ' + theExecutable + ' ' + cfgfile)
+			#sys.exit(0)
+			os.system('submit2batch.sh -q'+queue+' -G'+queuelog+'/'+dtag+str(segment)+'.log'+' -R"' + requirementtoBatch + '" -J' + dtag + str(segment) + ' ${CMSSW_BASE}/bin/${SCRAM_ARCH}/wrapLocalAnalysisRun.sh ' + theExecutable + ' ' + cfgfile)
     
 #run plotter over results
 #if(not subtoBatch) :

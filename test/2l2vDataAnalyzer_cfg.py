@@ -12,7 +12,7 @@ process.load("Configuration.Geometry.GeometryIdeal_cff")
 ## MessageLogger
 process.load("FWCore.MessageLogger.MessageLogger_cfi")
 process.MessageLogger.cerr.FwkReport.reportEvery = 5000
-process.options   = cms.untracked.PSet( wantSummary = cms.untracked.bool(True),
+process.options   = cms.untracked.PSet( wantSummary = cms.untracked.bool(False),
                                         SkipEvent = cms.untracked.vstring('ProductNotFound')
                                         )
 
