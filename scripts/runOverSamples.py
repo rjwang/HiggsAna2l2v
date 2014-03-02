@@ -119,10 +119,10 @@ for proc in procList :
                     print localParams
                     if(len(subtoBatch)>0) :
 			os.system('mkdir -p ' + queuelog)
-                        print('submit2batch.sh -q ' + subtoBatch + ' -G ' + queuelog+'/'+d['dtag']+str(ijob)+'.log' + ' -R "' + requirementtoBatch + '" -J ' + d['dtag']+str(ijob) + ' ' + scriptFile + ' ' + localParams)
-			SCRIPT.writelines('submit2batch.sh -q ' + subtoBatch + ' -G ' + queuelog+'/'+d['dtag']+str(ijob)+'.log' + ' -R "' + requirementtoBatch + '" -J ' + d['dtag']+str(ijob) + ' ' + scriptFile + ' ' + localParams+';\n')
+                        #print('submit2batch.sh -q' + subtoBatch + ' -G' + queuelog+'/'+d['dtag']+str(ijob)+'.log' + ' -R"' + requirementtoBatch + '" -J' + d['dtag']+str(ijob) + ' ' + scriptFile + ' ' + localParams)
+			SCRIPT.writelines('submit2batch.sh -q' + subtoBatch + ' -G' + queuelog+'/'+d['dtag']+str(ijob)+'.log' + ' -R"' + requirementtoBatch + '" -J' + d['dtag']+str(ijob) + ' ' + scriptFile + ' ' + localParams+';\n')
 			#sys.exit(0)
-                        os.system('submit2batch.sh -q ' + subtoBatch + ' -G ' + queuelog+'/'+d['dtag']+str(ijob)+'.log' + ' -R "' + requirementtoBatch + '" -J ' + d['dtag']+str(ijob) + ' ' + scriptFile + ' ' + localParams)
+                        os.system('submit2batch.sh -q' + subtoBatch + ' -G' + queuelog+'/'+d['dtag']+str(ijob)+'.log' + ' -R"' + requirementtoBatch + '" -J' + d['dtag']+str(ijob) + ' ' + scriptFile + ' ' + localParams)
 			#sys.exit(0)
 			#os.system('sleep ' + str(sleep) + 's')   ##THIS WAS NEEDED ONLY FOR FILE ON CASTOR
                     else :
