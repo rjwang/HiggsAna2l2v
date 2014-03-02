@@ -58,6 +58,8 @@ procList=json.load(jsonFile,encoding='utf-8').items()
 scriptFile=os.path.expandvars('${CMSSW_BASE}/bin/${SCRAM_ARCH}/wrapSubmitLocalRun.sh')
 jobParamsList = params.split(' ')
 
+SCRIPT = open('/tmp/rewang/script_jobs.sh',"w")
+
 from CMGTools.HiggsAna2l2v.localPatTuples_cff import fillFromCastor
 
 #run over sample
@@ -117,11 +119,16 @@ for proc in procList :
                     print localParams
                     if(len(subtoBatch)>0) :
 			os.system('mkdir -p ' + queuelog)
-                        print('submit2batch.sh -q' + subtoBatch + ' -G' + queuelog+'/'+d['dtag']+str(ijob)+'.log' + ' -R"' + requirementtoBatch + '" -J' + d['dtag']+str(ijob) + ' ' + scriptFile + ' ' + localParams)
+                        print('submit2batch.sh -q ' + subtoBatch + ' -G ' + queuelog+'/'+d['dtag']+str(ijob)+'.log' + ' -R "' + requirementtoBatch + '" -J ' + d['dtag']+str(ijob) + ' ' + scriptFile + ' ' + localParams)
+			SCRIPT.writelines('submit2batch.sh -q ' + subtoBatch + ' -G ' + queuelog+'/'+d['dtag']+str(ijob)+'.log' + ' -R "' + requirementtoBatch + '" -J ' + d['dtag']+str(ijob) + ' ' + scriptFile + ' ' + localParams+';\n')
 			#sys.exit(0)
-                        os.system('submit2batch.sh -q' + subtoBatch + ' -G' + queuelog+'/'+d['dtag']+str(ijob)+'.log' + ' -R"' + requirementtoBatch + '" -J' + d['dtag']+str(ijob) + ' ' + scriptFile + ' ' + localParams)
+                        os.system('submit2batch.sh -q ' + subtoBatch + ' -G ' + queuelog+'/'+d['dtag']+str(ijob)+'.log' + ' -R "' + requirementtoBatch + '" -J ' + d['dtag']+str(ijob) + ' ' + scriptFile + ' ' + localParams)
 			#sys.exit(0)
 			#os.system('sleep ' + str(sleep) + 's')   ##THIS WAS NEEDED ONLY FOR FILE ON CASTOR
                     else :
 #			print(scriptFile + ' '  + localParams)
                         os.system(scriptFile + ' '  + localParams)
+
+
+SCRIPT.close()
+os.system('mv /tmp/rewang/script_jobs.sh '+queuelog+'/')
