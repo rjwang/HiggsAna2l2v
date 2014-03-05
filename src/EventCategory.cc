@@ -100,7 +100,7 @@ int EventCategory::Get(const PhysicsEvent_t& phys, PhysicsObjectJetCollection* J
 	//NCentralLepton=2;
       }
       isVBF = (dEta>4.0) && (VBFSyst.M()>500) && (NCentralJet==0) && (NBJets==0) && (NCentralLepton==2); //ICHEP2012 selection
-//      isVBF = (dEta>4.5) && (VBFSyst.M()>450) && (NCentralJet==0) && (NBJets==0) && (NCentralLepton==2); //new selection optimized with datadriven backgrounds
+      //isVBF = (dEta>4.5) && (VBFSyst.M()>450) && (NCentralJet==0) && (NBJets==0) && (NCentralLepton==2); //new selection optimized with datadriven backgrounds
     }
 
 
@@ -120,16 +120,17 @@ int EventCategory::Get(const PhysicsEvent_t& phys, PhysicsObjectJetCollection* J
         if(NJets==1) return 1;
         return 0;
      }break;
-  case 4:{
-    if(isVBF)return 2;
-    if(NJets>=1) return 1;
-    return 0;
-  }break;
-  case 0:
-  default:{
-    return 0;      
-  }break;
+     case 4:{
+    	if(isVBF)return 2;
+    	if(NJets>=1) return 1;
+    	return 0;
+     }break;
+     case 0:
+     default:{
+     	return 0;      
+     }break;
   }
+
 }
 
 //
