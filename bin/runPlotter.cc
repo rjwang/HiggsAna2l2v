@@ -55,6 +55,7 @@ bool doPlot = true;
 bool splitCanvas = true;
 bool onlyCutIndex = false;
 bool nosig = false;
+double scaleSignal=1.0;
 string inDir   = "OUTNew/";
 string jsonFile = "../../data/beauty-samples.json";
 string outDir  = "Img/";
@@ -146,7 +147,7 @@ void GetListOfObject(JSONWrapper::Object& Root, std::string RootDir, std::list<N
 	      if(split>1) { char buf[255]; sprintf(buf,"_%i",0); segmentExt += buf; }
               string FileName = RootDir + (Samples[id])["dtag"].toString() +  (Samples[id].isTag("suffix")?(Samples[id])["suffix"].toString():string("")) + segmentExt + filtExt + ".root";
 
-              printf("Adding all objects from %25s to the list of considered objects\n",  FileName.c_str());
+              printf("\033[33m Adding all objects from %25s to the list of considered objects \033[0m \n",  FileName.c_str());
 	      TFile* file = new TFile(FileName.c_str());
 	      if(file->IsZombie())
 		{
@@ -230,7 +231,7 @@ void GetInitialNumberOfEvents(JSONWrapper::Object& Root, std::string RootDir, Na
          double PUUpnorm       =  1; if(tmphist->GetBinContent(5)>0)PUUpnorm       = tmphist->GetBinContent(3) / tmphist->GetBinContent(5);
          sampleInfo.PURescale_down = PUDownnorm;
          sampleInfo.PURescale_up   = PUUpnorm;
-         if(isMC)printf("PU Renormalization %25s Shift Down --> %6.2f  Central = %6.2f  Up Down --> %6.2f\n",(Samples[j])["dtag"].toString().c_str(),PUDownnorm, PUCentralnnorm, PUUpnorm);	
+         if(isMC)printf("\033[35m PU Renormalization %25s Shift Down --> %6.2f  Central = %6.2f  Up Down --> %6.2f\n \033[0m",(Samples[j])["dtag"].toString().c_str(),PUDownnorm, PUCentralnnorm, PUUpnorm);	
 
 
          double cnorm = 1.0;
@@ -667,6 +668,7 @@ void Draw2DHistogram(JSONWrapper::Object& Root, std::string RootDir, NameAndType
 void Draw1DHistogram(JSONWrapper::Object& Root, std::string RootDir, NameAndType HistoProperties){
    if(HistoProperties.isIndexPlot && cutIndex<0)return;
 
+   //gStyle->SetLineWidth(2);
    //TCanvas* c1 = new TCanvas("c1","c1",800,600); //change from 800,800, RJ
    TCanvas* c1 = new TCanvas("c1","c1",700,700); 
    TPad* t1 = new TPad();
@@ -767,7 +769,7 @@ void Draw1DHistogram(JSONWrapper::Object& Root, std::string RootDir, NameAndType
       fixExtremities(hist,true,true);
       hist->SetTitle("");
       hist->SetStats(kFALSE);
-      hist->SetMinimum(2e-2);//5e-1);//2e-2);
+      hist->SetMinimum(2e-3);//2e-2);//5e-1);//2e-2);
       //hist->SetMaximum(1E6);
       hist->SetMaximum(hist->GetBinContent(hist->GetMaximumBin())*1.10);
       TString tSaveName = hist->GetName();
@@ -794,8 +796,20 @@ void Draw1DHistogram(JSONWrapper::Object& Root, std::string RootDir, NameAndType
       else if(Process[i].isTag("spimpose") && Process[i]["spimpose"].toBool())
 	{
    	  //legB->AddEntry(hist, Process[i]["tag"].c_str(), "L");
-	  if(!nosig) legA->AddEntry(hist, Process[i]["tag"].c_str(), Process[i]["isdata"].toBool() ? "P" : "L" );
+	  if(!nosig) {
+		if(scaleSignal==1) legA->AddEntry(hist, Process[i]["tag"].c_str(), Process[i]["isdata"].toBool() ? "P" : "L" );
+		else{
+                	std::ostringstream strs;
+                	strs << scaleSignal;
+                	std::string _str_ = strs.str();
+                	TString str_scalesignal="#times"+_str_;
+                	TString newleg = Process[i]["tag"].c_str()+str_scalesignal;
+                	legA->AddEntry(hist, newleg, Process[i]["isdata"].toBool() ? "P" : "L" );
+		}
+	  }
+
 	  spimposeOpts.push_back( Process[i]["isdata"].toBool() ? "e1" : "hist" );
+	  hist->Scale(scaleSignal); //scale the signal, will not affect the root file
 	  spimpose.push_back(hist);
 	  if(maximumFound<hist->GetMaximum()) maximumFound=hist->GetMaximum()*5.0;//1.1;
 	}
@@ -927,7 +941,8 @@ void Draw1DHistogram(JSONWrapper::Object& Root, std::string RootDir, NameAndType
 //   if(isSim) sprintf(Buffer, "CMS simulation, ZH#rightarrow ll+invisible, #sqrt{s}=%.1f TeV, #scale[0.5]{#int} L=%.1f fb^{-1}", iEcm, iLumi/1000);
 //   else      sprintf(Buffer, "CMS preliminary, ZH#rightarrow ll+invisible, #sqrt{s}=%.1f TeV, #scale[0.5]{#int} L=%.1f fb^{-1}", iEcm, iLumi/1000);
    if(isSim) sprintf(Buffer, "CMS simulation, #it{ZH #rightarrow l^{+}l^{-}+#slash{E}_{T}}, #sqrt{s}=%.1f TeV, L=%.1f fb^{-1}", iEcm, iLumi/1000);
-   else      sprintf(Buffer, "CMS preliminary, #it{ZH #rightarrow l^{+}l^{-}+#slash{E}_{T}}, #sqrt{s}=%.1f TeV, L=%.1f fb^{-1}", iEcm, iLumi/1000);
+   //else      sprintf(Buffer, "CMS Preliminary, #it{ZH #rightarrow l^{+}l^{-}+#slash{E}_{T}}, #sqrt{s}=%.1f TeV, L=%.1f fb^{-1}", iEcm, iLumi/1000);
+   else      sprintf(Buffer, "CMS Preliminary, #it{H #rightarrow ZZ_{d} #rightarrow l^{+}l^{-}+#slash{E}_{T}}, #sqrt{s}=%.1f TeV, L=%.1f fb^{-1}", iEcm, iLumi/1000);
 
    T->AddText(Buffer);
    T->Draw("same");
@@ -1032,7 +1047,8 @@ void Draw1DHistogram(JSONWrapper::Object& Root, std::string RootDir, NameAndType
        t2->Draw();
        t2->cd();
        t2->SetGridy(true);
-       t2->SetTopMargin(0);
+       //t2->SetTopMargin(0);
+       t2->SetTopMargin(0.05);
        t2->SetBottomMargin(0.5);
 
        //mc stats
@@ -1113,6 +1129,8 @@ void Draw1DHistogram(JSONWrapper::Object& Root, std::string RootDir, NameAndType
        t1->SetBottomMargin(0.1);
        stack->GetXaxis()->SetTitle(name_denRelUncH); //RJ
      }
+
+   t1->RedrawAxis();
 
    c1->Modified();
    c1->Update();
@@ -1358,6 +1376,7 @@ int main(int argc, char* argv[]){
 	printf("--addcutLine2 --> Add cut Line 2\n"); //RJ
 	printf("--addleftcutLine --> Add left cut Line \n"); //RJ
 	printf("--addrightcutLine --> Add right cut Line \n"); //RJ
+	printf("--scaleSignal --> Scale the signal with a number \n");
 
         printf("command line example: runPlotter --json ../data/beauty-samples.json --iLumi 2007 --inDir OUT/ --outDir OUT/plots/ --outFile plotter.root --noRoot --noPlot\n");
 	return 0;
@@ -1405,6 +1424,7 @@ int main(int argc, char* argv[]){
      if(arg.find("--addrightcutLine"  )!=string::npos && i+1<argc) { sscanf(argv[i+1],"%f",&rightcutLine); i++; printf("rightcutLine = %f\n", rightcutLine); } //RJ
      if(arg.find("--ctrlSample" )!=string::npos && i+1<argc){ ctrlSample   = argv[i+1];  i++;  printf("Control Sample = %s\n", ctrlSample.c_str());  }
      if(arg.find("--rebin"  )!=string::npos && i+1<argc) { sscanf(argv[i+1],"%d",&rebin); i++; printf("rebin = %d\n", rebin); } //RJ
+     if(arg.find("--scaleSignal")!=string::npos && i+1<argc){ sscanf(argv[i+1],"%lf",&scaleSignal); i++; printf("scaleSignal = %f\n", scaleSignal); }
 
    } 
    system( (string("mkdir -p ") + outDir).c_str());
@@ -1425,8 +1445,8 @@ int main(int argc, char* argv[]){
    TFile* OutputFile = NULL;
    if(StoreInFile) OutputFile = new TFile(outFile.c_str(),"RECREATE");
    if(!doPlot){
-   	printf("Progressing Bar              :0%%       20%%       40%%       60%%       80%%       100%%\n");
-  	printf("                             :");
+   	printf("\033[33m Progressing Bar              :0%%       20%%       40%%       60%%       80%%       100%%\n \033[0m");
+  	printf("\033[33m                             : \033[0m");
    }
    int TreeStep = histlist.size()/50;if(TreeStep==0)TreeStep=1;
    string csvFile(outDir +"/histlist.csv");

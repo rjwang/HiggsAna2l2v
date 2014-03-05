@@ -93,7 +93,8 @@ int main(int argc, char* argv[])
     if(url.Contains("SingleEle")) fType=EE;
     bool isSingleMuPD(!isMC && url.Contains("SingleMu"));
     bool isSingleElePD(!isMC && url.Contains("SingleEle"));
-
+    bool isMC_ZZ  = isMC && ( string(url.Data()).find("TeV_ZZ")  != string::npos);
+    bool isMC_WZ  = isMC && ( string(url.Data()).find("TeV_WZ")  != string::npos);
 
     // print out event information
     TString outTxtUrl_full= outUrl + "/" + outFileUrl + "_FullList.txt";
@@ -106,7 +107,7 @@ int main(int argc, char* argv[])
     outTxtFile_final = fopen(outTxtUrl_final.Data(), "w");
     printf("TextFile URL = %s\n",outTxtUrl_final.Data());
 
-    //fprintf(outTxtFile_full,"run lumi event passId,passIdAndIso,passZmass,passZpt,pass3dLeptonVeto,passBveto,passLMetVeto,passdphiZllmetCut,passMet,passBalanceCut,passMTcut evCat | jet1.pt jet1.eta jet1.btag pfMET\n");
+    fprintf(outTxtFile_full,"run lumi event passId,passIdAndIso,passZmass,passZpt,pass3dLeptonVeto,passBveto,passLMetVeto,passdphiZllmetCut,passMet,passBalanceCut,passMTcut evCat | jet1.pt jet1.eta jet1.btag pfMET\n");
     //fprintf(outTxtFile_final,"run lumi event passId,passIdAndIso,passZmass,passZpt,pass3dLeptonVeto,passBveto,passLMetVeto,passdphiZllmetCut,passMet,passBalanceCut,passMTcut evCat | jet1.pt jet1.eta jet1.btag pfMET\n");
 
 
@@ -125,20 +126,39 @@ int main(int argc, char* argv[])
 
     //systematics
     bool runSystematics                        = runProcess.getParameter<bool>("runSystematics");
+/*
     TString varNames[]= {"",
                          "_jerup","_jerdown",
                          "_jesup","_jesdown",
                          "_umetup","_umetdown",
                          "_lesup","_lesdown",
                          "_puup","_pudown",
-                         "_btagup","_btagdown",
-                         "_sherpaup","_sherpadown"
+                         "_btagup","_btagdown"
                         };
     size_t nvarsToInclude(1);
     if(runSystematics) {
         cout << "Systematics will be computed for this analysis" << endl;
         nvarsToInclude=sizeof(varNames)/sizeof(TString);
     }
+*/
+    std::vector<TString> varNames(1,"");
+    if(runSystematics){
+      	cout << "Systematics will be computed for this analysis" << endl;
+      	varNames.push_back("_jerup");    varNames.push_back("_jerdown");
+      	varNames.push_back("_jesup");    varNames.push_back("_jesdown");
+      	varNames.push_back("_umetup");   varNames.push_back("_umetdown");
+      	varNames.push_back("_lesup");    varNames.push_back("_lesdown");
+      	varNames.push_back("_puup");     varNames.push_back("_pudown");
+      	varNames.push_back("_btagup");   varNames.push_back("_btagdown");
+      	//if(isMC_ZZ)             { varNames.push_back("_zzptup");   varNames.push_back("_zzptdown");     }
+      	//if(isMC_WZ)             { varNames.push_back("_wzptup");   varNames.push_back("_wzptdown");     }
+    }
+    size_t nvarsToInclude=varNames.size();
+
+
+
+
+
 
     // Muon scale/resolution corrections
     TString fitParametersFile = "/afs/cern.ch/work/r/rewang/HiggsZZd/HZZ/CMSSW_5_3_11/src/CMGTools/HiggsAna2l2v/src/MuScleFitCorrector_v4_1/";
@@ -190,7 +210,7 @@ int main(int argc, char* argv[])
 
 
     //reweigting pt of DY MC samples
-    mon.addHistogram( new TH2F( "MllvsPt", "; p_{T}^{ll} [GeV]; #it{m}_{ll} [GeV]; Events", 50,0,500, 100,40,250) );
+    mon.addHistogram( new TH2F( "MllvsPt", "; #it{p}_{T}^{ll} [GeV]; #it{m}_{ll} [GeV]; Events", 50,0,500, 100,40,250) );
 
     //for testing ABCD method
     mon.addHistogram( new TH2F( "dPhivsMET_ABCD", "; E_{T}^{miss} [GeV]; #Delta#phi(Z,E_{T}^{miss}) [rad]; Events", 500,0,500, 50,0,TMath::Pi()) );
@@ -206,14 +226,17 @@ int main(int argc, char* argv[])
     mon.addHistogram( new TH2F( "dPhivsBal_D", "; E_{T}^{miss}/q_{T}; #Delta#phi(Z,E_{T}^{miss}) [rad]; Events", 200,0,5, 50,0,TMath::Pi()) );
 
 
-    mon.addHistogram( new TH1F( "zpt", ";p_{T}^{ll} [GeV];Events", 50,0,500) );
+    mon.addHistogram( new TH1F( "zpt", ";#it{p}_{T}^{ll} [GeV];Events", 50,0,500) );
     //double zpt_bins[] = {0., 20., 40., 60., 80., 100., 150., 200., 300., 400., 600., 800.};
     double zpt_bins[] = {0., 20., 40., 60., 80., 100., 200., 400., 800.};
     const int n_zpt_bins = sizeof(zpt_bins)/sizeof(double) - 1;
-    mon.addHistogram( new TH1F( "zpt_rebin", ";p_{T}^{ll} [GeV];Events", n_zpt_bins, zpt_bins) );
+    mon.addHistogram( new TH1F( "zpt_rebin", ";#it{p}_{T}^{ll} [GeV];Events", n_zpt_bins, zpt_bins) );
     mon.addHistogram( new TH1F( "zmass_raw", ";#it{m}_{ll} [GeV];Events", 100,40,250) );
     mon.addHistogram( new TH1F( "zmass", ";#it{m}_{ll} [GeV];Events", 100,40,250) );
 
+    mon.addHistogram( new TH1F( "Zdpt", ";Z_{d} #it{p}_{T} [GeV];Events", 100,0,100) );
+    //Collins Soper Frame
+    mon.addHistogram( new TH1F( "CoslepZ_CS",";cos(#theta*(l,Z));Events", 80,-1.,1.) );
 
     TH1F* h = (TH1F*) mon.addHistogram( new TH1F( "nleptons", ";Lepton multiplicity;Events", 3,2,4) );
     for(int ibin=1; ibin<=h->GetXaxis()->GetNbins(); ibin++) {
@@ -263,8 +286,8 @@ int main(int argc, char* argv[])
     // Final distributions
     mon.addHistogram( new TH1F( "mt_final"  , ";M_{T}(Z,H) [GeV];Events", 8,200,1000) );
     mon.addHistogram( new TH1F( "new_mt_final"  , ";M_{T}(Z,H) [GeV];Events", 10,0,1000) );
-    mon.addHistogram( new TH1F( "zpt_final", ";p_{T}^{ll} [GeV];Events", 25,0,500) );
-    mon.addHistogram( new TH1F( "zpt_rebin_final", ";p_{T}^{ll} [GeV];Events", n_zpt_bins, zpt_bins) );
+    mon.addHistogram( new TH1F( "zpt_final", ";#it{p}_{T}^{ll} [GeV];Events", 25,0,500) );
+    mon.addHistogram( new TH1F( "zpt_rebin_final", ";#it{p}_{T}^{ll} [GeV];Events", n_zpt_bins, zpt_bins) );
     mon.addHistogram( new TH1F( "met_met_final"  , ";E_{T}^{miss} [GeV];Events", 25,0,250) );
     mon.addHistogram( new TH1F( "met_redMet_final"  , ";Reduced E_{T}^{miss} [GeV];Events", 50,0,500) );
     mon.addHistogram( new TH1F( "met_redMetL_final"  , ";Longitudinal Reduced E_{T}^{miss} [GeV];Events", 25,-100,400) );
@@ -582,7 +605,7 @@ int main(int argc, char* argv[])
 
     //event Categorizer
     //EventCategory eventCategoryInst(4); //jet(0,>=1)+vbf binning
-    EventCategory eventCategoryInst(1); //jet(0,1,>=2) binning //RJ
+    EventCategory eventCategoryInst(1);   //jet(0,1,>=2) binning
 
 
     LeptonEfficiencySF lsf(use2011Id ? 2011:2012);
@@ -693,12 +716,14 @@ int main(int argc, char* argv[])
         bool isWZ(false);
         bool isZZ(false);
         bool isZjets(false);
+        bool isMC_HZZd(false);
         if(isMC) { // need to put this an external function
             TString input_File = url.Data();
             if(input_File.Contains("TeV_ZH")) isZH=true;
             if(input_File.Contains("TeV_WZ")) isWZ=true;
             if(input_File.Contains("TeV_ZZ")) isZZ=true;
             if(input_File.Contains("TeV_DYJetsToLL") || input_File.Contains("TeV_ZG")) isZjets=true;
+	    if(input_File.Contains("TeV_HZZd")) isMC_HZZd=true;
 
 
             if(isZH) {
@@ -708,6 +733,12 @@ int main(int argc, char* argv[])
                 weight *= ewk_nloweightsZH;
                 //mon.fillHisto("v_pt_ewkcorr",tags,pt_zll,weight);
             }
+
+
+	    if(isMC_HZZd){
+	     	double pt_vv = (phys.genneutrinos[0]+phys.genneutrinos[1]).pt();
+	  	mon.fillHisto("Zdpt",tags, pt_vv, weight);	
+	    }
 
             if(isZZ) {
                 double pt_zll = (phys.genleptons[0]+phys.genleptons[1]).pt();
@@ -1082,9 +1113,9 @@ int main(int argc, char* argv[])
             aGoodIdJets.push_back(aJets[ijet]);
             if(aJets[ijet].pt()>30)nAJetsGood30++;
 
-            if(aJets[ijet].pt()>20 /*&& fabs(aJets[ijet].eta())<2.5*/)  nABtags += (aJets[ijet].btag2>0.244);
-            if(aJets[ijet].pt()>20 /*&& fabs(aJets[ijet].eta())<2.5*/)  nCSVMtags += (aJets[ijet].btag2>0.679);
-            if(aJets[ijet].pt()>20 /*&& fabs(aJets[ijet].eta())<2.5*/)  nCSVTtags += (aJets[ijet].btag2>0.898);
+            if(aJets[ijet].pt()>20 /*&& fabs(aJets[ijet].eta())<2.5*/)  nABtags += (aJets[ijet].btag6>0.244);
+            if(aJets[ijet].pt()>20 /*&& fabs(aJets[ijet].eta())<2.5*/)  nCSVMtags += (aJets[ijet].btag6>0.679);
+            if(aJets[ijet].pt()>20 /*&& fabs(aJets[ijet].eta())<2.5*/)  nCSVTtags += (aJets[ijet].btag6>0.898);
         }
         //passJetveto=(nAJetsGood30==0);
         passBveto=(nABtags==0);
@@ -1172,16 +1203,19 @@ int main(int argc, char* argv[])
         //fprintf(outTxtFile,"%d %d %d %d %d %f %f %s\n",ev.run,ev.lumi,ev.event,selWord,nAJetsGood30,zvvs[0].pt(),aMT,evCat.Data());
         //fprintf(outTxtFile,"%d %d %d %d %d %s\n",ev.run,ev.lumi,ev.event,selWord1,selWord2,evCat.Data());
 
-        /*
+        
                 fprintf(outTxtFile_full,"%d | %d |  %d | %d%d%d%d%d%d%d%d%d%d%d | %s ",ev.run,ev.lumi,ev.event,
                         passId,passIdAndIso,passZmass,passZpt,pass3dLeptonVeto,passBveto,passLMetVeto,passdphiZllmetCut,
                         passRedMet,passBalanceCut,passMTcut,evCat.Data());
 
-                if(aJets.size()>0 && zvvs.size()>0) {
-                    fprintf(outTxtFile_full,"| %f | %f | %f | %f",aJets[0].pt(),aJets[0].eta(), aJets[0].btag2, zvvs[0].pt());
-                }
+                //if(aJets.size()>0 && zvvs.size()>0) {
+                //    fprintf(outTxtFile_full,"| %f | %f | %f | %f",aJets[0].pt(),aJets[0].eta(), aJets[0].btag2, zvvs[0].pt());
+                //}
+		for(unsigned int i=0; i<aJets.size(); i++)
+		      fprintf(outTxtFile_full,"| %f",aJets[i].pt());
+		fprintf(outTxtFile_full,"| %d",nAJetsGood30);
                 fprintf(outTxtFile_full,"\n");
-        */
+        
 
 
 
@@ -1247,6 +1281,7 @@ int main(int argc, char* argv[])
             mon.fillHisto("nvtxraw"  ,   tags, ev.nvtx,      1);
             mon.fillHisto("zpt"      ,   tags, zll.pt(),     weight);
             mon.fillHisto("zpt_rebin",   tags, zll.pt(),     weight);
+	    mon.fillHisto("CoslepZ_CS",  tags, colin_soper,  weight);
 
             if(passZpt) {
                 //analyze lepton kinematics

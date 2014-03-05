@@ -7,7 +7,6 @@ General:
 
 Prepare:
 
-	------------------------
 	setenv SCRAM_ARCH slc5_amd64_gcc462 
 	scramv1 project CMSSW CMSSW_5_3_11
 	cd CMSSW_5_3_11/src
