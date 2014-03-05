@@ -1,14 +1,12 @@
 #include <iostream>
 #include <boost/shared_ptr.hpp>
 
-//#include "EGamma/EGammaAnalysisTools/interface/EGammaCutBasedEleId.h"
 #include "EgammaAnalysis/ElectronTools/interface/EGammaCutBasedEleId.h"
 
 #include "CMGTools/HiggsAna2l2v/interface/ZZ2l2nuSummaryHandler.h"
 #include "CMGTools/HiggsAna2l2v/interface/ZZ2l2nuPhysicsEvent.h"
 #include "CMGTools/HiggsAna2l2v/interface/METUtils.h"
-#include "CMGTools/HiggsAna2l2v/interface/ZHUtils.h" //RJ
-//#include "CMGTools/HiggsAna2l2v/interface/GammaEventHandler.h"
+#include "CMGTools/HiggsAna2l2v/interface/ZHUtils.h"
 #include "CMGTools/HiggsAna2l2v/interface/setStyle.h"
 #include "CMGTools/HiggsAna2l2v/interface/plotter.h"
 #include "CMGTools/HiggsAna2l2v/interface/ObjectFilters.h"
@@ -16,7 +14,6 @@
 #include "CMGTools/HiggsAna2l2v/interface/TMVAUtils.h"
 #include "CMGTools/HiggsAna2l2v/interface/MacroUtils.h"
 #include "CMGTools/HiggsAna2l2v/interface/EventCategory.h"
-//#include "CMGTools/HiggsAna2l2v/interface/EfficiencyMap.h"
 #include "CMGTools/HiggsAna2l2v/interface/LeptonEfficiencySF.h"
 
 #include "CondFormats/JetMETObjects/interface/JetResolution.h"
@@ -107,8 +104,8 @@ int main(int argc, char* argv[])
     outTxtFile_final = fopen(outTxtUrl_final.Data(), "w");
     printf("TextFile URL = %s\n",outTxtUrl_final.Data());
 
-    fprintf(outTxtFile_full,"run lumi event passId,passIdAndIso,passZmass,passZpt,pass3dLeptonVeto,passBveto,passLMetVeto,passdphiZllmetCut,passMet,passBalanceCut,passMTcut evCat | jet1.pt jet1.eta jet1.btag pfMET\n");
-    //fprintf(outTxtFile_final,"run lumi event passId,passIdAndIso,passZmass,passZpt,pass3dLeptonVeto,passBveto,passLMetVeto,passdphiZllmetCut,passMet,passBalanceCut,passMTcut evCat | jet1.pt jet1.eta jet1.btag pfMET\n");
+    fprintf(outTxtFile_full,"run lumi event passId,passIdAndIso,passZmass,passZpt,pass3dLeptonVeto,passBveto,passLMetVeto,passdphiZllmetCut,passMet,passBalanceCut,passMTcut evCat \n");
+    //fprintf(outTxtFile_final,"run lumi event passId,passIdAndIso,passZmass,passZpt,pass3dLeptonVeto,passBveto,passLMetVeto,passdphiZllmetCut,passMet,passBalanceCut,passMTcut evCat \n");
 
 
     //tree info
@@ -126,21 +123,6 @@ int main(int argc, char* argv[])
 
     //systematics
     bool runSystematics                        = runProcess.getParameter<bool>("runSystematics");
-/*
-    TString varNames[]= {"",
-                         "_jerup","_jerdown",
-                         "_jesup","_jesdown",
-                         "_umetup","_umetdown",
-                         "_lesup","_lesdown",
-                         "_puup","_pudown",
-                         "_btagup","_btagdown"
-                        };
-    size_t nvarsToInclude(1);
-    if(runSystematics) {
-        cout << "Systematics will be computed for this analysis" << endl;
-        nvarsToInclude=sizeof(varNames)/sizeof(TString);
-    }
-*/
     std::vector<TString> varNames(1,"");
     if(runSystematics){
       	cout << "Systematics will be computed for this analysis" << endl;
@@ -150,14 +132,11 @@ int main(int argc, char* argv[])
       	varNames.push_back("_lesup");    varNames.push_back("_lesdown");
       	varNames.push_back("_puup");     varNames.push_back("_pudown");
       	varNames.push_back("_btagup");   varNames.push_back("_btagdown");
+	// will need to add ZZ and WZ shape uncertainty
       	//if(isMC_ZZ)             { varNames.push_back("_zzptup");   varNames.push_back("_zzptdown");     }
       	//if(isMC_WZ)             { varNames.push_back("_wzptup");   varNames.push_back("_wzptdown");     }
     }
     size_t nvarsToInclude=varNames.size();
-
-
-
-
 
 
     // Muon scale/resolution corrections
@@ -186,28 +165,26 @@ int main(int argc, char* argv[])
     mon.addHistogram( new TH1F( "nvtx",";Vertices;Events",50,0,50) );
     mon.addHistogram( new TH1F( "nvtxraw",";Vertices;Events",50,0,50) );
 
-    mon.addHistogram( new TH1F( "nvtx_dy",";Vertices;Events",50,0,50) );
+
     double VTXaxis[29] = {0,4,5,6,7,8,9,10,11,12,13,14,15,16,17,18,19,20,21,22,23,24,25,26,27,28,29,30,50};
+    mon.addHistogram( new TH1F( "nvtx_dy",";Vertices;Events",50,0,50) );
     mon.addHistogram( new TH1F( "nvtx_dy_rebin",";Vertices;Events",28,VTXaxis) );
-    mon.addHistogram( new TH1F("npfjets_dy",  ";Jet multiplicity (p_{T}>30 GeV);Events",5,0,5) );
 
     //for MC normalization (to 1/pb)
     TH1F* Hcutflow  = (TH1F*) mon.addHistogram(  new TH1F ("cutflow"    , "cutflow"    ,6,0,6) ) ;
-
 
     Double_t qtaxis[100];
     for(size_t i=0; i<40; i++)  qtaxis[i]=2.5*i;       //0-97.5
     for(size_t i=0; i<20; i++)  qtaxis[40+i]=100+5*i;  //100-195
     for(size_t i=0; i<15; i++)  qtaxis[60+i]=200+10*i; //200-340
     for(size_t i=0; i<25; i++)  qtaxis[75+i]=350+25*i; //350-976
-
-    mon.addHistogram( new TH1D( "qt_rebin",        ";p_{T}^{#gamma} [GeV];Events",99,qtaxis));
     double Qtaxis[15]= {0,50,55,60,65,70,75,80,85,90,100,125,150,200,1000};
+
+    // Z+jets control with photon template
+    mon.addHistogram( new TH1D( "qt_rebin",        ";#it{p}_{T}^{#gamma} [GeV];Events",99,qtaxis));
     mon.addHistogram( new TH1D( "qt_rebin_new",  ";#it{q}_{T} [GeV];Events",14,Qtaxis));
-    mon.addHistogram( new TH1F( "qt",";p_{T}^{#gamma} [GeV];Events",1000,0,1000));
+    mon.addHistogram( new TH1F( "qt",";#it{p}_{T}^{#gamma} [GeV];Events",1000,0,1000));
     mon.addHistogram( new TH1F( "qmass", ";#it{m}_{ll} [GeV];Events", 15,76,106) );
-
-
 
     //reweigting pt of DY MC samples
     mon.addHistogram( new TH2F( "MllvsPt", "; #it{p}_{T}^{ll} [GeV]; #it{m}_{ll} [GeV]; Events", 50,0,500, 100,40,250) );
@@ -219,24 +196,25 @@ int main(int argc, char* argv[])
     mon.addHistogram( new TH2F( "dPhivsMET_C", "; E_{T}^{miss} [GeV]; #Delta#phi(Z,E_{T}^{miss}) [rad]; Events", 500,0,500, 50,0,TMath::Pi()) );
     mon.addHistogram( new TH2F( "dPhivsMET_D", "; E_{T}^{miss} [GeV]; #Delta#phi(Z,E_{T}^{miss}) [rad]; Events", 500,0,500, 50,0,TMath::Pi()) );
 
-    mon.addHistogram( new TH2F( "dPhivsBal_ABCD", "; E_{T}^{miss}/q_{T}; #Delta#phi(Z,E_{T}^{miss}) [rad]; Events", 200,0,5, 50,0,TMath::Pi()) );
-    mon.addHistogram( new TH2F( "dPhivsBal_A", "; E_{T}^{miss}/q_{T}; #Delta#phi(Z,E_{T}^{miss}) [rad]; Events", 200,0,5, 50,0,TMath::Pi()) );
-    mon.addHistogram( new TH2F( "dPhivsBal_B", "; E_{T}^{miss}/q_{T}; #Delta#phi(Z,E_{T}^{miss}) [rad]; Events", 200,0,5, 50,0,TMath::Pi()) );
-    mon.addHistogram( new TH2F( "dPhivsBal_C", "; E_{T}^{miss}/q_{T}; #Delta#phi(Z,E_{T}^{miss}) [rad]; Events", 200,0,5, 50,0,TMath::Pi()) );
-    mon.addHistogram( new TH2F( "dPhivsBal_D", "; E_{T}^{miss}/q_{T}; #Delta#phi(Z,E_{T}^{miss}) [rad]; Events", 200,0,5, 50,0,TMath::Pi()) );
+    mon.addHistogram( new TH2F( "dPhivsBal_ABCD", "; E_{T}^{miss}/#it{q}_{T}; #Delta#phi(Z,E_{T}^{miss}) [rad]; Events", 200,0,5, 50,0,TMath::Pi()) );
+    mon.addHistogram( new TH2F( "dPhivsBal_A", "; E_{T}^{miss}/#it{q}_{T}; #Delta#phi(Z,E_{T}^{miss}) [rad]; Events", 200,0,5, 50,0,TMath::Pi()) );
+    mon.addHistogram( new TH2F( "dPhivsBal_B", "; E_{T}^{miss}/#it{q}_{T}; #Delta#phi(Z,E_{T}^{miss}) [rad]; Events", 200,0,5, 50,0,TMath::Pi()) );
+    mon.addHistogram( new TH2F( "dPhivsBal_C", "; E_{T}^{miss}/#it{q}_{T}; #Delta#phi(Z,E_{T}^{miss}) [rad]; Events", 200,0,5, 50,0,TMath::Pi()) );
+    mon.addHistogram( new TH2F( "dPhivsBal_D", "; E_{T}^{miss}/#it{q}_{T}; #Delta#phi(Z,E_{T}^{miss}) [rad]; Events", 200,0,5, 50,0,TMath::Pi()) );
 
 
-    mon.addHistogram( new TH1F( "zpt", ";#it{p}_{T}^{ll} [GeV];Events", 50,0,500) );
-    //double zpt_bins[] = {0., 20., 40., 60., 80., 100., 150., 200., 300., 400., 600., 800.};
     double zpt_bins[] = {0., 20., 40., 60., 80., 100., 200., 400., 800.};
     const int n_zpt_bins = sizeof(zpt_bins)/sizeof(double) - 1;
+    mon.addHistogram( new TH1F( "zpt", 	     ";#it{p}_{T}^{ll} [GeV];Events", 50,0,500) );
     mon.addHistogram( new TH1F( "zpt_rebin", ";#it{p}_{T}^{ll} [GeV];Events", n_zpt_bins, zpt_bins) );
     mon.addHistogram( new TH1F( "zmass_raw", ";#it{m}_{ll} [GeV];Events", 100,40,250) );
-    mon.addHistogram( new TH1F( "zmass", ";#it{m}_{ll} [GeV];Events", 100,40,250) );
+    mon.addHistogram( new TH1F( "zmass",     ";#it{m}_{ll} [GeV];Events", 100,40,250) );
 
+    // for HZZd MC truth
     mon.addHistogram( new TH1F( "Zdpt", ";Z_{d} #it{p}_{T} [GeV];Events", 100,0,100) );
     //Collins Soper Frame
     mon.addHistogram( new TH1F( "CoslepZ_CS",";cos(#theta*(l,Z));Events", 80,-1.,1.) );
+
 
     TH1F* h = (TH1F*) mon.addHistogram( new TH1F( "nleptons", ";Lepton multiplicity;Events", 3,2,4) );
     for(int ibin=1; ibin<=h->GetXaxis()->GetNbins(); ibin++) {
@@ -248,7 +226,7 @@ int main(int argc, char* argv[])
     }
 
 
-    h=(TH1F *)mon.addHistogram( new TH1F("npfjets",  ";Jet multiplicity (p_{T}>30 GeV);Events",5,0,5) );
+    h=(TH1F *)mon.addHistogram( new TH1F("npfjets",  ";Jet multiplicity (#it{p}_{T}>30 GeV);Events",5,0,5) );
     for(int ibin=1; ibin<=h->GetXaxis()->GetNbins(); ibin++) {
         TString label("");
         if(ibin==h->GetXaxis()->GetNbins()) label +="#geq";
@@ -268,39 +246,34 @@ int main(int argc, char* argv[])
     }
 
 
-
-    mon.addHistogram( new TH1D( "balancedif",    ";|E_{T}^{miss}-q_{T}|/q_{T};Events", 5,0,1.0) );
-    mon.addHistogram( new TH1D( "balance",    ";E_{T}^{miss}/q_{T};Events", 25,0,5) );
-    mon.addHistogram( new TH1F( "met_metSB",        ";E_{T}^{miss} [GeV];Events", 50,0,500) );
-    mon.addHistogram( new TH1F( "met_redMetSB",     ";Reduced E_{T}^{miss} [GeV];Events", 50,0,300) );
+    mon.addHistogram( new TH1D( "balancedif",   ";|E_{T}^{miss}-#it{q}_{T}|/#it{q}_{T};Events", 5,0,1.0) );
+    mon.addHistogram( new TH1D( "balance",	";E_{T}^{miss}/#it{q}_{T};Events", 25,0,5) );
+    mon.addHistogram( new TH1F( "met_metSB",    ";E_{T}^{miss} [GeV];Events", 50,0,500) );
+    mon.addHistogram( new TH1F( "met_redMetSB", ";Reduced E_{T}^{miss} [GeV];Events", 50,0,300) );
 
     double newMETBin[21]= {0,10,20,30,40,50,60,70,80,90,100,120,140,160,180,200,250,300,350,400,500};
-    mon.addHistogram( new TH1F( "met_met",          ";E_{T}^{miss} [GeV];Events", 20, newMETBin));//50,0,500) );
-    mon.addHistogram( new TH1F( "met_redMet",       ";Reduced E_{T}^{miss} [GeV];Events", 50,0,500) );
+    mon.addHistogram( new TH1F( "met_met",      ";E_{T}^{miss} [GeV];Events", 20, newMETBin));
+    mon.addHistogram( new TH1F( "met_redMet",   ";Reduced E_{T}^{miss} [GeV];Events", 50,0,500) );
     double redMet_bins[] = {0., 20., 40., 60., 80., 100., 150., 400., 800.};
     const int n_redMet_bins = sizeof(redMet_bins)/sizeof(double) - 1;
-    mon.addHistogram( new TH1F( "met_redMet_rebin",       ";Reduced E_{T}^{miss} [GeV];Events", n_redMet_bins,redMet_bins) );
+    mon.addHistogram( new TH1F( "met_redMet_rebin",";Reduced E_{T}^{miss} [GeV];Events", n_redMet_bins,redMet_bins) );
 
 
-
-    // Final distributions
-    mon.addHistogram( new TH1F( "mt_final"  , ";M_{T}(Z,H) [GeV];Events", 8,200,1000) );
-    mon.addHistogram( new TH1F( "new_mt_final"  , ";M_{T}(Z,H) [GeV];Events", 10,0,1000) );
-    mon.addHistogram( new TH1F( "zpt_final", ";#it{p}_{T}^{ll} [GeV];Events", 25,0,500) );
-    mon.addHistogram( new TH1F( "zpt_rebin_final", ";#it{p}_{T}^{ll} [GeV];Events", n_zpt_bins, zpt_bins) );
-    mon.addHistogram( new TH1F( "met_met_final"  , ";E_{T}^{miss} [GeV];Events", 25,0,250) );
-    mon.addHistogram( new TH1F( "met_redMet_final"  , ";Reduced E_{T}^{miss} [GeV];Events", 50,0,500) );
-    mon.addHistogram( new TH1F( "met_redMetL_final"  , ";Longitudinal Reduced E_{T}^{miss} [GeV];Events", 25,-100,400) );
-    mon.addHistogram( new TH1F( "met_redMet_rebin_final", ";Reduced E_{T}^{miss} [GeV];Events", n_redMet_bins,redMet_bins) );
+    // final distributions
+    mon.addHistogram( new TH1F( "mt_final", 		";#it{m}_{T} [GeV];Events", 8,200,1000) );
+    mon.addHistogram( new TH1F( "new_mt_final", 	";#it{m}_{T} [GeV];Events", 10,0,1000) );
+    mon.addHistogram( new TH1F( "zpt_final",		";#it{p}_{T}^{ll} [GeV];Events", 25,0,500) );
+    mon.addHistogram( new TH1F( "zpt_rebin_final",	";#it{p}_{T}^{ll} [GeV];Events", n_zpt_bins, zpt_bins) );
+    mon.addHistogram( new TH1F( "met_met_final", 	";E_{T}^{miss} [GeV];Events", 25,0,250) );
+    mon.addHistogram( new TH1F( "met_redMet_final",	";Reduced E_{T}^{miss} [GeV];Events", 50,0,500) );
+    mon.addHistogram( new TH1F( "met_redMetL_final",	";Longitudinal Reduced E_{T}^{miss} [GeV];Events", 25,-100,400) );
+    mon.addHistogram( new TH1F( "met_redMet_rebin_final",";Reduced E_{T}^{miss} [GeV];Events", n_redMet_bins,redMet_bins) );
 
 
     //NLO EWK Correction study
-    //mon.addHistogram( new TH1F( "v_pt",";p_{T} [GeV];Events", 500,0,500) );
-    //mon.addHistogram( new TH1F( "v_pt_ewkcorr",";p_{T} EWK Corr [GeV];Events", 500,0,500) );
+    //mon.addHistogram( new TH1F( "v_pt",";#it{p}_{T} [GeV];Events", 500,0,500) );
+    //mon.addHistogram( new TH1F( "v_pt_ewkcorr",";#it{p}_{T} EWK Corr [GeV];Events", 500,0,500) );
 
-
-
-    //here need to reduce mroe histograms
 
 
     //##############################################
@@ -384,7 +357,7 @@ int main(int argc, char* argv[])
     for(size_t ivar=0; ivar<nvarsToInclude; ivar++) {
         Hoptim_systs->GetXaxis()->SetBinLabel(ivar+1, varNames[ivar]);
 
-        //1-D shapes
+        //1-D shapes for limit setting
         mon.addHistogram( new TH2F (TString("redMet_shapes")+varNames[ivar],";cut index;red-MET [GeV];#Events (/5GeV)",optim_Cuts1_met.size(),0,optim_Cuts1_met.size(),80,0,800) );
         mon.addHistogram( new TH2F (TString("redMet_rebin_shapes")+varNames[ivar],";cut index;red-MET [GeV];#Events (/5GeV)",optim_Cuts1_met.size(),0,optim_Cuts1_met.size(), n_redMet_bins,redMet_bins) );
         mon.addHistogram( new TH2F (TString("mt_shapes")+varNames[ivar],";cut index; #it{m}_{T} [GeV];#Events (/100GeV)",optim_Cuts1_met.size(),0,optim_Cuts1_met.size(),12,0,1200) );
@@ -392,20 +365,18 @@ int main(int argc, char* argv[])
         mon.addHistogram( new TH2F (TString("dphi_shapes")+varNames[ivar],";cut index; #Delta#phi(Z,E_{T}^{miss}) [rad];#events",optim_Cuts1_met.size(),0,optim_Cuts1_met.size(),5,2.5,TMath::Pi()) );
         mon.addHistogram( new TH2F (TString("met_shapes")+varNames[ivar],";cut index;MET [GeV];#events (/5GeV)",optim_Cuts1_met.size(),0,optim_Cuts1_met.size(), 160,0,800) );
         mon.addHistogram( new TH2F (TString("met_rebin_shapes")+varNames[ivar],";cut index;MET [GeV];#events (/5GeV)",optim_Cuts1_met.size(),0,optim_Cuts1_met.size(), n_redMet_bins,redMet_bins) );
-        mon.addHistogram( new TH2F (TString("zpt_shapes")+varNames[ivar],";cut index;Z p_{T} [GeV];#events (/5GeV)",optim_Cuts1_met.size(),0,optim_Cuts1_met.size(), 160,0,800) );
-        mon.addHistogram( new TH2F (TString("zpt_rebin_shapes")+varNames[ivar],";cut index;Z p_{T} [GeV];#events (/5GeV)",optim_Cuts1_met.size(),0,optim_Cuts1_met.size(), n_zpt_bins, zpt_bins) );
+        mon.addHistogram( new TH2F (TString("zpt_shapes")+varNames[ivar],";cut index;Z #it{p}_{T} [GeV];#events (/5GeV)",optim_Cuts1_met.size(),0,optim_Cuts1_met.size(), 160,0,800) );
+        mon.addHistogram( new TH2F (TString("zpt_rebin_shapes")+varNames[ivar],";cut index;Z #it{p}_{T} [GeV];#events (/5GeV)",optim_Cuts1_met.size(),0,optim_Cuts1_met.size(), n_zpt_bins, zpt_bins) );
 
-
-
-        //2-D shapes
+        //2-D shapes for limit setting
         TH2F *hh=(TH2F *) mon.addHistogram( new TH2F (TString("balance_mt_shapes")+varNames[ivar],";cut index; #it{m}_{T} [GeV];#Events (/100GeV)",optim_Cuts1_met.size(),0,optim_Cuts1_met.size(),36,0,3600) );
         for(int j=1; j<=36; j++) hh->GetYaxis()->SetBinLabel(j,"");
-        hh->GetYaxis()->SetBinLabel(1 ,"0.8<E_{T}^{miss}/q_{T}<0.9");
-        hh->GetYaxis()->SetBinLabel(13,"0.9<E_{T}^{miss}/q_{T}<1.1");
-        hh->GetYaxis()->SetBinLabel(25,"1.1<E_{T}^{miss}/q_{T}<1.2");
-        hh->GetYaxis()->SetBinLabel(5 ,"0<M_{T}(Z,H)<1200");
-        hh->GetYaxis()->SetBinLabel(17,"0<M_{T}(Z,H)<1200");
-        hh->GetYaxis()->SetBinLabel(29,"0<M_{T}(Z,H)<1200");
+        hh->GetYaxis()->SetBinLabel(1 ,"0.8<E_{T}^{miss}/#it{q}_{T}<0.9");
+        hh->GetYaxis()->SetBinLabel(13,"0.9<E_{T}^{miss}/#it{q}_{T}<1.1");
+        hh->GetYaxis()->SetBinLabel(25,"1.1<E_{T}^{miss}/#it{q}_{T}<1.2");
+        hh->GetYaxis()->SetBinLabel(5 ,"0<#it{m}_{T}<1200");
+        hh->GetYaxis()->SetBinLabel(17,"0<#it{m}_{T}<1200");
+        hh->GetYaxis()->SetBinLabel(29,"0<#it{m}_{T}<1200");
 
         double dphimtshapes_xbins[34];
         for(int i=0; i<34; i++) {
@@ -429,107 +400,37 @@ int main(int argc, char* argv[])
         hh->GetYaxis()->SetBinLabel(1 ,"-1.0<cos#theta*<-0.5");
         hh->GetYaxis()->SetBinLabel(13,"-0.5<cos#theta*<0.0");
         hh->GetYaxis()->SetBinLabel(25,"0.0<cos#theta*<1.0");
-        hh->GetYaxis()->SetBinLabel(5 ,"0<M_{T}(Z,H)<1200");
-        hh->GetYaxis()->SetBinLabel(17,"0<M_{T}(Z,H)<1200");
-        hh->GetYaxis()->SetBinLabel(29,"0<M_{T}(Z,H)<1200");
+        hh->GetYaxis()->SetBinLabel(5 ,"0<#it{m}_{T}<1200");
+        hh->GetYaxis()->SetBinLabel(17,"0<#it{m}_{T}<1200");
+        hh->GetYaxis()->SetBinLabel(29,"0<#it{m}_{T}<1200");
 
-        //Non-Resonant Bkgs
-        TH2F *h2=(TH2F *) mon.addHistogram( new TH2F ("redMet_shapes_NRBctrl"+varNames[ivar],";cut index;Selection region;Events",optim_Cuts1_met.size(),0,optim_Cuts1_met.size(),6,0,6) );
-        h2->GetYaxis()->SetBinLabel(1,"M_{in}^{ll}/=0 b-tags");
-        h2->GetYaxis()->SetBinLabel(2,"M_{out}^{ll}/=0 b-tags");
-        h2->GetYaxis()->SetBinLabel(3,"M_{out+}^{ll}/=0 b-tags");
-        h2->GetYaxis()->SetBinLabel(4,"M_{in}^{ll}/#geq 1 b-tag");
-        h2->GetYaxis()->SetBinLabel(5,"M_{out}^{ll}/#geq 1 b-tag");
-        h2->GetYaxis()->SetBinLabel(6,"M_{out+}^{ll}/#geq 1 b-tag");
 
-        h2=(TH2F *) mon.addHistogram( new TH2F ("redMet_rebin_shapes_NRBctrl"+varNames[ivar],";cut index;Selection region;Events",optim_Cuts1_met.size(),0,optim_Cuts1_met.size(),6,0,6) );
-        h2->GetYaxis()->SetBinLabel(1,"M_{in}^{ll}/=0 b-tags");
-        h2->GetYaxis()->SetBinLabel(2,"M_{out}^{ll}/=0 b-tags");
-        h2->GetYaxis()->SetBinLabel(3,"M_{out+}^{ll}/=0 b-tags");
-        h2->GetYaxis()->SetBinLabel(4,"M_{in}^{ll}/#geq 1 b-tag");
-        h2->GetYaxis()->SetBinLabel(5,"M_{out}^{ll}/#geq 1 b-tag");
-        h2->GetYaxis()->SetBinLabel(6,"M_{out+}^{ll}/#geq 1 b-tag");
+        // non-resonant background control
+        std::vector<TString> allshapesVars;
+        allshapesVars.push_back("redMet_shapes");
+        allshapesVars.push_back("redMet_rebin_shapes");
+        allshapesVars.push_back("mt_shapes");
+        allshapesVars.push_back("new_mt_shapes");
+        allshapesVars.push_back("dphi_shapes");
+        allshapesVars.push_back("met_shapes");
+        allshapesVars.push_back("met_rebin_shapes");
+        allshapesVars.push_back("zpt_shapes");
+        allshapesVars.push_back("zpt_rebin_shapes");
+        allshapesVars.push_back("balance_mt_shapes");
+        allshapesVars.push_back("dphiLL_mt_shapes");
+        allshapesVars.push_back("coslZ_mt_shapes");
 
-        h2=(TH2F *) mon.addHistogram( new TH2F ("mt_shapes_NRBctrl"+varNames[ivar],";cut index;Selection region;Events",optim_Cuts1_met.size(),0,optim_Cuts1_met.size(),6,0,6) );
-        h2->GetYaxis()->SetBinLabel(1,"M_{in}^{ll}/=0 b-tags");
-        h2->GetYaxis()->SetBinLabel(2,"M_{out}^{ll}/=0 b-tags");
-        h2->GetYaxis()->SetBinLabel(3,"M_{out+}^{ll}/=0 b-tags");
-        h2->GetYaxis()->SetBinLabel(4,"M_{in}^{ll}/#geq 1 b-tag");
-        h2->GetYaxis()->SetBinLabel(5,"M_{out}^{ll}/#geq 1 b-tag");
-        h2->GetYaxis()->SetBinLabel(6,"M_{out+}^{ll}/#geq 1 b-tag");
+        for(size_t j=0; j<allshapesVars.size(); j++)
+        {
+            TH2F *h2=(TH2F *) mon.addHistogram( new TH2F (allshapesVars[j]+"_NRBctrl"+varNames[ivar],";cut index;Selection region;Events",optim_Cuts1_met.size(),0,optim_Cuts1_met.size(),6,0,6) );
+            h2->GetYaxis()->SetBinLabel(1,"M_{in}^{ll}/=0 b-tags");
+            h2->GetYaxis()->SetBinLabel(2,"M_{out}^{ll}/=0 b-tags");
+            h2->GetYaxis()->SetBinLabel(3,"M_{out+}^{ll}/=0 b-tags");
+            h2->GetYaxis()->SetBinLabel(4,"M_{in}^{ll}/#geq 1 b-tag");
+            h2->GetYaxis()->SetBinLabel(5,"M_{out}^{ll}/#geq 1 b-tag");
+            h2->GetYaxis()->SetBinLabel(6,"M_{out+}^{ll}/#geq 1 b-tag");
+        }
 
-        h2=(TH2F *) mon.addHistogram( new TH2F ("new_mt_shapes_NRBctrl"+varNames[ivar],";cut index;Selection region;Events",optim_Cuts1_met.size(),0,optim_Cuts1_met.size(),6,0,6) );
-        h2->GetYaxis()->SetBinLabel(1,"M_{in}^{ll}/=0 b-tags");
-        h2->GetYaxis()->SetBinLabel(2,"M_{out}^{ll}/=0 b-tags");
-        h2->GetYaxis()->SetBinLabel(3,"M_{out+}^{ll}/=0 b-tags");
-        h2->GetYaxis()->SetBinLabel(4,"M_{in}^{ll}/#geq 1 b-tag");
-        h2->GetYaxis()->SetBinLabel(5,"M_{out}^{ll}/#geq 1 b-tag");
-        h2->GetYaxis()->SetBinLabel(6,"M_{out+}^{ll}/#geq 1 b-tag");
-
-        //2D shapes
-        h2=(TH2F *) mon.addHistogram( new TH2F ("balance_mt_shapes_NRBctrl"+varNames[ivar],";cut index;Selection region;Events",optim_Cuts1_met.size(),0,optim_Cuts1_met.size(),6,0,6) );
-        h2->GetYaxis()->SetBinLabel(1,"M_{in}^{ll}/=0 b-tags");
-        h2->GetYaxis()->SetBinLabel(2,"M_{out}^{ll}/=0 b-tags");
-        h2->GetYaxis()->SetBinLabel(3,"M_{out+}^{ll}/=0 b-tags");
-        h2->GetYaxis()->SetBinLabel(4,"M_{in}^{ll}/#geq 1 b-tag");
-        h2->GetYaxis()->SetBinLabel(5,"M_{out}^{ll}/#geq 1 b-tag");
-        h2->GetYaxis()->SetBinLabel(6,"M_{out+}^{ll}/#geq 1 b-tag");
-
-        h2=(TH2F *) mon.addHistogram( new TH2F ("dphiLL_mt_shapes_NRBctrl"+varNames[ivar],";cut index;Selection region;Events",optim_Cuts1_met.size(),0,optim_Cuts1_met.size(),6,0,6) );
-        h2->GetYaxis()->SetBinLabel(1,"M_{in}^{ll}/=0 b-tags");
-        h2->GetYaxis()->SetBinLabel(2,"M_{out}^{ll}/=0 b-tags");
-        h2->GetYaxis()->SetBinLabel(3,"M_{out+}^{ll}/=0 b-tags");
-        h2->GetYaxis()->SetBinLabel(4,"M_{in}^{ll}/#geq 1 b-tag");
-        h2->GetYaxis()->SetBinLabel(5,"M_{out}^{ll}/#geq 1 b-tag");
-        h2->GetYaxis()->SetBinLabel(6,"M_{out+}^{ll}/#geq 1 b-tag");
-
-        h2=(TH2F *) mon.addHistogram( new TH2F ("coslZ_mt_shapes_NRBctrl"+varNames[ivar],";cut index;Selection region;Events",optim_Cuts1_met.size(),0,optim_Cuts1_met.size(),6,0,6) );
-        h2->GetYaxis()->SetBinLabel(1,"M_{in}^{ll}/=0 b-tags");
-        h2->GetYaxis()->SetBinLabel(2,"M_{out}^{ll}/=0 b-tags");
-        h2->GetYaxis()->SetBinLabel(3,"M_{out+}^{ll}/=0 b-tags");
-        h2->GetYaxis()->SetBinLabel(4,"M_{in}^{ll}/#geq 1 b-tag");
-        h2->GetYaxis()->SetBinLabel(5,"M_{out}^{ll}/#geq 1 b-tag");
-        h2->GetYaxis()->SetBinLabel(6,"M_{out+}^{ll}/#geq 1 b-tag");
-
-        h2=(TH2F *) mon.addHistogram( new TH2F ("dphi_shapes_NRBctrl"+varNames[ivar],";cut index;Selection region;Events",optim_Cuts1_met.size(),0,optim_Cuts1_met.size(),6,0,6) );
-        h2->GetYaxis()->SetBinLabel(1,"M_{in}^{ll}/=0 b-tags");
-        h2->GetYaxis()->SetBinLabel(2,"M_{out}^{ll}/=0 b-tags");
-        h2->GetYaxis()->SetBinLabel(3,"M_{out+}^{ll}/=0 b-tags");
-        h2->GetYaxis()->SetBinLabel(4,"M_{in}^{ll}/#geq 1 b-tag");
-        h2->GetYaxis()->SetBinLabel(5,"M_{out}^{ll}/#geq 1 b-tag");
-        h2->GetYaxis()->SetBinLabel(6,"M_{out+}^{ll}/#geq 1 b-tag");
-
-        h2=(TH2F *) mon.addHistogram( new TH2F ("met_shapes_NRBctrl"+varNames[ivar],";cut index;Selection region;Events",optim_Cuts1_met.size(),0,optim_Cuts1_met.size(),6,0,6) );
-        h2->GetYaxis()->SetBinLabel(1,"M_{in}^{ll}/=0 b-tags");
-        h2->GetYaxis()->SetBinLabel(2,"M_{out}^{ll}/=0 b-tags");
-        h2->GetYaxis()->SetBinLabel(3,"M_{out+}^{ll}/=0 b-tags");
-        h2->GetYaxis()->SetBinLabel(4,"M_{in}^{ll}/#geq 1 b-tag");
-        h2->GetYaxis()->SetBinLabel(5,"M_{out}^{ll}/#geq 1 b-tag");
-        h2->GetYaxis()->SetBinLabel(6,"M_{out+}^{ll}/#geq 1 b-tag");
-
-        h2=(TH2F *) mon.addHistogram( new TH2F ("met_rebin_shapes_NRBctrl"+varNames[ivar],";cut index;Selection region;Events",optim_Cuts1_met.size(),0,optim_Cuts1_met.size(),6,0,6) );
-        h2->GetYaxis()->SetBinLabel(1,"M_{in}^{ll}/=0 b-tags");
-        h2->GetYaxis()->SetBinLabel(2,"M_{out}^{ll}/=0 b-tags");
-        h2->GetYaxis()->SetBinLabel(3,"M_{out+}^{ll}/=0 b-tags");
-        h2->GetYaxis()->SetBinLabel(4,"M_{in}^{ll}/#geq 1 b-tag");
-        h2->GetYaxis()->SetBinLabel(5,"M_{out}^{ll}/#geq 1 b-tag");
-        h2->GetYaxis()->SetBinLabel(6,"M_{out+}^{ll}/#geq 1 b-tag");
-
-        h2=(TH2F *) mon.addHistogram( new TH2F ("zpt_shapes_NRBctrl"+varNames[ivar],";cut index;Selection region;Events",optim_Cuts1_met.size(),0,optim_Cuts1_met.size(),6,0,6) );
-        h2->GetYaxis()->SetBinLabel(1,"M_{in}^{ll}/=0 b-tags");
-        h2->GetYaxis()->SetBinLabel(2,"M_{out}^{ll}/=0 b-tags");
-        h2->GetYaxis()->SetBinLabel(3,"M_{out+}^{ll}/=0 b-tags");
-        h2->GetYaxis()->SetBinLabel(4,"M_{in}^{ll}/#geq 1 b-tag");
-        h2->GetYaxis()->SetBinLabel(5,"M_{out}^{ll}/#geq 1 b-tag");
-        h2->GetYaxis()->SetBinLabel(6,"M_{out+}^{ll}/#geq 1 b-tag");
-
-        h2=(TH2F *) mon.addHistogram( new TH2F ("zpt_rebin_shapes_NRBctrl"+varNames[ivar],";cut index;Selection region;Events",optim_Cuts1_met.size(),0,optim_Cuts1_met.size(),6,0,6) );
-        h2->GetYaxis()->SetBinLabel(1,"M_{in}^{ll}/=0 b-tags");
-        h2->GetYaxis()->SetBinLabel(2,"M_{out}^{ll}/=0 b-tags");
-        h2->GetYaxis()->SetBinLabel(3,"M_{out+}^{ll}/=0 b-tags");
-        h2->GetYaxis()->SetBinLabel(4,"M_{in}^{ll}/#geq 1 b-tag");
-        h2->GetYaxis()->SetBinLabel(5,"M_{out}^{ll}/#geq 1 b-tag");
-        h2->GetYaxis()->SetBinLabel(6,"M_{out+}^{ll}/#geq 1 b-tag");
     }
 
 
@@ -1306,7 +1207,6 @@ int main(int argc, char* argv[])
                             mon.fillHisto("nvtx_dy"     ,   tags, ev.nvtx,      weight);
                             mon.fillHisto("nvtx_dy_rebin"     ,   tags, ev.nvtx,      weight);
                             mon.fillHisto("met_met_phi_dy",   tags,zvvs[0].phi(),weight);
-                            mon.fillHisto("npfjets_dy",              tags, nAJetsGood30,weight);
 
                             if(passDphijmet && passLMetVeto) {
                                 //RJ, Data-Driven DY sample
