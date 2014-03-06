@@ -170,6 +170,12 @@ int main(int argc, char* argv[])
     mon.addHistogram( new TH1F( "nvtx_dy",";Vertices;Events",50,0,50) );
     mon.addHistogram( new TH1F( "nvtx_dy_rebin",";Vertices;Events",28,VTXaxis) );
 
+
+    TH1F *h=(TH1F*) mon.addHistogram( new TH1F ("eventflow", ";;Events", 12,0,12) );
+    h->GetXaxis()->SetBinLabel(1,"Trigger");
+    h->GetXaxis()->SetBinLabel(2,"#geq 2 leptons");
+    h->GetXaxis()->SetBinLabel(3,"#geq 2 iso leptons");
+
     //for MC normalization (to 1/pb)
     TH1F* Hcutflow  = (TH1F*) mon.addHistogram(  new TH1F ("cutflow"    , "cutflow"    ,6,0,6) ) ;
 
@@ -216,7 +222,7 @@ int main(int argc, char* argv[])
     mon.addHistogram( new TH1F( "CoslepZ_CS",";cos(#theta*(l,Z));Events", 80,-1.,1.) );
 
 
-    TH1F* h = (TH1F*) mon.addHistogram( new TH1F( "nleptons", ";Lepton multiplicity;Events", 3,2,4) );
+    h = (TH1F*) mon.addHistogram( new TH1F( "nleptons", ";Lepton multiplicity;Events", 3,2,4) );
     for(int ibin=1; ibin<=h->GetXaxis()->GetNbins(); ibin++) {
         TString label("");
         if(ibin==h->GetXaxis()->GetNbins()) label +="#geq";
@@ -354,6 +360,23 @@ int main(int argc, char* argv[])
     const int nBinMVA = 11;
     double xbins[nBinMVA+1] = {0, 250, 300, 350, 400, 450, 500, 550, 600, 700, 800, 1200};
 
+    
+    // non-resonant background control
+    std::vector<TString> allshapesVars;
+    allshapesVars.push_back("redMet_shapes");
+    allshapesVars.push_back("redMet_rebin_shapes");
+    allshapesVars.push_back("mt_shapes");
+    allshapesVars.push_back("new_mt_shapes");
+    allshapesVars.push_back("dphi_shapes");
+    allshapesVars.push_back("met_shapes");
+    allshapesVars.push_back("met_rebin_shapes");
+    allshapesVars.push_back("zpt_shapes");
+    allshapesVars.push_back("zpt_rebin_shapes");
+    allshapesVars.push_back("balance_mt_shapes");
+    allshapesVars.push_back("dphiLL_mt_shapes");
+    allshapesVars.push_back("coslZ_mt_shapes");
+
+
     for(size_t ivar=0; ivar<nvarsToInclude; ivar++) {
         Hoptim_systs->GetXaxis()->SetBinLabel(ivar+1, varNames[ivar]);
 
@@ -405,21 +428,8 @@ int main(int argc, char* argv[])
         hh->GetYaxis()->SetBinLabel(29,"0<#it{m}_{T}<1200");
 
 
+        
         // non-resonant background control
-        std::vector<TString> allshapesVars;
-        allshapesVars.push_back("redMet_shapes");
-        allshapesVars.push_back("redMet_rebin_shapes");
-        allshapesVars.push_back("mt_shapes");
-        allshapesVars.push_back("new_mt_shapes");
-        allshapesVars.push_back("dphi_shapes");
-        allshapesVars.push_back("met_shapes");
-        allshapesVars.push_back("met_rebin_shapes");
-        allshapesVars.push_back("zpt_shapes");
-        allshapesVars.push_back("zpt_rebin_shapes");
-        allshapesVars.push_back("balance_mt_shapes");
-        allshapesVars.push_back("dphiLL_mt_shapes");
-        allshapesVars.push_back("coslZ_mt_shapes");
-
         for(size_t j=0; j<allshapesVars.size(); j++)
         {
             TH2F *h2=(TH2F *) mon.addHistogram( new TH2F (allshapesVars[j]+"_NRBctrl"+varNames[ivar],";cut index;Selection region;Events",optim_Cuts1_met.size(),0,optim_Cuts1_met.size(),6,0,6) );
@@ -511,9 +521,10 @@ int main(int argc, char* argv[])
 
     LeptonEfficiencySF lsf(use2011Id ? 2011:2012);
 
-    //##############################################
-    //########           EVENT LOOP         ########
-    //##############################################
+    //##############################################################################################################################
+    //################################################           EVENT LOOP         ################################################
+    //##############################################################################################################################
+
     //loop on all the events
     printf("Progressing Bar     :0%%       20%%       40%%       60%%       80%%       100%%\n");
     printf("Scanning the ntuple :");
@@ -1105,6 +1116,15 @@ int main(int argc, char* argv[])
         //#########################################################
 
         if(isMC && use2011Id) weight *= llScaleFactor*llTriggerEfficiency;
+        if(hasTrigger)                 {
+            mon.fillHisto("eventflow",tags,0,weight);
+        }
+        if(hasTrigger && passId)       {
+            mon.fillHisto("eventflow",tags,1,weight);
+        }
+        if(hasTrigger && passIdAndIso) {
+            mon.fillHisto("eventflow",tags,2,weight);
+        } else continue;
 
         //event category
         int eventSubCat  = eventCategoryInst.Get(phys,&aGoodIdJets);
@@ -1117,8 +1137,9 @@ int main(int argc, char* argv[])
             if(tag_subcat=="eq0jets" || tag_subcat=="eq1jets") tags.push_back("lllesq1jets");
         }
 
-	mon.fillHisto("zmass_raw",       tags, zll.mass(), weight);
 
+
+	mon.fillHisto("zmass_raw",       tags, zll.mass(), weight);
 	//
         // Reweighting MC DY samples
 	//
@@ -1128,11 +1149,9 @@ int main(int argc, char* argv[])
             double DY_weights = myZHUtils.get2DWeights(zll.pt(), zll.mass(),"MllvsPt",tag_cat+tag_subcat);
             weight *= DY_weights;
         }
-
 	mon.fillHisto("zmass",       tags, zll.mass(), weight);
 
         // new method estimate Z+jets: ABCD
-        //if(passZmass) {
         if(passZmass && passZpt && pass3dLeptonVeto && passBveto && passLMetVeto) {
             mon.fillHisto("dPhivsMET_ABCD", tags, zvvs[0].pt(), dphiZllmet, weight);
             if(zvvs[0].pt() > 120  && dphiZllmet > 2.7)  mon.fillHisto("dPhivsMET_A", tags, zvvs[0].pt(), dphiZllmet, weight);
@@ -1443,11 +1462,9 @@ int main(int argc, char* argv[])
                     }
                 }
 
-
-
-            }
-        }
-    }
+            }//all shape variables END
+        }//Systematic variation END 
+    }//Event loop END
 
     printf("\n");
     file->Close();
