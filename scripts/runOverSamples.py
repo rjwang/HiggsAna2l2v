@@ -58,7 +58,8 @@ procList=json.load(jsonFile,encoding='utf-8').items()
 scriptFile=os.path.expandvars('${CMSSW_BASE}/bin/${SCRAM_ARCH}/wrapSubmitLocalRun.sh')
 jobParamsList = params.split(' ')
 
-SCRIPT = open('/tmp/rewang/script_jobs.sh',"w")
+who = commands.getstatusoutput('whoami')[1]
+SCRIPT = open('/tmp/'+who+'/script_jobs.sh',"w")
 
 from CMGTools.HiggsAna2l2v.localPatTuples_cff import fillFromCastor
 
@@ -131,4 +132,4 @@ for proc in procList :
 
 
 SCRIPT.close()
-os.system('mv /tmp/rewang/script_jobs.sh '+queuelog+'/')
+os.system('mv /tmp/'+who+'/script_jobs.sh '+queuelog+'/')

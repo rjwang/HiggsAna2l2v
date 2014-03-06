@@ -58,6 +58,9 @@ params=''
 onlytag='all'
 queuelog=''
 
+who = commands.getstatusoutput('whoami')[1]
+SCRIPT = open('/tmp/'+who+'/SCRIPT_runLocalAnalysisOverSamples.sh',"w")
+
 for o,a in opts:
     if o in("-?", "-h"):
         usage()
@@ -146,9 +149,14 @@ for proc in procList :
             	else :
 			os.system('mkdir -p ' + queuelog)
 			print('\033[33m submit2batch.sh -q'+queue+' -G'+queuelog+'/'+dtag+str(segment)+'.log'+' -R"' + requirementtoBatch + '" -J' + dtag + str(segment) + ' ${CMSSW_BASE}/bin/${SCRAM_ARCH}/wrapLocalAnalysisRun.sh ' + theExecutable + ' ' + cfgfile + '\033[0m')
+			SCRIPT.writelines('submit2batch.sh -q'+queue+' -G'+queuelog+'/'+dtag+str(segment)+'.log'+' -R"' + requirementtoBatch + '" -J' + dtag + str(segment) + ' ${CMSSW_BASE}/bin/${SCRAM_ARCH}/wrapLocalAnalysisRun.sh ' + theExecutable + ' ' + cfgfile + '\n\n')
 			#sys.exit(0)
 			os.system('submit2batch.sh -q'+queue+' -G'+queuelog+'/'+dtag+str(segment)+'.log'+' -R"' + requirementtoBatch + '" -J' + dtag + str(segment) + ' ${CMSSW_BASE}/bin/${SCRAM_ARCH}/wrapLocalAnalysisRun.sh ' + theExecutable + ' ' + cfgfile)
     
+
+SCRIPT.close()
+os.system('mv /tmp/'+who+'/SCRIPT_runLocalAnalysisOverSamples.sh '+queuelog+'/')
+
 #run plotter over results
 #if(not subtoBatch) :
 #    os.system('mkdir -p ' + outdir + '/plots')
