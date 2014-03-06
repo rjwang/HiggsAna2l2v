@@ -47,8 +47,11 @@ ZHUtils::ZHUtils(const edm::ParameterSet &runProcess)
                     if(h!=0) iWgtsH[key] = h;
                 } else if(wgtName=="MllvsPt") {
                     TH2F *h = (TH2F *) fwgt->Get(key);
-		    h->SetDirectory(0); //THIS IS IMPORTANT FOR TH1 Weight File!!!
-                    if(h!=0) {iWgts2DH[key] = h; cout << "Saving hists." << endl;}
+                    h->SetDirectory(0); //THIS IS IMPORTANT FOR TH1 Weight File!!!
+                    if(h!=0) {
+                        iWgts2DH[key] = h;
+                        cout << "Saving hists." << endl;
+                    }
                 }
             }
             wgtsH_[wgtName]=iWgtsH;
@@ -94,11 +97,10 @@ double ZHUtils::Collins_Soper(const LorentzVector& lepton1, const LorentzVector&
     }
 
     return cos_theta_CS;
-
 }
 
 
-float ZHUtils::weightNLOEWKsignal(float pt)
+float ZHUtils::weightNLOEWKzh(float pt)
 {
     if(pt < 50) return 1;
     return 0.94-(0.2-0.068)/400.*(pt-50.);
@@ -115,6 +117,101 @@ float ZHUtils::weightNLOEWKwz(float pt)
 {
     if(pt < 50) return 1;
     return 1.+(-0.037*pt+1.9)/100.;
+}
+
+
+
+double ZHUtils::GetNLOZHWeight(const PhysicsEvent_t& phys)
+{
+    double weight = 1.0;
+
+    double pt_dilep = (phys.genleptons[0]+phys.genleptons[1]).pt();
+    weight = weightNLOEWKzh(pt_dilep);
+    return weight;
+}
+
+
+
+double ZHUtils::GetNLOZZWeight(const PhysicsEvent_t& phys)
+{
+    double weight = 1.0;
+    double pt_dilep = (phys.genleptons[0]+phys.genleptons[1]).pt();
+    double pt_zvv = (phys.genneutrinos[0]+phys.genneutrinos[1]).pt();
+    double trailing_pt = pt_dilep < pt_zvv ? pt_dilep : pt_zvv;
+    weight = weightNLOEWKzz(trailing_pt);
+    return weight;
+}
+
+
+double ZHUtils::GetNLOWZWeight(const PhysicsEvent_t& phys)
+{
+    double weight = 1.0;
+    int ngenleps = phys.genleptons.size();
+    int Nneutrinos = phys.genneutrinos.size();
+    if(ngenleps==3 && Nneutrinos==1) {
+        int id_lep0 = fabs(phys.genleptons[0].id);
+        int id_lep1 = fabs(phys.genleptons[1].id);
+        int id_lep2 = fabs(phys.genleptons[2].id);
+        int id_Lep0 = phys.genleptons[0].id;
+        int id_Lep1 = phys.genleptons[1].id;
+        int id_Lep2 = phys.genleptons[2].id;
+        bool hassameids = (id_lep0==id_lep1)&&(id_lep1==id_lep2);
+
+        double pt_zll(-1.);
+        double pt_wlv(-1);
+        if(!hassameids) {
+            if(id_lep0==id_lep1) {
+                pt_zll = (phys.genleptons[0]+phys.genleptons[1]).pt();
+                pt_wlv = (phys.genleptons[2]+phys.genneutrinos[0]).pt();
+            } else if(id_lep0==id_lep2) {
+                pt_zll = (phys.genleptons[0]+phys.genleptons[2]).pt();
+                pt_wlv = (phys.genleptons[1]+phys.genneutrinos[0]).pt();
+            } else if(id_lep1==id_lep2) {
+                pt_zll = (phys.genleptons[1]+phys.genleptons[2]).pt();
+                pt_wlv = (phys.genleptons[0]+phys.genneutrinos[0]).pt();
+            }
+        } else { // if 3 leptons has same ids
+
+            //find the one different lepton
+            int sum_lepid = id_Lep0+id_Lep1+id_Lep2;
+            if(id_Lep0 == -sum_lepid) {
+                double mass1 = fabs((phys.genleptons[0]+phys.genleptons[1]).mass()-91.);
+                double mass2 = fabs((phys.genleptons[0]+phys.genleptons[2]).mass()-91.);
+                if(mass1 < mass2) {
+                    pt_zll = (phys.genleptons[0]+phys.genleptons[1]).pt();
+                    pt_wlv = (phys.genleptons[2]+phys.genneutrinos[0]).pt();
+                } else {
+                    pt_zll = (phys.genleptons[0]+phys.genleptons[2]).pt();
+                    pt_wlv = (phys.genleptons[1]+phys.genneutrinos[0]).pt();
+                }
+            } else if(id_Lep1 == -sum_lepid) {
+                double mass1 = fabs((phys.genleptons[1]+phys.genleptons[0]).mass()-91.);
+                double mass2 = fabs((phys.genleptons[1]+phys.genleptons[2]).mass()-91.);
+                if(mass1 < mass2) {
+                    pt_zll = (phys.genleptons[1]+phys.genleptons[0]).pt();
+                    pt_wlv = (phys.genleptons[2]+phys.genneutrinos[0]).pt();
+                } else {
+                    pt_zll = (phys.genleptons[1]+phys.genleptons[2]).pt();
+                    pt_wlv = (phys.genleptons[0]+phys.genneutrinos[0]).pt();
+                }
+            } else if(id_Lep2 == -sum_lepid) {
+                double mass1 = fabs((phys.genleptons[2]+phys.genleptons[0]).mass()-91.);
+                double mass2 = fabs((phys.genleptons[2]+phys.genleptons[1]).mass()-91.);
+                if(mass1 < mass2) {
+                    pt_zll = (phys.genleptons[2]+phys.genleptons[0]).pt();
+                    pt_wlv = (phys.genleptons[1]+phys.genneutrinos[0]).pt();
+                } else {
+                    pt_zll = (phys.genleptons[2]+phys.genleptons[1]).pt();
+                    pt_wlv = (phys.genleptons[0]+phys.genneutrinos[0]).pt();
+                }
+            }
+        }//if 3 leptons has same ids
+
+        double trailing_pt = pt_zll < pt_wlv ? pt_zll : pt_wlv;
+        weight = weightNLOEWKwz(trailing_pt);
+    } //ngenleps==3 && Nneutrinos==1
+
+    return weight;
 }
 
 

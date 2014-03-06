@@ -28,6 +28,8 @@
 #include "TVector2.h"
 #include "FWCore/ParameterSet/interface/ParameterSet.h"
 
+#include "CMGTools/HiggsAna2l2v/interface/ZZ2l2nuPhysicsEvent.h"
+
 typedef ROOT::Math::LorentzVector<ROOT::Math::PxPyPzE4D<double> > LorentzVector;
 typedef std::vector<LorentzVector> LorentzVectorCollection;
 
@@ -39,11 +41,16 @@ class ZHUtils
 
   ZHUtils(const edm::ParameterSet &runProcess);
   double Collins_Soper(const LorentzVector& lepton1, const LorentzVector& lepton2); 
-  float weightNLOEWKsignal(float pt);
+  float weightNLOEWKzh(float pt);
   float weightNLOEWKzz(float pt);
   float weightNLOEWKwz(float pt);
   //float weightNLOEWKwplusz(float pt);
   //float weightNLOEWKwminuz(float pt); 
+
+  double GetNLOZHWeight(const PhysicsEvent_t& phys);
+  double GetNLOZZWeight(const PhysicsEvent_t& phys);
+  double GetNLOWZWeight(const PhysicsEvent_t& phys);
+
 
   //void ZHEventHandler(const edm::ParameterSet &runProcess);
   std::map<TString,float> getWeights(double ValtoWeight, TString wgtName);

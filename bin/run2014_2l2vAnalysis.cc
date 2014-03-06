@@ -92,6 +92,10 @@ int main(int argc, char* argv[])
     bool isSingleElePD(!isMC && url.Contains("SingleEle"));
     bool isMC_ZZ  = isMC && ( string(url.Data()).find("TeV_ZZ")  != string::npos);
     bool isMC_WZ  = isMC && ( string(url.Data()).find("TeV_WZ")  != string::npos);
+    bool isMC_ZH  = isMC && ( string(url.Data()).find("TeV_ZH")  != string::npos);
+    bool isMC_HZZd= isMC && ( string(url.Data()).find("TeV_HZZd")  != string::npos);
+    bool isMC_DY  = isMC && ( (string(url.Data()).find("TeV_DYJetsToLL")!= string::npos)
+			|| (string(url.Data()).find("TeV_ZG")!= string::npos) );
 
     // print out event information
     TString outTxtUrl_full= outUrl + "/" + outFileUrl + "_FullList.txt";
@@ -621,121 +625,20 @@ int main(int argc, char* argv[])
         Hcutflow->Fill(4,weight*TotalWeight_plus);
 
 
-        //#################################
-        //######## EWK Correction  ########
-        //#################################
-        bool isZH(false);
-        bool isWZ(false);
-        bool isZZ(false);
-        bool isZjets(false);
-        bool isMC_HZZd(false);
-        if(isMC) { // need to put this an external function
-            TString input_File = url.Data();
-            if(input_File.Contains("TeV_ZH")) isZH=true;
-            if(input_File.Contains("TeV_WZ")) isWZ=true;
-            if(input_File.Contains("TeV_ZZ")) isZZ=true;
-            if(input_File.Contains("TeV_DYJetsToLL") || input_File.Contains("TeV_ZG")) isZjets=true;
-	    if(input_File.Contains("TeV_HZZd")) isMC_HZZd=true;
 
 
-            if(isZH) {
-                double pt_zll = (phys.genleptons[0]+phys.genleptons[1]).pt();
-                float ewk_nloweightsZH = myZHUtils.weightNLOEWKsignal(pt_zll);
-                //mon.fillHisto("v_pt",tags,pt_zll,weight);
-                weight *= ewk_nloweightsZH;
-                //mon.fillHisto("v_pt_ewkcorr",tags,pt_zll,weight);
-            }
+
+	if(isMC_HZZd){
+	    double pt_vv = (phys.genneutrinos[0]+phys.genneutrinos[1]).pt();
+	    mon.fillHisto("Zdpt",tags, pt_vv, weight);	
+	}
 
 
-	    if(isMC_HZZd){
-	     	double pt_vv = (phys.genneutrinos[0]+phys.genneutrinos[1]).pt();
-	  	mon.fillHisto("Zdpt",tags, pt_vv, weight);	
-	    }
+	// ewk correction for diboson processes
+	if(isMC_ZH) weight *= myZHUtils.GetNLOZHWeight(phys);
+	if(isMC_ZZ) weight *= myZHUtils.GetNLOZZWeight(phys);
+        if(isMC_WZ) weight *= myZHUtils.GetNLOWZWeight(phys);
 
-            if(isZZ) {
-                double pt_zll = (phys.genleptons[0]+phys.genleptons[1]).pt();
-                double pt_zvv = (phys.genneutrinos[0]+phys.genneutrinos[1]).pt();
-                double trailing_zzpt = pt_zvv;
-                if(pt_zll<pt_zvv) trailing_zzpt = pt_zll;
-                double ewk_nloweightsZZ = myZHUtils.weightNLOEWKzz(trailing_zzpt);
-                //mon.fillHisto("v_pt",tags,trailing_zzpt,weight);
-                weight *= ewk_nloweightsZZ;
-                //fprintf(outTxtFile,"ZZ:%f \n",ewk_nloweightsZZ);
-                //mon.fillHisto("v_pt_ewkcorr",tags,trailing_zzpt,weight);
-            }
-
-            if(isWZ) {
-                int ngenleps = phys.genleptons.size();
-                int Nneutrinos = phys.genneutrinos.size();
-                if(ngenleps==3 && Nneutrinos==1) {
-                    int id_lep0 = fabs(phys.genleptons[0].id);
-                    int id_lep1 = fabs(phys.genleptons[1].id);
-                    int id_lep2 = fabs(phys.genleptons[2].id);
-                    int id_Lep0 = phys.genleptons[0].id;
-                    int id_Lep1 = phys.genleptons[1].id;
-                    int id_Lep2 = phys.genleptons[2].id;
-                    bool hassameids = (id_lep0==id_lep1)&&(id_lep1==id_lep2);
-
-                    double pt_zll(-1.);
-                    double pt_wlv(-1);
-                    if(!hassameids) {
-                        if(id_lep0==id_lep1) {
-                            pt_zll = (phys.genleptons[0]+phys.genleptons[1]).pt();
-                            pt_wlv = (phys.genleptons[2]+phys.genneutrinos[0]).pt();
-                        } else if(id_lep0==id_lep2) {
-                            pt_zll = (phys.genleptons[0]+phys.genleptons[2]).pt();
-                            pt_wlv = (phys.genleptons[1]+phys.genneutrinos[0]).pt();
-                        } else if(id_lep1==id_lep2) {
-                            pt_zll = (phys.genleptons[1]+phys.genleptons[2]).pt();
-                            pt_wlv = (phys.genleptons[0]+phys.genneutrinos[0]).pt();
-                        }
-                    } else { // if 3 leptons has same ids
-
-                        //find the one different lepton
-                        int sum_lepid = id_Lep0+id_Lep1+id_Lep2;
-                        if(id_Lep0 == -sum_lepid) {
-                            double mass1 = fabs((phys.genleptons[0]+phys.genleptons[1]).mass()-91.);
-                            double mass2 = fabs((phys.genleptons[0]+phys.genleptons[2]).mass()-91.);
-                            if(mass1 < mass2) {
-                                pt_zll = (phys.genleptons[0]+phys.genleptons[1]).pt();
-                                pt_wlv = (phys.genleptons[2]+phys.genneutrinos[0]).pt();
-                            } else {
-                                pt_zll = (phys.genleptons[0]+phys.genleptons[2]).pt();
-                                pt_wlv = (phys.genleptons[1]+phys.genneutrinos[0]).pt();
-                            }
-                        } else if(id_Lep1 == -sum_lepid) {
-                            double mass1 = fabs((phys.genleptons[1]+phys.genleptons[0]).mass()-91.);
-                            double mass2 = fabs((phys.genleptons[1]+phys.genleptons[2]).mass()-91.);
-                            if(mass1 < mass2) {
-                                pt_zll = (phys.genleptons[1]+phys.genleptons[0]).pt();
-                                pt_wlv = (phys.genleptons[2]+phys.genneutrinos[0]).pt();
-                            } else {
-                                pt_zll = (phys.genleptons[1]+phys.genleptons[2]).pt();
-                                pt_wlv = (phys.genleptons[0]+phys.genneutrinos[0]).pt();
-                            }
-                        } else if(id_Lep2 == -sum_lepid) {
-                            double mass1 = fabs((phys.genleptons[2]+phys.genleptons[0]).mass()-91.);
-                            double mass2 = fabs((phys.genleptons[2]+phys.genleptons[1]).mass()-91.);
-                            if(mass1 < mass2) {
-                                pt_zll = (phys.genleptons[2]+phys.genleptons[0]).pt();
-                                pt_wlv = (phys.genleptons[1]+phys.genneutrinos[0]).pt();
-                            } else {
-                                pt_zll = (phys.genleptons[2]+phys.genleptons[1]).pt();
-                                pt_wlv = (phys.genleptons[0]+phys.genneutrinos[0]).pt();
-                            }
-                        }
-                    }//if 3 leptons has same ids
-
-                    double trailing_pt = pt_wlv;
-                    if(pt_zll<pt_wlv) trailing_pt = pt_zll;
-                    double ewk_nloweightsWZ = myZHUtils.weightNLOEWKwz(trailing_pt);
-                    //mon.fillHisto("v_pt",tags,trailing_pt,weight);
-                    weight *= ewk_nloweightsWZ;
-                    //mon.fillHisto("v_pt_ewkcorr",tags,trailing_pt,weight);
-
-                } //ngenleps==3 && Nneutrinos==1
-            } //isWZ
-        }
 
 
 
@@ -1145,7 +1048,7 @@ int main(int argc, char* argv[])
 	//
         mon.fillHisto("MllvsPt", tags, zll.pt(), zll.mass(), weight);
 
-        if(isZjets) {
+        if(isMC_DY) {
             double DY_weights = myZHUtils.get2DWeights(zll.pt(), zll.mass(),"MllvsPt",tag_cat+tag_subcat);
             weight *= DY_weights;
         }
