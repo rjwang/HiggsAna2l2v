@@ -231,7 +231,7 @@ void GetInitialNumberOfEvents(JSONWrapper::Object& Root, std::string RootDir, Na
          double PUUpnorm       =  1; if(tmphist->GetBinContent(5)>0)PUUpnorm       = tmphist->GetBinContent(3) / tmphist->GetBinContent(5);
          sampleInfo.PURescale_down = PUDownnorm;
          sampleInfo.PURescale_up   = PUUpnorm;
-         if(isMC)printf("\033[35m PU Renormalization %25s Shift Down --> %6.2f  Central = %6.2f  Up Down --> %6.2f\n \033[0m",(Samples[j])["dtag"].toString().c_str(),PUDownnorm, PUCentralnnorm, PUUpnorm);	
+         if(isMC)printf("\033[35m PU Renormalization %25s Shift Down --> %6.2f  Central = %6.2f  Up Down --> %6.2f \033[0m \n",(Samples[j])["dtag"].toString().c_str(),PUDownnorm, PUCentralnnorm, PUUpnorm);	
 
 
          double cnorm = 1.0;
@@ -771,7 +771,7 @@ void Draw1DHistogram(JSONWrapper::Object& Root, std::string RootDir, NameAndType
       fixExtremities(hist,true,true);
       hist->SetTitle("");
       hist->SetStats(kFALSE);
-      hist->SetMinimum(2e-3);//2e-2);//5e-1);//2e-2);
+      hist->SetMinimum(2e-2);//5e-1);//2e-2);
       //hist->SetMaximum(1E6);
       hist->SetMaximum(hist->GetBinContent(hist->GetMaximumBin())*1.10);
       TString tSaveName = hist->GetName();
@@ -940,7 +940,8 @@ void Draw1DHistogram(JSONWrapper::Object& Root, std::string RootDir, NameAndType
        pave->Draw();
      }
    
-   TPaveText* T = new TPaveText(0.1,0.995,0.84,0.95, "NDC");
+   //TPaveText* T = new TPaveText(0.1,0.995,0.84,0.95, "NDC");
+   TPaveText* T = new TPaveText(0.1,0.995,0.90,0.95, "NDC");
    T->SetFillColor(0);
    T->SetFillStyle(0);  T->SetLineColor(0);
    T->SetTextAlign(22);
@@ -949,7 +950,8 @@ void Draw1DHistogram(JSONWrapper::Object& Root, std::string RootDir, NameAndType
 //   else      sprintf(Buffer, "CMS preliminary, ZH#rightarrow ll+invisible, #sqrt{s}=%.1f TeV, #scale[0.5]{#int} L=%.1f fb^{-1}", iEcm, iLumi/1000);
    if(isSim) sprintf(Buffer, "CMS simulation, #it{ZH #rightarrow l^{+}l^{-}+#slash{E}_{T}}, #sqrt{s}=%.1f TeV, L=%.1f fb^{-1}", iEcm, iLumi/1000);
    //else      sprintf(Buffer, "CMS Preliminary, #it{ZH #rightarrow l^{+}l^{-}+#slash{E}_{T}}, #sqrt{s}=%.1f TeV, L=%.1f fb^{-1}", iEcm, iLumi/1000);
-   else      sprintf(Buffer, "CMS Preliminary, #it{H #rightarrow ZZ_{d} #rightarrow l^{+}l^{-}+#slash{E}_{T}}, #sqrt{s}=%.1f TeV, L=%.1f fb^{-1}", iEcm, iLumi/1000);
+   //else      sprintf(Buffer, "CMS Preliminary, #it{H #rightarrow ZZ_{d} #rightarrow l^{+}l^{-}+#slash{E}_{T}}, #sqrt{s}=%.1f TeV, L=%.1f fb^{-1}", iEcm, iLumi/1000);
+   else      sprintf(Buffer, "CMS Preliminary, #sqrt{s}=%.1f TeV, L=%.1f fb^{-1}", iEcm, iLumi/1000);
 
    T->AddText(Buffer);
    T->Draw("same");
@@ -963,53 +965,39 @@ void Draw1DHistogram(JSONWrapper::Object& Root, std::string RootDir, NameAndType
    T2->SetTextAlign(22);
    char Buffer2[1024];
    TString ssName = SaveName;
-   if(SaveName.find("eeeq0jets") != string::npos)	{sprintf(Buffer2,"#it{ee channel, 0 jets}"); T2->AddText(Buffer2); T2->Draw("same");}
-   if(SaveName.find("eeeq1jets") != string::npos)       {sprintf(Buffer2,"#it{ee channel, 1 jets}"); T2->AddText(Buffer2); T2->Draw("same");}
-   if(SaveName.find("eelesq1jets") != string::npos)	{sprintf(Buffer2,"#it{ee channel, 0,1 jets}"); T2->AddText(Buffer2); T2->Draw("same");}
-   if(SaveName.find("eegeq2jets") != string::npos)      {sprintf(Buffer2,"#it{ee channel, #geq 2 jets}"); T2->AddText(Buffer2); T2->Draw("same");}
-   if(SaveName.find("mumueq0jets") != string::npos) 	{sprintf(Buffer2,"#it{#mu#mu channel, 0 jets}"); T2->AddText(Buffer2); T2->Draw("same");}
-   if(SaveName.find("mumueq1jets") != string::npos)     {sprintf(Buffer2,"#it{#mu#mu channel, 1 jets}"); T2->AddText(Buffer2); T2->Draw("same");}
-   if(SaveName.find("mumulesq1jets") != string::npos)	{sprintf(Buffer2,"#it{#mu#mu channel, 0,1 jets}"); T2->AddText(Buffer2); T2->Draw("same");}
-   if(SaveName.find("mumugeq2jets") != string::npos)    {sprintf(Buffer2,"#it{#mu#mu channel, #geq 2 jets}"); T2->AddText(Buffer2); T2->Draw("same");}
-   if(SaveName.find("emueq0jets") != string::npos)      {sprintf(Buffer2,"#it{e#mu channel, 0 jets}"); T2->AddText(Buffer2); T2->Draw("same");}
-   if(SaveName.find("emueq1jets") != string::npos)      {sprintf(Buffer2,"#it{e#mu channel, 1 jets}"); T2->AddText(Buffer2); T2->Draw("same");}
-   if(SaveName.find("emulesq1jets") != string::npos)    {sprintf(Buffer2,"#it{e#mu channel, 0,1 jets}"); T2->AddText(Buffer2); T2->Draw("same");}
-   if(SaveName.find("emugeq2jets") != string::npos)     {sprintf(Buffer2,"#it{e#mu channel, #geq 2 jets}"); T2->AddText(Buffer2); T2->Draw("same");}
-   if(SaveName.find("lleq0jets") != string::npos)   	{sprintf(Buffer2,"#it{ee,#mu#mu channel, 0 jets}"); T2->AddText(Buffer2); T2->Draw("same");}
-   if(SaveName.find("lleq1jets") != string::npos)       {sprintf(Buffer2,"#it{ee,#mu#mu channel, 1 jets}"); T2->AddText(Buffer2); T2->Draw("same");}
-   if(SaveName.find("lllesq1jets") != string::npos)     {sprintf(Buffer2,"#it{ee,#mu#mu channel, 0,1 jets}"); T2->AddText(Buffer2); T2->Draw("same");}
-   if(SaveName.find("llgeq2jets") != string::npos)      {sprintf(Buffer2,"#it{ee,#mu#mu channel, #geq 2 jets}"); T2->AddText(Buffer2); T2->Draw("same");}
+   if(SaveName.find("eeeq0jets") != string::npos)	{sprintf(Buffer2,"#it{ee, 0 jets channel}"); T2->AddText(Buffer2); T2->Draw("same");}
+   if(SaveName.find("eeeq1jets") != string::npos)       {sprintf(Buffer2,"#it{ee, 1 jets channel}"); T2->AddText(Buffer2); T2->Draw("same");}
+   if(SaveName.find("eelesq1jets") != string::npos)	{sprintf(Buffer2,"#it{ee, #leq 1 jets channel}"); T2->AddText(Buffer2); T2->Draw("same");}
+   if(SaveName.find("eegeq2jets") != string::npos)      {sprintf(Buffer2,"#it{ee, #geq 2 jets channel}"); T2->AddText(Buffer2); T2->Draw("same");}
+   if(SaveName.find("mumueq0jets") != string::npos) 	{sprintf(Buffer2,"#it{#mu#mu, 0 jets channel}"); T2->AddText(Buffer2); T2->Draw("same");}
+   if(SaveName.find("mumueq1jets") != string::npos)     {sprintf(Buffer2,"#it{#mu#mu, 1 jets channel}"); T2->AddText(Buffer2); T2->Draw("same");}
+   if(SaveName.find("mumulesq1jets") != string::npos)	{sprintf(Buffer2,"#it{#mu#mu, #leq 1 jets channel}"); T2->AddText(Buffer2); T2->Draw("same");}
+   if(SaveName.find("mumugeq2jets") != string::npos)    {sprintf(Buffer2,"#it{#mu#mu, #geq 2 jets channel}"); T2->AddText(Buffer2); T2->Draw("same");}
+   if(SaveName.find("emueq0jets") != string::npos)      {sprintf(Buffer2,"#it{e#mu, 0 jets channel}"); T2->AddText(Buffer2); T2->Draw("same");}
+   if(SaveName.find("emueq1jets") != string::npos)      {sprintf(Buffer2,"#it{e#mu, 1 jets channel}"); T2->AddText(Buffer2); T2->Draw("same");}
+   if(SaveName.find("emulesq1jets") != string::npos)    {sprintf(Buffer2,"#it{e#mu, #leq 1 jets channel}"); T2->AddText(Buffer2); T2->Draw("same");}
+   if(SaveName.find("emugeq2jets") != string::npos)     {sprintf(Buffer2,"#it{e#mu, #geq 2 jets channel}"); T2->AddText(Buffer2); T2->Draw("same");}
+   if(SaveName.find("lleq0jets") != string::npos)   	{sprintf(Buffer2,"#it{ee,#mu#mu, 0 jets channel}"); T2->AddText(Buffer2); T2->Draw("same");}
+   if(SaveName.find("lleq1jets") != string::npos)       {sprintf(Buffer2,"#it{ee,#mu#mu, 1 jets channel}"); T2->AddText(Buffer2); T2->Draw("same");}
+   if(SaveName.find("lllesq1jets") != string::npos)     {sprintf(Buffer2,"#it{ee,#mu#mu, #leq 1 jets channel}"); T2->AddText(Buffer2); T2->Draw("same");}
+   if(SaveName.find("llgeq2jets") != string::npos)      {sprintf(Buffer2,"#it{ee,#mu#mu, #geq 2 jets channel}"); T2->AddText(Buffer2); T2->Draw("same");}
 
    if(SaveName.find("ee") != string::npos && SaveName.find("eq0jets") == string::npos 
 	&& SaveName.find("eq1jets") == string::npos && SaveName.find("lesq1jets") == string::npos
-	&& SaveName.find("geq2jets") == string::npos )  {sprintf(Buffer2,"#it{ee channel, #geq 0 jets}"); T2->AddText(Buffer2); T2->Draw("same");}
+	&& SaveName.find("geq2jets") == string::npos )  {sprintf(Buffer2,"#it{ee, #geq 0 jets channel}"); T2->AddText(Buffer2); T2->Draw("same");}
 
    if(SaveName.find("mumu") != string::npos && SaveName.find("eq0jets") == string::npos 
 	&& SaveName.find("eq1jets") == string::npos && SaveName.find("lesq1jets") == string::npos
-	&& SaveName.find("geq2jets") == string::npos )  {sprintf(Buffer2,"#it{#mu#mu channel, #geq 0 jets}"); T2->AddText(Buffer2); T2->Draw("same");}
+	&& SaveName.find("geq2jets") == string::npos )  {sprintf(Buffer2,"#it{#mu#mu, #geq 0 jets channel}"); T2->AddText(Buffer2); T2->Draw("same");}
 
    if(SaveName.find("emu") != string::npos && SaveName.find("eq0jets") == string::npos 
 	&& SaveName.find("eq1jets") == string::npos && SaveName.find("lesq1jets") == string::npos
-	&& SaveName.find("geq2jets") == string::npos )  {sprintf(Buffer2,"#it{e#mu channel, #geq 0 jets}"); T2->AddText(Buffer2); T2->Draw("same");}
+	&& SaveName.find("geq2jets") == string::npos )  {sprintf(Buffer2,"#it{e#mu, #geq 0 jets channel}"); T2->AddText(Buffer2); T2->Draw("same");}
 
    if(SaveName.find("ll") != string::npos && SaveName.find("eq0jets") == string::npos 
 	&& SaveName.find("eq1jets") == string::npos && SaveName.find("lesq1jets") == string::npos
-	&& SaveName.find("geq2jets") == string::npos )  {sprintf(Buffer2,"#it{ee,#mu#mu channel, #geq 0 jets}"); T2->AddText(Buffer2); T2->Draw("same");}
+	&& SaveName.find("geq2jets") == string::npos )  {sprintf(Buffer2,"#it{ee,#mu#mu, #geq 0 jets channel}"); T2->AddText(Buffer2); T2->Draw("same");}
 
-
-/*
-   T2->AddText(Buffer2);
-
-   if(SaveName.find("eeeq0jets") != string::npos || SaveName.find("eeeq1jets") != string::npos || SaveName.find("eelesq1jets") != string::npos || 
-		SaveName.find("mumueq0jets") != string::npos || SaveName.find("mumueq1jets") != string::npos || SaveName.find("mumulesq1jets") != string::npos ||
-		SaveName.find("lleq0jets") != string::npos || SaveName.find("lleq1jets") != string::npos || SaveName.find("lllesq1jets") != string::npos ||
-		SaveName.find("eegeq2jets") != string::npos || SaveName.find("mumugeq2jets") != string::npos ||
-		SaveName.find("emugeq2jets") != string::npos || SaveName.find("llgeq2jets") != string::npos ||
-		SaveName.find("emueq0jets") != string::npos || SaveName.find("emueq1jets") != string::npos || SaveName.find("emulesq1jets") != string::npos )
-   {
-	  	T2->Draw("same");
-   }
-*/
 
    //RJ
    TGraph *leftcut;
@@ -1558,6 +1546,6 @@ int main(int argc, char* argv[]){
    system(("python ${CMSSW_BASE}/src/CMGTools/HiggsAna2l2v/data/html/generateJSONplotterFromList.py -i " + csvFile + " -o "+outDir+"/plotter.json").c_str());
    //system(("rm " + csvFile).c_str());
    system(("cp ${CMSSW_BASE}/src/CMGTools/HiggsAna2l2v/data/html/index.html " + outDir).c_str());
-   printf("You can browse the results using %sindex.html\n",outDir.c_str());
+   printf("\033[33m You can browse the results using %sindex.html \033[0m\n",outDir.c_str());
 }
 

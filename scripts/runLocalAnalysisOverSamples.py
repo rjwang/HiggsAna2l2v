@@ -59,7 +59,10 @@ onlytag='all'
 queuelog=''
 
 who = commands.getstatusoutput('whoami')[1]
-SCRIPT = open('/tmp/'+who+'/SCRIPT_runLocalAnalysisOverSamples.sh',"w")
+SCRIPT = open('/tmp/'+who+'/SCRIPT_Submit2batch.sh',"w")
+SCRIPT_L = open('/tmp/'+who+'/SCRIPT_Local.sh',"w")
+SCRIPT_L.writelines('#!bin/sh \n\n')
+SCRIPT_L.writelines('cd $CMSSW_BASE/src/CMGTools/HiggsAna2l2v/; \n\n')
 
 for o,a in opts:
     if o in("-?", "-h"):
@@ -150,12 +153,17 @@ for proc in procList :
 			os.system('mkdir -p ' + queuelog)
 			print('\033[33m submit2batch.sh -q'+queue+' -G'+queuelog+'/'+dtag+str(segment)+'.log'+' -R"' + requirementtoBatch + '" -J' + dtag + str(segment) + ' ${CMSSW_BASE}/bin/${SCRAM_ARCH}/wrapLocalAnalysisRun.sh ' + theExecutable + ' ' + cfgfile + '\033[0m')
 			SCRIPT.writelines('submit2batch.sh -q'+queue+' -G'+queuelog+'/'+dtag+str(segment)+'.log'+' -R"' + requirementtoBatch + '" -J' + dtag + str(segment) + ' ${CMSSW_BASE}/bin/${SCRAM_ARCH}/wrapLocalAnalysisRun.sh ' + theExecutable + ' ' + cfgfile + '\n\n')
+			SCRIPT_L.writelines(theExecutable + ' ' + cfgfile + ' >& '+queuelog+'/'+dtag+str(segment)+'.log'+' & \n\n')
 			#sys.exit(0)
-			os.system('submit2batch.sh -q'+queue+' -G'+queuelog+'/'+dtag+str(segment)+'.log'+' -R"' + requirementtoBatch + '" -J' + dtag + str(segment) + ' ${CMSSW_BASE}/bin/${SCRAM_ARCH}/wrapLocalAnalysisRun.sh ' + theExecutable + ' ' + cfgfile)
+			#os.system('submit2batch.sh -q'+queue+' -G'+queuelog+'/'+dtag+str(segment)+'.log'+' -R"' + requirementtoBatch + '" -J' + dtag + str(segment) + ' ${CMSSW_BASE}/bin/${SCRAM_ARCH}/wrapLocalAnalysisRun.sh ' + theExecutable + ' ' + cfgfile)
     
 
 SCRIPT.close()
-os.system('mv /tmp/'+who+'/SCRIPT_runLocalAnalysisOverSamples.sh '+queuelog+'/')
+SCRIPT_L.writelines('cd -;')
+SCRIPT_L.close()
+os.system('chmod u+x,g-r,o-r '+'/tmp/'+who+'/SCRIPT_Submit2batch.sh '+'/tmp/'+who+'/SCRIPT_Local.sh ')
+os.system('mv /tmp/'+who+'/SCRIPT_Submit2batch.sh '+queuelog+'/')
+os.system('mv /tmp/'+who+'/SCRIPT_Local.sh '+queuelog+'/')
 
 #run plotter over results
 #if(not subtoBatch) :

@@ -94,6 +94,7 @@ int main(int argc, char* argv[])
     bool isMC_WZ  = isMC && ( string(url.Data()).find("TeV_WZ")  != string::npos);
     bool isMC_ZH  = isMC && ( string(url.Data()).find("TeV_ZH")  != string::npos);
     bool isMC_HZZd= isMC && ( string(url.Data()).find("TeV_HZZd")  != string::npos);
+    bool isV0JetsMC(isMC && (url.Contains("DYJetsToLL_50toInf") || url.Contains("WJets")));
     bool isMC_DY  = isMC && ( (string(url.Data()).find("TeV_DYJetsToLL")!= string::npos)
 			|| (string(url.Data()).find("TeV_ZG")!= string::npos) );
 
@@ -216,9 +217,10 @@ int main(int argc, char* argv[])
 
     double zpt_bins[] = {0., 20., 40., 60., 80., 100., 200., 400., 800.};
     const int n_zpt_bins = sizeof(zpt_bins)/sizeof(double) - 1;
+    mon.addHistogram( new TH1F( "zpt_raw",       ";#it{p}_{T}^{ll} [GeV];Events", 30,0,150) );
     mon.addHistogram( new TH1F( "zpt", 	     ";#it{p}_{T}^{ll} [GeV];Events", 50,0,500) );
     mon.addHistogram( new TH1F( "zpt_rebin", ";#it{p}_{T}^{ll} [GeV];Events", n_zpt_bins, zpt_bins) );
-    mon.addHistogram( new TH1F( "zmass_raw", ";#it{m}_{ll} [GeV];Events", 100,40,250) );
+    mon.addHistogram( new TH1F( "zmass_raw", ";#it{m}_{ll} [GeV];Events", 100,0,300) );
     mon.addHistogram( new TH1F( "zmass",     ";#it{m}_{ll} [GeV];Events", 100,40,250) );
 
     // for HZZd MC truth
@@ -549,6 +551,11 @@ int main(int argc, char* argv[])
             nDuplicates++;
             continue;
         }
+
+        if(isV0JetsMC){
+            if(ev.mc_nup>5) continue;
+        }
+
         PhysicsEvent_t phys=getPhysicsEventFrom(ev);
 
         //event category
@@ -567,9 +574,9 @@ int main(int argc, char* argv[])
         default   :
             continue;
         }
-        //      if(isMC && mctruthmode==1 && !isDYToLL(ev.mccat) && !isZZ2l2nu(ev.mccat) ) continue;
-        if(isMC && mctruthmode==1 && !isDYToLL(ev.mccat) ) continue;
-        if(isMC && mctruthmode==2 && !isDYToTauTau(ev.mccat) ) continue;
+
+        //if(isMC && mctruthmode==1 && !isDYToLL(ev.mccat) ) continue;
+        //if(isMC && mctruthmode==2 && !isDYToTauTau(ev.mccat) ) continue;
 
         //require compatibilitiy of the event with the PD
         bool hasTrigger(false);
@@ -1040,6 +1047,8 @@ int main(int argc, char* argv[])
 
 
 	mon.fillHisto("zmass_raw",       tags, zll.mass(), weight);
+        mon.fillHisto("zpt_raw",	 tags, zll.pt(),   weight);
+
 	//
         // Reweighting MC DY samples
 	//

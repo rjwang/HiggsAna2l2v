@@ -64,8 +64,9 @@ fi
 #<<<<<<< submit2batch.sh
 #bsub -q $QUEUE -R "type==SLC5_64 && pool>30000 && tmp>50000" `echo ${SCRIPT} ${PARAMS}`
 echo -e "\e[0;35m Submitting shell script: bsub -q $QUEUE -o $LOG -R $REQUIREMENT -J $JOBNAME `echo ${SCRIPT} ${PARAMS}` \e[0m"
+######
 bsub -q $QUEUE -o $LOG -R "$REQUIREMENT" -J $JOBNAME `echo ${SCRIPT} ${PARAMS}`
-
+######
 #
 # END
 #
