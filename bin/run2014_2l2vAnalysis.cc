@@ -217,16 +217,23 @@ int main(int argc, char* argv[])
 
     double zpt_bins[] = {0., 20., 40., 60., 80., 100., 200., 400., 800.};
     const int n_zpt_bins = sizeof(zpt_bins)/sizeof(double) - 1;
-    mon.addHistogram( new TH1F( "zpt_raw",       ";#it{p}_{T}^{ll} [GeV];Events", 30,0,150) );
     mon.addHistogram( new TH1F( "zpt", 	     ";#it{p}_{T}^{ll} [GeV];Events", 50,0,500) );
     mon.addHistogram( new TH1F( "zpt_rebin", ";#it{p}_{T}^{ll} [GeV];Events", n_zpt_bins, zpt_bins) );
-    mon.addHistogram( new TH1F( "zmass_raw", ";#it{m}_{ll} [GeV];Events", 100,0,300) );
     mon.addHistogram( new TH1F( "zmass",     ";#it{m}_{ll} [GeV];Events", 100,40,250) );
+
+    mon.addHistogram( new TH1F( "zpt_raw",       ";#it{p}_{T}^{ll} [GeV];Events", 30,0,150) );
+    mon.addHistogram( new TH1F( "zmass_raw", ";#it{m}_{ll} [GeV];Events", 100,0,300) );
+    mon.addHistogram( new TH1F( "met_met_raw",        ";E_{T}^{miss} [GeV];Events", 50,0,150) );
+    mon.addHistogram( new TH2F( "ZptvsMET_raw", ";E_{T}^{miss} [GeV];#it{p}_{T}^{ll} [GeV];Events", 50,0,150, 50,0,150) ); 
+    mon.addHistogram( new TH2F( "DPhi_ZMETvsMET_raw", ";E_{T}^{miss} [GeV];#Delta#phi(Z,E_{T}^{miss});Events", 50,0,150, 50,0,TMath::Pi()) );
+    mon.addHistogram( new TH2F( "mtless_MetTLpvsmt_MetLLp_raw",";#it{m}_{T}(Leading Lepton, E_{T}^{miss}) [GeV];#it{m}_{T}(Trailing Lepton, E_{T}^{miss}) [GeV];Events", 200,0,200,200,0,200) );
+    mon.addHistogram( new TH2F( "METvsmtless_ZMet_raw", ";#it{m}_{T}(Z, E_{T}^{miss}) [GeV];E_{T}^{miss} [GeV];Events", 200,0,200, 50,0,150) );
 
     // for HZZd MC truth
     mon.addHistogram( new TH1F( "Zdpt", ";Z_{d} #it{p}_{T} [GeV];Events", 100,0,100) );
     //Collins Soper Frame
-    mon.addHistogram( new TH1F( "CoslepZ_CS",";cos(#theta*(l,Z));Events", 80,-1.,1.) );
+    mon.addHistogram( new TH1F( "CoslepZ_CS",";cos#theta*_{l,Z};Events", 80,-1.,1.) );
+    mon.addHistogram( new TH1F( "CoslepZd", ";cos#theta_{#nu,Z}; Events", 80,-1.,1.) );
 
 
     h = (TH1F*) mon.addHistogram( new TH1F( "nleptons", ";Lepton multiplicity;Events", 3,2,4) );
@@ -637,6 +644,15 @@ int main(int argc, char* argv[])
 	if(isMC_HZZd){
 	    double pt_vv = (phys.genneutrinos[0]+phys.genneutrinos[1]).pt();
 	    mon.fillHisto("Zdpt",tags, pt_vv, weight);	
+
+	    TVector3 nu1, nu2, Zd;
+	    nu1.SetXYZ(phys.genneutrinos[0].Px(),phys.genneutrinos[0].Py(),phys.genneutrinos[0].Pz());
+	    nu2.SetXYZ(phys.genneutrinos[1].Px(),phys.genneutrinos[1].Py(),phys.genneutrinos[1].Pz());
+	    Zd = nu1+nu2;
+	    double theta_NuZd = nu1.Dot(nu2); 
+	    theta_NuZd /= sqrt(nu1.Dot(nu1));
+	    theta_NuZd /= sqrt(nu2.Dot(nu2));
+	    mon.fillHisto("CoslepZd",tags, theta_NuZd, weight);
 	}
 
 
@@ -980,6 +996,8 @@ int main(int argc, char* argv[])
         //transverse masses
         double aMT=METUtils::transverseMass(zll,zvvs[0],true);
         double aMTmassless=METUtils::transverseMass(zll,zvvs[0],false);
+	double mtless_MetLLp = METUtils::transverseMass(lep1,zvvs[0],false);
+	double mtless_MetTLp = METUtils::transverseMass(lep2,zvvs[0],false);
         double balanceDif=fabs(zvvs[0].pt()-zll.pt())/zll.pt();
         TVector2 dil2(zll.px(),zll.py());
         TVector2 met2(zvvs[0].px(),zvvs[0].py());
@@ -1046,8 +1064,15 @@ int main(int argc, char* argv[])
 
 
 
-	mon.fillHisto("zmass_raw",       tags, zll.mass(), weight);
-        mon.fillHisto("zpt_raw",	 tags, zll.pt(),   weight);
+	mon.fillHisto("zmass_raw"			,tags, zll.mass(), weight);
+        mon.fillHisto("zpt_raw"				,tags, zll.pt(),   weight);
+	mon.fillHisto("met_met_raw"			,tags, zvvs[0].pt(), weight);
+	mon.fillHisto("ZptvsMET_raw"			,tags, zvvs[0].pt(), zll.pt(),   weight);
+        mon.fillHisto("DPhi_ZMETvsMET_raw"		,tags, zvvs[0].pt(), dphiZllmet, zvvs[0].pt(), weight);
+	mon.fillHisto("mtless_MetTLpvsmt_MetLLp_raw"	,tags, mtless_MetLLp, mtless_MetTLp, weight);
+        mon.fillHisto("METvsmtless_ZMet_raw"		,tags,aMTmassless,zvvs[0].pt(),weight);
+
+
 
 	//
         // Reweighting MC DY samples
@@ -1160,7 +1185,7 @@ int main(int argc, char* argv[])
                                                                                     passRedMet,passBalanceCut,passMTcut,evCat.Data());
 
                                                                             if(aJets.size()>0 && zvvs.size()>0) {
-                                                                                fprintf(outTxtFile_final,"| %f | %f | %f | %f",aJets[0].pt(),aJets[0].eta(), aJets[0].btag2, zvvs[0].pt());
+                                                                                fprintf(outTxtFile_final,"| %f | %f | %f | %f",aJets[0].pt(),aJets[0].eta(), aJets[0].btag6, zvvs[0].pt());
                                                                             }
                                                                             fprintf(outTxtFile_final,"\n");
                                                     */
@@ -1234,9 +1259,9 @@ int main(int argc, char* argv[])
                 if(varJets[ijet].pt()>30)localNAJetsGood30++;
 
                 if(varJets[ijet].pt()>20 /*&& fabs(varJets[ijet].eta())<2.5*/) {
-                    if(ivar==11)      passLocalBveto &= (varJets[ijet].btag2<0.250);
-                    else if(ivar==12) passLocalBveto &= (varJets[ijet].btag2<0.240);
-                    else              passLocalBveto &= (varJets[ijet].btag2<0.244);
+                    if(ivar==11)      passLocalBveto &= (varJets[ijet].btag6<0.250);
+                    else if(ivar==12) passLocalBveto &= (varJets[ijet].btag6<0.240);
+                    else              passLocalBveto &= (varJets[ijet].btag6<0.244);
                 }
             }
             //passLocalJetveto=(localNAJetsGood30==0);

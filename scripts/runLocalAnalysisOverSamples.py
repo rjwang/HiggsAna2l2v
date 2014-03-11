@@ -58,6 +58,7 @@ params=''
 onlytag='all'
 queuelog=''
 
+count=0
 who = commands.getstatusoutput('whoami')[1]
 SCRIPT = open('/tmp/'+who+'/SCRIPT_Submit2batch.sh',"w")
 SCRIPT_L = open('/tmp/'+who+'/SCRIPT_Local.sh',"w")
@@ -154,6 +155,8 @@ for proc in procList :
 			print('\033[33m submit2batch.sh -q'+queue+' -G'+queuelog+'/'+dtag+str(segment)+'.log'+' -R"' + requirementtoBatch + '" -J' + dtag + str(segment) + ' ${CMSSW_BASE}/bin/${SCRAM_ARCH}/wrapLocalAnalysisRun.sh ' + theExecutable + ' ' + cfgfile + '\033[0m')
 			SCRIPT.writelines('submit2batch.sh -q'+queue+' -G'+queuelog+'/'+dtag+str(segment)+'.log'+' -R"' + requirementtoBatch + '" -J' + dtag + str(segment) + ' ${CMSSW_BASE}/bin/${SCRAM_ARCH}/wrapLocalAnalysisRun.sh ' + theExecutable + ' ' + cfgfile + '\n\n')
 			SCRIPT_L.writelines(theExecutable + ' ' + cfgfile + ' >& '+queuelog+'/'+dtag+str(segment)+'.log'+' & \n\n')
+			count = count + 1
+			if count % 10 == 0: SCRIPT_L.writelines('sleep 25\n\n')
 			#sys.exit(0)
 			#os.system('submit2batch.sh -q'+queue+' -G'+queuelog+'/'+dtag+str(segment)+'.log'+' -R"' + requirementtoBatch + '" -J' + dtag + str(segment) + ' ${CMSSW_BASE}/bin/${SCRAM_ARCH}/wrapLocalAnalysisRun.sh ' + theExecutable + ' ' + cfgfile)
     
