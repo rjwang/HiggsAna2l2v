@@ -73,6 +73,7 @@ struct stSampleInfo{ double PURescale_up; double PURescale_down; double initialN
 std::unordered_map<string, stSampleInfo> sampleInfoMap;
 std::unordered_map<string, bool> FileExist;
 TString getChannelName(std::string SaveName);
+void savePath(TCanvas* c,std::string outDir,std::string SaveName,std::string plotExt);
 
 struct NameAndType{
    std::string name;
@@ -507,35 +508,9 @@ void Draw2DHistogramSplitCanvas(JSONWrapper::Object& Root, std::string RootDir, 
           }
 
 
-      string SavePath = SaveName + "_" + (Process[i])["tag"].toString() + plotExt;
-      while(SavePath.find("*")!=std::string::npos)SavePath.replace(SavePath.find("*"),1,"");
-      while(SavePath.find("#")!=std::string::npos)SavePath.replace(SavePath.find("#"),1,"");
-      while(SavePath.find("{")!=std::string::npos)SavePath.replace(SavePath.find("{"),1,"");
-      while(SavePath.find("}")!=std::string::npos)SavePath.replace(SavePath.find("}"),1,"");
-      while(SavePath.find("(")!=std::string::npos)SavePath.replace(SavePath.find("("),1,"");
-      while(SavePath.find(")")!=std::string::npos)SavePath.replace(SavePath.find(")"),1,"");
-      while(SavePath.find("^")!=std::string::npos)SavePath.replace(SavePath.find("^"),1,"");
-      while(SavePath.find(" ")!=std::string::npos)SavePath.replace(SavePath.find(" "),1,"");
-      while(SavePath.find("/")!=std::string::npos)SavePath.replace(SavePath.find("/"),1,"-");
-      if(outDir.size()) SavePath = outDir +"/"+ SavePath;
-      system(string(("rm -f ") + SavePath).c_str());
-      c1->SaveAs(SavePath.c_str());
 
-
-      SavePath = SaveName + "_" + (Process[i])["tag"].toString() + plotExt2;
-      while(SavePath.find("*")!=std::string::npos)SavePath.replace(SavePath.find("*"),1,"");
-      while(SavePath.find("#")!=std::string::npos)SavePath.replace(SavePath.find("#"),1,"");
-      while(SavePath.find("{")!=std::string::npos)SavePath.replace(SavePath.find("{"),1,"");
-      while(SavePath.find("}")!=std::string::npos)SavePath.replace(SavePath.find("}"),1,"");
-      while(SavePath.find("(")!=std::string::npos)SavePath.replace(SavePath.find("("),1,"");
-      while(SavePath.find(")")!=std::string::npos)SavePath.replace(SavePath.find(")"),1,"");
-      while(SavePath.find("^")!=std::string::npos)SavePath.replace(SavePath.find("^"),1,"");
-       while(SavePath.find(" ")!=std::string::npos)SavePath.replace(SavePath.find(" "),1,"");
-      while(SavePath.find("/")!=std::string::npos)SavePath.replace(SavePath.find("/"),1,"-");
-      if(outDir.size()) SavePath = outDir +"/"+ SavePath;
-      system(string(("rm -f ") + SavePath).c_str());
-      c1->SaveAs(SavePath.c_str());
-
+      savePath(c1,outDir,SaveName+"_"+(Process[i])["tag"].toString(),plotExt);
+      savePath(c1,outDir,SaveName+"_"+(Process[i])["tag"].toString(),".pdf");
       delete c1;
    }
 
@@ -613,11 +588,9 @@ void Draw2DHistogram(JSONWrapper::Object& Root, std::string RootDir, NameAndType
       hist->SetStats(kFALSE);
       hist->GetXaxis()->SetTitleOffset(1.3);
       hist->GetYaxis()->SetTitleOffset(2.0);
-
       hist->Draw("COL Z");
 
       TString savename = getChannelName(SaveName);
-  
       TPaveText* leg = new TPaveText(0.20,0.993,0.95,0.88, "NDC");
       leg->SetFillColor(0);
       leg->SetFillStyle(0);  leg->SetLineColor(0);
@@ -630,11 +603,19 @@ void Draw2DHistogram(JSONWrapper::Object& Root, std::string RootDir, NameAndType
       leg->AddText(processName);
       leg->Draw("same");
       ObjectToDelete.push_back(leg);
-//      delete leg;
-//      delete hist;
    }
    c1->cd(0);
-   //T->Draw("same");
+
+   savePath(c1,outDir,SaveName,plotExt);
+   savePath(c1,outDir,SaveName,".pdf");
+
+   for(unsigned int d=0;d<ObjectToDelete.size();d++){delete ObjectToDelete[d];}ObjectToDelete.clear();
+   delete c1;
+}
+
+
+void savePath(TCanvas* c,std::string outDir,std::string SaveName,std::string plotExt)
+{
    string SavePath = SaveName + plotExt;
    while(SavePath.find("*")!=std::string::npos)SavePath.replace(SavePath.find("*"),1,"");
    while(SavePath.find("#")!=std::string::npos)SavePath.replace(SavePath.find("#"),1,"");
@@ -644,30 +625,10 @@ void Draw2DHistogram(JSONWrapper::Object& Root, std::string RootDir, NameAndType
    while(SavePath.find(")")!=std::string::npos)SavePath.replace(SavePath.find(")"),1,"");
    while(SavePath.find("^")!=std::string::npos)SavePath.replace(SavePath.find("^"),1,"");
    while(SavePath.find("/")!=std::string::npos)SavePath.replace(SavePath.find("/"),1,"-");
-   if(outDir.size()) SavePath = outDir +"/"+ SavePath; 
+   if(outDir.size()) SavePath = outDir +"/"+ SavePath;
    system(string(("rm -f ") + SavePath).c_str());
-   c1->SaveAs(SavePath.c_str());
-
-   SavePath = SaveName + plotExt2;
-   while(SavePath.find("*")!=std::string::npos)SavePath.replace(SavePath.find("*"),1,"");
-   while(SavePath.find("#")!=std::string::npos)SavePath.replace(SavePath.find("#"),1,"");
-   while(SavePath.find("{")!=std::string::npos)SavePath.replace(SavePath.find("{"),1,"");
-   while(SavePath.find("}")!=std::string::npos)SavePath.replace(SavePath.find("}"),1,"");
-   while(SavePath.find("(")!=std::string::npos)SavePath.replace(SavePath.find("("),1,"");
-   while(SavePath.find(")")!=std::string::npos)SavePath.replace(SavePath.find(")"),1,"");
-   while(SavePath.find("^")!=std::string::npos)SavePath.replace(SavePath.find("^"),1,"");
-   while(SavePath.find("/")!=std::string::npos)SavePath.replace(SavePath.find("/"),1,"-");
-   if(outDir.size()) SavePath = outDir +"/"+ SavePath; 
-   system(string(("rm -f ") + SavePath).c_str());
-   c1->SaveAs(SavePath.c_str());
-
-
-
-   for(unsigned int d=0;d<ObjectToDelete.size();d++){delete ObjectToDelete[d];}ObjectToDelete.clear();
-   delete c1;
-   //delete T;
+   c->SaveAs(SavePath.c_str());
 }
-
 
 void Draw1DHistogram(JSONWrapper::Object& Root, std::string RootDir, NameAndType HistoProperties){
    if(HistoProperties.isIndexPlot && cutIndex<0)return;
@@ -1133,40 +1094,12 @@ void Draw1DHistogram(JSONWrapper::Object& Root, std::string RootDir, NameAndType
    c1->Modified();
    c1->Update();
    c1->cd();
-   string SavePath = SaveName + plotExt;
-   while(SavePath.find("*")!=std::string::npos)SavePath.replace(SavePath.find("*"),1,"");
-   while(SavePath.find("#")!=std::string::npos)SavePath.replace(SavePath.find("#"),1,"");
-   while(SavePath.find("{")!=std::string::npos)SavePath.replace(SavePath.find("{"),1,"");
-   while(SavePath.find("}")!=std::string::npos)SavePath.replace(SavePath.find("}"),1,"");
-   while(SavePath.find("(")!=std::string::npos)SavePath.replace(SavePath.find("("),1,"");
-   while(SavePath.find(")")!=std::string::npos)SavePath.replace(SavePath.find(")"),1,"");
-   while(SavePath.find("^")!=std::string::npos)SavePath.replace(SavePath.find("^"),1,"");
-   while(SavePath.find("/")!=std::string::npos)SavePath.replace(SavePath.find("/"),1,"-");
-   if(outDir.size()) SavePath = outDir +"/"+ SavePath;
-   system(string(("rm -f ") + SavePath).c_str());
-   c1->SaveAs(SavePath.c_str());
-
-   SavePath = SaveName + plotExt2;
-   while(SavePath.find("*")!=std::string::npos)SavePath.replace(SavePath.find("*"),1,"");
-   while(SavePath.find("#")!=std::string::npos)SavePath.replace(SavePath.find("#"),1,"");
-   while(SavePath.find("{")!=std::string::npos)SavePath.replace(SavePath.find("{"),1,"");
-   while(SavePath.find("}")!=std::string::npos)SavePath.replace(SavePath.find("}"),1,"");
-   while(SavePath.find("(")!=std::string::npos)SavePath.replace(SavePath.find("("),1,"");
-   while(SavePath.find(")")!=std::string::npos)SavePath.replace(SavePath.find(")"),1,"");
-   while(SavePath.find("^")!=std::string::npos)SavePath.replace(SavePath.find("^"),1,"");
-   while(SavePath.find("/")!=std::string::npos)SavePath.replace(SavePath.find("/"),1,"-");
-   if(outDir.size()) SavePath = outDir +"/"+ SavePath;
-   system(string(("rm -f ") + SavePath).c_str());
-   c1->SaveAs(SavePath.c_str());
-
-
-
-
+   savePath(c1,outDir,SaveName,plotExt);
+   savePath(c1,outDir,SaveName,".pdf");
 
    delete c1;
    for(unsigned int d=0;d<ObjectToDelete.size();d++){delete ObjectToDelete[d];}ObjectToDelete.clear();
    delete legA;
-   //   delete legB;
    delete T;
 }
 
@@ -1205,9 +1138,6 @@ void ConvertToTex(JSONWrapper::Object& Root, std::string RootDir, NameAndType Hi
    for(unsigned int i=0;i<Process.size();i++){
       TH1* hist = NULL;
       std::vector<JSONWrapper::Object> Samples = (Process[i])["data"].daughters();
-
-
-
 
       for(unsigned int j=0;j<Samples.size();j++){
          double Weight = 1.0;
@@ -1323,9 +1253,7 @@ void ConvertToTex(JSONWrapper::Object& Root, std::string RootDir, NameAndType Hi
 
 
 TString getChannelName(std::string SaveName){
-
    TString Buffer2;
-
    if(SaveName.find("eeeq0jets") != string::npos)       {Buffer2="#it{ee, 0 jets channel}";}
    if(SaveName.find("eeeq1jets") != string::npos)       {Buffer2="#it{ee, 1 jets channel}";}
    if(SaveName.find("eelesq1jets") != string::npos)     {Buffer2="#it{ee, #leq 1 jets channel}";}
@@ -1342,23 +1270,18 @@ TString getChannelName(std::string SaveName){
    if(SaveName.find("lleq1jets") != string::npos)       {Buffer2="#it{ee,#mu#mu, 1 jets channel}";}
    if(SaveName.find("lllesq1jets") != string::npos)     {Buffer2="#it{ee,#mu#mu, #leq 1 jets channel}";}
    if(SaveName.find("llgeq2jets") != string::npos)      {Buffer2="#it{ee,#mu#mu, #geq 2 jets channel}";}
-
    if(SaveName.find("ee") != string::npos && SaveName.find("eq0jets") == string::npos
         && SaveName.find("eq1jets") == string::npos && SaveName.find("lesq1jets") == string::npos
         && SaveName.find("geq2jets") == string::npos )  {Buffer2="#it{ee, #geq 0 jets channel}";}
-
    if(SaveName.find("mumu") != string::npos && SaveName.find("eq0jets") == string::npos
         && SaveName.find("eq1jets") == string::npos && SaveName.find("lesq1jets") == string::npos
         && SaveName.find("geq2jets") == string::npos )  {Buffer2="#it{#mu#mu, #geq 0 jets channel}";}
-
    if(SaveName.find("emu") != string::npos && SaveName.find("eq0jets") == string::npos
         && SaveName.find("eq1jets") == string::npos && SaveName.find("lesq1jets") == string::npos
         && SaveName.find("geq2jets") == string::npos )  {Buffer2="#it{e#mu, #geq 0 jets channel}";}
-
    if(SaveName.find("ll") != string::npos && SaveName.find("eq0jets") == string::npos
         && SaveName.find("eq1jets") == string::npos && SaveName.find("lesq1jets") == string::npos
         && SaveName.find("geq2jets") == string::npos )  {Buffer2="#it{ee,#mu#mu, #geq 0 jets channel}";}
-
 
    return Buffer2;
 }
