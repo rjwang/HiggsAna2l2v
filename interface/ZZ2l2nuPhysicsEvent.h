@@ -193,6 +193,7 @@ struct PhysicsEvent_t
   int gammaTriggerWord;
   std::vector<int> gammaPrescale;
   LorentzVectorCollection met;
+  std::vector<double> met_sig;
   LorentzVector vtx;
   PhysicsObjectGammaCollection gammas;
   PhysicsObjectJetCollection jets, ajets;

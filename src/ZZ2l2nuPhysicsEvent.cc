@@ -69,6 +69,7 @@ PhysicsEvent_t getPhysicsEventFrom(ZZ2l2nuSummary_t &ev)
   
   for(Int_t i=0; i<ev.nmet; i++){
     phys.met.push_back(  LorentzVector( ev.met_pt[i]*cos(ev.met_phi[i]), ev.met_pt[i]*sin(ev.met_phi[i]), 0, ev.met_pt[i]) );
+    phys.met_sig.push_back( ev.met_sig[i] );
   }
 
   for(Int_t ipart=0; ipart<ev.gn; ipart++){

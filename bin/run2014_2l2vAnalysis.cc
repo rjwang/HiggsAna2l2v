@@ -215,28 +215,84 @@ int main(int argc, char* argv[])
     mon.addHistogram( new TH2F( "dPhivsBal_D", "; E_{T}^{miss}/#it{q}_{T}; #Delta#phi(Z,E_{T}^{miss}) [rad]; Events", 200,0,5, 50,0,TMath::Pi()) );
 
 
+    // data-driven WW/ttbar/Wt/tautau background
+    mon.addHistogram( new TH1F( "zmass_WtCtrl_1", ";M^{ll} [GeV];Events", 100,40,250) );
+    mon.addHistogram( new TH1F( "zmass_WtCtrl_2", ";M^{ll} [GeV];Events", 100,40,250) );
+    mon.addHistogram( new TH1F( "zmass_WtCtrl_3", ";M^{ll} [GeV];Events", 100,40,250) );
+    mon.addHistogram( new TH1F( "zmass_WtCtrl_4", ";M^{ll} [GeV];Events", 100,40,250) );
+    mon.addHistogram( new TH1F( "zmass_WtCtrl_5", ";M^{ll} [GeV];Events", 100,40,250) );
+    mon.addHistogram( new TH1F( "zmass_WtCtrl_6", ";M^{ll} [GeV];Events", 100,40,250) );
+    mon.addHistogram( new TH1F( "zmass_WtCtrl_7", ";M^{ll} [GeV];Events", 100,40,250) );
+    mon.addHistogram( new TH1F( "zmass_WtCtrl_8", ";M^{ll} [GeV];Events", 100,40,250) );
+    mon.addHistogram( new TH1F( "zmass_WtCtrl_9", ";M^{ll} [GeV];Events", 100,40,250) );
+    mon.addHistogram( new TH1F( "zmass_WtCtrl_10", ";M^{ll} [GeV];Events", 100,40,250) );
+
+    // WW/ttbar/Wt/tautau control plots
+    mon.addHistogram( new TH1F( "zpt_WWCtrl",	";#it{p}_{T}^{ll} [GeV];Events", 50,0,300) );
+    mon.addHistogram( new TH1F( "zmass_WWCtrl",	";#it{m}_{ll} [GeV];Events", 100,20,300) );
+    mon.addHistogram( new TH1F( "pfmet_WWCtrl",	";E_{T}^{miss} [GeV];Events", 50,0,300) );
+    mon.addHistogram( new TH1F( "redmet_WWCtrl",	";Red-E_{T}^{miss} [GeV];Events", 50,0,300) );
+    mon.addHistogram( new TH1F( "mtless_ZMet_WWCtrl",";#it{m}_{T}(Z, E_{T}^{miss}) [GeV];Events", 50,0,300) );
+
+
+
+
     double zpt_bins[] = {0., 20., 40., 60., 80., 100., 200., 400., 800.};
     const int n_zpt_bins = sizeof(zpt_bins)/sizeof(double) - 1;
     mon.addHistogram( new TH1F( "zpt", 	     ";#it{p}_{T}^{ll} [GeV];Events", 50,0,500) );
     mon.addHistogram( new TH1F( "zpt_rebin", ";#it{p}_{T}^{ll} [GeV];Events", n_zpt_bins, zpt_bins) );
     mon.addHistogram( new TH1F( "zmass",     ";#it{m}_{ll} [GeV];Events", 100,40,250) );
 
-    mon.addHistogram( new TH1F( "zpt_raw",       ";#it{p}_{T}^{ll} [GeV];Events", 30,0,150) );
-    mon.addHistogram( new TH1F( "zmass_raw", ";#it{m}_{ll} [GeV];Events", 100,0,300) );
-    mon.addHistogram( new TH1F( "met_met_raw",        ";E_{T}^{miss} [GeV];Events", 50,0,150) );
+    mon.addHistogram( new TH1F( "zpt_raw",       ";#it{p}_{T}^{ll} [GeV];Events", 50,0,500) );
+    mon.addHistogram( new TH1F( "zmass_raw", ";#it{m}_{ll} [GeV];Events", 100,40,250) );
+    mon.addHistogram( new TH1F( "pfmet_raw",        ";E_{T}^{miss} [GeV];Events", 50,0,500) );
+    mon.addHistogram( new TH1F( "redmet_raw",        ";Red-E_{T}^{miss} [GeV];Events", 50,0,500) );
+    mon.addHistogram( new TH1F( "met_sig_raw",        ";E_{T}^{miss} Significance;Events", 50,0,100) );
+    mon.addHistogram( new TH1F( "mtless_ZMet_raw",      ";#it{m}_{T}(Z, E_{T}^{miss}) [GeV];Events", 50,0,500) );
+    h = (TH1F*) mon.addHistogram( new TH1F( "nleptons_raw", ";Lepton multiplicity;Events", 3,0,3) );
+    for(int ibin=1; ibin<=h->GetXaxis()->GetNbins(); ibin++) {
+        TString label("");
+        if(ibin==h->GetXaxis()->GetNbins()) label +="#geq";
+        else                                label +="=";
+        label += (ibin+1);
+        h->GetXaxis()->SetBinLabel(ibin,label);
+    }
+
+    h=(TH1F *)mon.addHistogram( new TH1F("npfjets_raw",  ";Jet multiplicity (#it{p}_{T}>30 GeV);Events",5,0,5) );
+    for(int ibin=1; ibin<=h->GetXaxis()->GetNbins(); ibin++) {
+        TString label("");
+        if(ibin==h->GetXaxis()->GetNbins()) label +="#geq";
+        else                                label +="=";
+        label += (ibin-1);
+        h->GetXaxis()->SetBinLabel(ibin,label);
+    }
+
+    h=(TH1F *)mon.addHistogram( new TH1F("npfbjets_raw",    ";b-tag Jet multiplicity;Events",5,0,5) );
+    for(int ibin=1; ibin<=h->GetXaxis()->GetNbins(); ibin++) {
+        TString label("");
+        if(ibin==h->GetXaxis()->GetNbins()) label +="#geq";
+        else                                label +="=";
+        label += (ibin-1);
+        h->GetXaxis()->SetBinLabel(ibin,label);
+    }
     mon.addHistogram( new TH2F( "ZptvsMET_raw", ";E_{T}^{miss} [GeV];#it{p}_{T}^{ll} [GeV];Events", 50,0,150, 50,0,150) ); 
     mon.addHistogram( new TH2F( "DPhi_ZMETvsMET_raw", ";E_{T}^{miss} [GeV];#Delta#phi(Z,E_{T}^{miss});Events", 50,0,150, 50,0,TMath::Pi()) );
     mon.addHistogram( new TH2F( "mtless_MetTLpvsmt_MetLLp_raw",";#it{m}_{T}(Leading Lepton, E_{T}^{miss}) [GeV];#it{m}_{T}(Trailing Lepton, E_{T}^{miss}) [GeV];Events", 200,0,200,200,0,200) );
-    mon.addHistogram( new TH2F( "METvsmtless_ZMet_raw", ";#it{m}_{T}(Z, E_{T}^{miss}) [GeV];E_{T}^{miss} [GeV];Events", 200,0,200, 50,0,150) );
+    mon.addHistogram( new TH2F( "METvsmtlessZMet_raw", ";#it{m}_{T}(Z, E_{T}^{miss}) [GeV];E_{T}^{miss} [GeV];Events", 200,0,200, 50,0,150) );
+
 
     // for HZZd MC truth
-    mon.addHistogram( new TH1F( "Zdpt", ";Z_{d} #it{p}_{T} [GeV];Events", 100,0,100) );
+    mon.addHistogram( new TH1F( "Zdpt_Gen", ";Z_{d} #it{p}_{T} [GeV];Events", 100,0,100) );
+    mon.addHistogram( new TH1F( "Zpt_Gen", ";#it{p}^{ll}_{T} [GeV];Events", 100,0,100) );
+    mon.addHistogram( new TH1F( "CoslepZd_Gen", ";cos#theta_{#nu,Z}; Events", 80,-1.,1.) );
+    mon.addHistogram( new TH1F( "Zdmass_Gen",   ";#it{m}_{Z_{d}} [GeV];Events", 200,0,20) );
+
+
     //Collins Soper Frame
     mon.addHistogram( new TH1F( "CoslepZ_CS",";cos#theta*_{l,Z};Events", 80,-1.,1.) );
-    mon.addHistogram( new TH1F( "CoslepZd", ";cos#theta_{#nu,Z}; Events", 80,-1.,1.) );
 
 
-    h = (TH1F*) mon.addHistogram( new TH1F( "nleptons", ";Lepton multiplicity;Events", 3,2,4) );
+    h = (TH1F*) mon.addHistogram( new TH1F( "nleptons", ";Lepton multiplicity;Events", 3,0,3) );
     for(int ibin=1; ibin<=h->GetXaxis()->GetNbins(); ibin++) {
         TString label("");
         if(ibin==h->GetXaxis()->GetNbins()) label +="#geq";
@@ -643,7 +699,11 @@ int main(int argc, char* argv[])
 
 	if(isMC_HZZd){
 	    double pt_vv = (phys.genneutrinos[0]+phys.genneutrinos[1]).pt();
-	    mon.fillHisto("Zdpt",tags, pt_vv, weight);	
+	    double m_vv  = (phys.genneutrinos[0]+phys.genneutrinos[1]).mass();
+	    double pt_ll = (phys.genleptons[0]+phys.genleptons[1]).pt();
+	    mon.fillHisto("Zdpt_Gen",tags, pt_vv, weight);	
+	    mon.fillHisto("Zpt_Gen",tags, pt_ll,weight);
+	    mon.fillHisto("Zdmass_Gen",tags, m_vv, weight); 
 
 	    TVector3 nu1, nu2, Zd;
 	    nu1.SetXYZ(phys.genneutrinos[0].Px(),phys.genneutrinos[0].Py(),phys.genneutrinos[0].Pz());
@@ -652,7 +712,7 @@ int main(int argc, char* argv[])
 	    double theta_NuZd = nu1.Dot(nu2); 
 	    theta_NuZd /= sqrt(nu1.Dot(nu1));
 	    theta_NuZd /= sqrt(nu2.Dot(nu2));
-	    mon.fillHisto("CoslepZd",tags, theta_NuZd, weight);
+	    mon.fillHisto("CoslepZd_Gen",tags, theta_NuZd, weight);
 	}
 
 
@@ -669,7 +729,7 @@ int main(int argc, char* argv[])
         //
         //MET variables
         //
-        LorentzVector rawMetP4=phys.met[2];
+        LorentzVector rawMetP4=phys.met[1];
         if(use2011Id) rawMetP4=phys.met[0]; //V3 Test
         //LorentzVector fullTypeIMetP4=phys.met[0];
         //LorentzVector mvaMetP4=phys.met[7];
@@ -869,7 +929,7 @@ int main(int argc, char* argv[])
             int lpid=phys.leptons[ilep].pid;
             if(fabs(phys.leptons[ilep].id)==13) {
                 if(!use2011Id) {
-                    isGood = (hasObjectId(ev.mn_idbits[lpid], MID_LOOSE) && phys.leptons[ilep].pfRelIsoDbeta()<0.2);
+                    isGood = (hasObjectId(ev.mn_idbits[lpid], MID_LOOSE) && phys.leptons[ilep].pfRelIsoDbeta()<0.2 && phys.leptons[ilep].pt()>10);
                     isGood |= (hasObjectId(ev.mn_idbits[lpid], MID_SOFT) && phys.leptons[ilep].pt()>3);
                     isGood_WZ = (hasObjectId(ev.mn_idbits[lpid], MID_LOOSE) && phys.leptons[ilep].pfRelIsoDbeta()<0.2 && phys.leptons[ilep].pt()>20);
                 } else {
@@ -916,7 +976,7 @@ int main(int argc, char* argv[])
         //
         bool passJetveto(true);
         bool passBveto(true);
-        bool passRedMet(true);
+        bool passMetCut(true);
         bool passDphijmet(true);
         bool passBalanceCut(true);
         PhysicsObjectJetCollection &aJets = ( useJERsmearing ? variedAJets[0] : recoJets );
@@ -978,8 +1038,14 @@ int main(int argc, char* argv[])
         TVector2 aClusteredMet2(aClusteredMetP4.px(),aClusteredMetP4.py());
         //double clusteredMetL=aRedMetOut.a_l*aClusteredMet2;
         //double clusteredMetT=aRedMetOut.a_t*aClusteredMet2;
-        passRedMet=(zvvs[0].pt()>120); //ReducedMET: aRedMet.pt(); PFMET: zvvs[0].pt()
-        //bool passRedMetWWCtrl=(aRedMet.pt()>65);
+        passMetCut=(zvvs[0].pt()>120); //ReducedMET: aRedMet.pt(); PFMET: zvvs[0].pt()
+
+	bool passMetCut90=(zvvs[0].pt()>90);
+	bool passMetCut100=(zvvs[0].pt()>100);
+	bool passMetCut110=(zvvs[0].pt()>110);
+	bool passMetCut120=(zvvs[0].pt()>120);
+
+        //bool passMetCutWWCtrl=(aRedMet.pt()>65);
 
         TVector2 RecoilMet2(Recoil.px(),Recoil.py());
         //double RecoilMetL=aRedMetOut.a_l*RecoilMet2;
@@ -1026,7 +1092,7 @@ int main(int argc, char* argv[])
         
         fprintf(outTxtFile_full,"%d | %d |  %d | %d%d%d%d%d%d%d%d%d%d%d | %s ",ev.run,ev.lumi,ev.event,
                 passId,passIdAndIso,passZmass,passZpt,pass3dLeptonVeto,passBveto,passLMetVeto,passdphiZllmetCut,
-                passRedMet,passBalanceCut,passMTcut,evCat.Data());
+                passMetCut,passBalanceCut,passMTcut,evCat.Data());
 	for(unsigned int i=0; i<aJets.size(); i++) {fprintf(outTxtFile_full,"| %f",aJets[i].pt());}
 		
         fprintf(outTxtFile_full,"| %d",nAJetsGood30);
@@ -1066,12 +1132,25 @@ int main(int argc, char* argv[])
 
 	mon.fillHisto("zmass_raw"			,tags, zll.mass(), weight);
         mon.fillHisto("zpt_raw"				,tags, zll.pt(),   weight);
-	mon.fillHisto("met_met_raw"			,tags, zvvs[0].pt(), weight);
+	mon.fillHisto("pfmet_raw"			,tags, zvvs[0].pt(), weight);
+	mon.fillHisto("redmet_raw"			,tags, aRedMet.pt(), weight);
+	mon.fillHisto("met_sig_raw"			,tags, phys.met_sig[1], weight);
+	mon.fillHisto("mtless_ZMet_raw"                 ,tags, aMTmassless, weight);
 	mon.fillHisto("ZptvsMET_raw"			,tags, zvvs[0].pt(), zll.pt(),   weight);
         mon.fillHisto("DPhi_ZMETvsMET_raw"		,tags, zvvs[0].pt(), dphiZllmet, zvvs[0].pt(), weight);
 	mon.fillHisto("mtless_MetTLpvsmt_MetLLp_raw"	,tags, mtless_MetLLp, mtless_MetTLp, weight);
-        mon.fillHisto("METvsmtless_ZMet_raw"		,tags,aMTmassless,zvvs[0].pt(),weight);
+        mon.fillHisto("METvsmtlessZMet_raw"		,tags,aMTmassless,zvvs[0].pt(),weight);
+	mon.fillHisto("nleptons_raw"			,tags, nextraleptons, weight);
+	mon.fillHisto("npfjets_raw"			,tags, nAJetsGood30, weight);
+	mon.fillHisto("npfbjets_raw"			,tags, nABtags, weight);
 
+
+	// WW/ttbar/Wt/tautau control
+	mon.fillHisto("zpt_WWCtrl"                      ,tags, zll.pt(),   weight);
+        mon.fillHisto("zmass_WWCtrl"                    ,tags, zll.mass(), weight);
+        mon.fillHisto("pfmet_WWCtrl"                    ,tags, zvvs[0].pt(), weight);
+        mon.fillHisto("redmet_WWCtrl"                   ,tags, aRedMet.pt(), weight);
+        mon.fillHisto("mtless_ZMet_WWCtrl"              ,tags, aMTmassless, weight);
 
 
 	//
@@ -1100,6 +1179,26 @@ int main(int argc, char* argv[])
             if(METBal >= 0.25  && dphiZllmet > 2.7) mon.fillHisto("dPhivsBal_C", tags, METBal, dphiZllmet, weight);
             if(METBal >= 0.25  && dphiZllmet <= 2.7) mon.fillHisto("dPhivsBal_D", tags, METBal, dphiZllmet, weight);
         }
+
+
+
+
+        //#############################
+        // new method of data-driven WW/ttbar/Wt/tautau background
+        //#############################
+        if(passZmass) mon.fillHisto("zmass_WtCtrl_1",tags,zll.mass(),weight);
+        if(passZmass && passZpt) mon.fillHisto("zmass_WtCtrl_2",tags,zll.mass(),weight);
+        if(passZmass && passZpt && pass3dLeptonVeto) mon.fillHisto("zmass_WtCtrl_3",tags,zll.mass(),weight);
+        if(passZmass && passZpt && pass3dLeptonVeto && passBveto) mon.fillHisto("zmass_WtCtrl_4",tags,zll.mass(),weight);
+        if(passZmass && passZpt && pass3dLeptonVeto && passBveto && passdphiZllmetCut) mon.fillHisto("zmass_WtCtrl_5",tags,zll.mass(),weight);
+        if(passZmass && passZpt && pass3dLeptonVeto && passBveto && passdphiZllmetCut && passBalanceCut) mon.fillHisto("zmass_WtCtrl_6",tags,zll.mass(),weight);
+        if(passZmass && passZpt && pass3dLeptonVeto && passBveto && passdphiZllmetCut && passBalanceCut && passMetCut90) mon.fillHisto("zmass_WtCtrl_7",tags,zll.mass(),weight);
+        if(passZmass && passZpt && pass3dLeptonVeto && passBveto && passdphiZllmetCut && passBalanceCut && passMetCut100) mon.fillHisto("zmass_WtCtrl_8",tags,zll.mass(),weight);
+        if(passZmass && passZpt && pass3dLeptonVeto && passBveto && passdphiZllmetCut && passBalanceCut && passMetCut110) mon.fillHisto("zmass_WtCtrl_9",tags,zll.mass(),weight);
+        if(passZmass && passZpt && pass3dLeptonVeto && passBveto && passdphiZllmetCut && passBalanceCut && passMetCut120) mon.fillHisto("zmass_WtCtrl_10",tags,zll.mass(),weight);
+
+
+
 
 
 
@@ -1151,7 +1250,7 @@ int main(int argc, char* argv[])
                                     mon.fillHisto("deltaleptonpt",tags, leadingLep.pt()-trailerLep.pt()    ,weight);
                                     mon.fillHisto("deltazpt",tags, zll.pt()-zvvs[0].pt(),weight);
 
-                                    if(passRedMet) {
+                                    if(passMetCut) {
 
                                         if(passBalanceCut) {   //RJ
 
@@ -1177,12 +1276,12 @@ int main(int argc, char* argv[])
                                                 if(!evCat.Contains("geq2jets")) {
                                                     //fprintf(outTxtFile_final,"%d | %d |  %d | %d%d%d%d%d%d%d%d%d%d%d | %s \n",ev.run,ev.lumi,ev.event,
                                                     //      passId,passIdAndIso,passZmass,passZpt,pass3dLeptonVeto,passBveto,passLMetVeto,passdphiZllmetCut,
-                                                    //      passRedMet,passBalanceCut,passMTcut, evCat.Data());
+                                                    //      passMetCut,passBalanceCut,passMTcut, evCat.Data());
 
                                                     /*
                                                                             fprintf(outTxtFile_final,"%d | %d |  %d | %d%d%d%d%d%d%d%d%d%d%d | %s ",ev.run,ev.lumi,ev.event,
                                                                                     passId,passIdAndIso,passZmass,passZpt,pass3dLeptonVeto,passBveto,passLMetVeto,passdphiZllmetCut,
-                                                                                    passRedMet,passBalanceCut,passMTcut,evCat.Data());
+                                                                                    passMetCut,passBalanceCut,passMTcut,evCat.Data());
 
                                                                             if(aJets.size()>0 && zvvs.size()>0) {
                                                                                 fprintf(outTxtFile_final,"| %f | %f | %f | %f",aJets[0].pt(),aJets[0].eta(), aJets[0].btag6, zvvs[0].pt());
@@ -1194,7 +1293,7 @@ int main(int argc, char* argv[])
 
                                             } //end MT cut
                                         }//end passBalanceCut
-                                    } // end passRedMet
+                                    } // end passMetCut
                                 }//end passdphiZllmetCut
                             }//end passLMetVeto,
                         }//end passBveto
@@ -1282,8 +1381,8 @@ int main(int argc, char* argv[])
 
 
             // with standard Z mass, Z pt, RedMet (will be variated later)
-            bool passPreselection(passZmass && passZpt && pass3dLeptonVeto && passLocalJetveto && passLocalBveto && passLocalDphijmet && passLocalLMetVeto && passLocalBalanceCut && passRedMet);
-            //bool passPreselectionMbvetoMzmass(passZpt && pass3dLeptonVeto && passLocalJetveto && passLocalDphijmet && passLocalLMetVeto && passLocalBalanceCut && passRedMet);
+            bool passPreselection(passZmass && passZpt && pass3dLeptonVeto && passLocalJetveto && passLocalBveto && passLocalDphijmet && passLocalLMetVeto && passLocalBalanceCut && passMetCut);
+            //bool passPreselectionMbvetoMzmass(passZpt && pass3dLeptonVeto && passLocalJetveto && passLocalDphijmet && passLocalLMetVeto && passLocalBalanceCut && passMetCut);
 
             //RJ compute dphi(zpt,redMet) for statistics
             double LocaldphiZllmet=fabs(deltaPhi(zll.phi(),zvv.phi()));

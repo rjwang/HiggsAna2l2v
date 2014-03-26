@@ -242,9 +242,9 @@ void GetInitialNumberOfEvents(JSONWrapper::Object& Root, std::string RootDir, Na
          if(cnorm==1 && isMC)printf("is there a problem with %s ? cnorm = %f\n",(Samples[j])["dtag"].toString().c_str(), cnorm);          
          if(!isMC)PUCentralnnorm = 1;
 
-          double VBFMCRescale = tmphist->GetXaxis()->GetNbins()>5 ? tmphist->GetBinContent(6) / tmphist->GetBinContent(2) : 1.0;
-	  if(VBFMCRescale!=0)          cnorm *= VBFMCRescale;
-          //printf("VBFMCRescale for sample %s is %f\n", (Samples[j])["dtag"].toString().c_str(), VBFMCRescale );
+         double VBFMCRescale = tmphist->GetXaxis()->GetNbins()>5 ? tmphist->GetBinContent(6) / tmphist->GetBinContent(2) : 1.0;
+	 if(VBFMCRescale!=0)          cnorm *= VBFMCRescale;
+         //printf("VBFMCRescale for sample %s is %f\n", (Samples[j])["dtag"].toString().c_str(), VBFMCRescale );
          sampleInfo.initialNumberOfEvents = cnorm / PUCentralnnorm;
          delete tmphist;
       }   
@@ -634,7 +634,6 @@ void Draw1DHistogram(JSONWrapper::Object& Root, std::string RootDir, NameAndType
    if(HistoProperties.isIndexPlot && cutIndex<0)return;
 
    //gStyle->SetLineWidth(2);
-   //TCanvas* c1 = new TCanvas("c1","c1",800,600); //change from 800,800, RJ
    TCanvas* c1 = new TCanvas("c1","c1",700,700); 
    TPad* t1 = new TPad();
    if(isDataBlind) t1 = new TPad("t1","t1", 0.0, 0.0, 1.0, 1.0);
@@ -642,19 +641,16 @@ void Draw1DHistogram(JSONWrapper::Object& Root, std::string RootDir, NameAndType
 
    t1->Draw();
    t1->cd();
-   if(!isDataBlind) t1->SetBottomMargin(0); //RJ
+   if(!isDataBlind) t1->SetBottomMargin(0);
    TString name_denRelUncH;
    if(!noLog) t1->SetLogy(true);
    float maximumFound(noLog);
 
-   //TLegend* legA  = new TLegend(0.845,0.2,0.99,0.99, "NDC"); 
    TLegend* legA  = new TLegend();
-   if(!isDataBlind) legA  = new TLegend(0.45,0.7,0.9,0.95, "NDC"); //RJ
+   if(!isDataBlind) legA  = new TLegend(0.45,0.7,0.9,0.95, "NDC");
    else legA = new TLegend(0.55,0.78,0.9,0.95, "NDC");
 
-   legA->SetNColumns(3); //RJ
-   //   TLegend* legA  = new TLegend(0.51,0.93,0.67,0.75, "NDC"); 
-   // TLegend* legB  = new TLegend(0.67,0.93,0.83,0.75, "NDC");
+   legA->SetNColumns(3);
    THStack* stack = new THStack("MC","MC");
    TH1 *     mc   = NULL;
    TH1 *     mcPlusRelUnc = NULL;
@@ -705,6 +701,7 @@ void Draw1DHistogram(JSONWrapper::Object& Root, std::string RootDir, NameAndType
                tmptmphist = (TH1*) GetObjectFromPath(File,HistoProperties.name);
 	    }
 	    if(!tmptmphist){delete File;continue;}
+	    if(tmptmphist->GetEntries() == 0) {delete File;continue;}
             if(!tmphist){gROOT->cd(); tmphist = (TH1*)tmptmphist->Clone(tmptmphist->GetName());}else{tmphist->Add(tmptmphist);}
             //if(Process[i]["isdata"].toBool())printf("%s --> %f\n",(Samples[j])["dtag"].toString().c_str(), tmptmphist->Integral());
 	    //cout << ">>>>>>>>>>>>> debug tmphist: " << tmptmphist->GetEntries() << " weight: " << Weight << " File: " << FileName.c_str() << endl;		
@@ -721,7 +718,7 @@ void Draw1DHistogram(JSONWrapper::Object& Root, std::string RootDir, NameAndType
       SaveName = hist->GetName();
       TString postfix(""); postfix+=i;
       hist->SetName(SaveName+postfix);
-      hist->Rebin(rebin); //RJ
+      hist->Rebin(rebin);
       if(Process[i].isTag("color" ) )hist->SetLineColor  ((int)Process[i][ "color"].toDouble()); else hist->SetLineColor  (1);
       if(Process[i].isTag("color" ) )hist->SetMarkerColor((int)Process[i][ "color"].toDouble()); else hist->SetMarkerColor(1);
       if(Process[i].isTag("color" ) )hist->SetFillColor  ((int)Process[i][ "color"].toDouble()); else hist->SetFillColor  (0);
@@ -739,23 +736,24 @@ void Draw1DHistogram(JSONWrapper::Object& Root, std::string RootDir, NameAndType
       hist->SetMinimum(2e-2);//5e-1);//2e-2);
       //hist->SetMaximum(1E6);
       hist->SetMaximum(hist->GetBinContent(hist->GetMaximumBin())*1.10);
-      TString tSaveName = hist->GetName();
-      if(tSaveName.Contains("phi_dy")) hist->SetMaximum(hist->GetBinContent(hist->GetMaximumBin())*15);
-      if(tSaveName.Contains("nvtx")) hist->SetMaximum(hist->GetBinContent(hist->GetMaximumBin())*20);
-      if(tSaveName.Contains("nleptons")) hist->SetMaximum(hist->GetBinContent(hist->GetMaximumBin())*15);
-      if(tSaveName.Contains("npfjets")) hist->SetMaximum(hist->GetBinContent(hist->GetMaximumBin())*20);
-      if(tSaveName.Contains("npfjetsbtags")) hist->SetMaximum(hist->GetBinContent(hist->GetMaximumBin())*15);
+      //TString tSaveName = hist->GetName();
+      //if(tSaveName.Contains("phi_dy")) hist->SetMaximum(hist->GetBinContent(hist->GetMaximumBin())*15);
+      //if(tSaveName.Contains("nvtx")) hist->SetMaximum(hist->GetBinContent(hist->GetMaximumBin())*1e2); // this has problem, to be fixed
+      //if(tSaveName.Contains("nleptons")) hist->SetMaximum(hist->GetBinContent(hist->GetMaximumBin())*1e2);
+      //if(tSaveName.Contains("npfjets")) hist->SetMaximum(hist->GetBinContent(hist->GetMaximumBin())*1e2);
+      //if(tSaveName.Contains("npfbjets")) hist->SetMaximum(hist->GetBinContent(hist->GetMaximumBin())*1e2);
       
 
       ObjectToDelete.push_back(hist);
       if(Process[i].isTag("normto")) hist->Scale( Process[i]["normto"].toDouble()/hist->Integral() );
       if((!Process[i].isTag("spimpose") || !Process[i]["spimpose"].toBool()) && !Process[i]["isdata"].toBool()){
          //Add to Stack
-	//cout << "------------" << endl;
-	//cout << "stack: " << Process[i]["tag"].c_str() << endl;
-	if(Process[i]["tag"].c_str() == ctrlSample) 
+	 //cout << "------------" << endl;
+	 //cout << "stack: " << Process[i]["tag"].c_str() << "\t Entries: " << hist->GetEntries()<< endl;
+	 if(Process[i]["tag"].c_str() == ctrlSample) 
 		stack->Add(hist, "HIST");               
-	else 	fakeStack.push_back(hist); //RENJIE
+	 else 	
+		fakeStack.push_back(hist);
 
          legA->AddEntry(hist, Process[i]["tag"].c_str(), "F");	 
          if(!mc){mc = (TH1D*)hist->Clone("mc");}else{mc->Add(hist);}
@@ -800,7 +798,6 @@ void Draw1DHistogram(JSONWrapper::Object& Root, std::string RootDir, NameAndType
 
    bool canvasIsFilled(false);
 
-   //RENJIE
    for(unsigned int j=0; j<fakeStack.size(); j++){
 	stack->Add(fakeStack[j], "HIST");
    }
@@ -808,7 +805,7 @@ void Draw1DHistogram(JSONWrapper::Object& Root, std::string RootDir, NameAndType
    if(stack && stack->GetStack() && stack->GetStack()->GetEntriesFast()>0){
      stack->Draw("");
      
-     stack->GetYaxis()->SetTitleOffset(0.9/*0.8*/);
+     stack->GetYaxis()->SetTitleOffset(0.9);
      stack->GetYaxis()->SetLabelSize(0.06);
      stack->GetYaxis()->SetTitleSize(0.06);
 
@@ -816,8 +813,7 @@ void Draw1DHistogram(JSONWrapper::Object& Root, std::string RootDir, NameAndType
      if(stack->GetXaxis())
        {
 	 if(isDataBlind) stack->GetXaxis()->SetTitle(hist->GetXaxis()->GetTitle());
-	 //stack->GetXaxis()->SetTitleSize(0.); 
-	 name_denRelUncH = hist->GetXaxis()->GetTitle(); //RJ
+	 name_denRelUncH = hist->GetXaxis()->GetTitle();
 
 	 //Set YTitle, RJ
 	 float binsize = hist->GetBinWidth(1);
@@ -832,13 +828,19 @@ void Draw1DHistogram(JSONWrapper::Object& Root, std::string RootDir, NameAndType
 	 	else 			stack->GetYaxis()->SetTitle("Events / "+binSize);
 	 }
 
-	 //stack->GetYaxis()->SetTitle(hist->GetYaxis()->GetTitle());
 	 stack->SetMinimum(hist->GetMinimum());
+
+	 TString tSaveName = hist->GetName();
+      	 if(tSaveName.Contains("nvtx")) maximumFound*= 50;
+      	 if(tSaveName.Contains("nleptons")) maximumFound*= 50; 
+         if(tSaveName.Contains("npfjets")) maximumFound*= 50;
+         if(tSaveName.Contains("npfbjets")) maximumFound*= 50;
+	 if(tSaveName.Contains("_WWCtrl")) maximumFound*= 50;
+
 	 stack->SetMaximum(maximumFound);
 	 if(noLog)
 	   {
 	     stack->SetMaximum(maximumFound);
-	     //stack->GetXaxis()->SetRangeUser(hist->GetMinimum(),maximumFound);
 	   }
        }
      ObjectToDelete.push_back(stack);
@@ -921,7 +923,7 @@ void Draw1DHistogram(JSONWrapper::Object& Root, std::string RootDir, NameAndType
    T->SetBorderSize(0);
 
 
-   TPaveText* T2 = new TPaveText(0.2,0.93,0.36,0.83, "NDC");
+   TPaveText* T2 = new TPaveText(0.2,0.93,0.39,0.8, "NDC");
    T2->SetFillColor(0);
    T2->SetFillStyle(0);  T2->SetLineColor(0);
    T2->SetTextAlign(22);
@@ -1143,7 +1145,7 @@ void ConvertToTex(JSONWrapper::Object& Root, std::string RootDir, NameAndType Hi
          double Weight = 1.0;
          if(!Process[i]["isdata"].toBool()  && !Process[i]["isdatadriven"].toBool())Weight*= iLumi;
 	  string filtExt("");
-	  if(Process[i].isTag("mctruthmode") ) { char buf[255]; sprintf(buf,"_filt%d",(int)Process[i]["mctruthmode"].toInt()); filtExt += buf; }
+	 if(Process[i].isTag("mctruthmode") ) { char buf[255]; sprintf(buf,"_filt%d",(int)Process[i]["mctruthmode"].toInt()); filtExt += buf; }
          if(Samples[j].isTag("xsec")     )Weight*= Samples[j]["xsec"].toDouble();
          std::vector<JSONWrapper::Object> BR = Samples[j]["br"].daughters();for(unsigned int b=0;b<BR.size();b++){Weight*=BR[b].toDouble();}
          stSampleInfo& sampleInfo = sampleInfoMap[(Samples[j])["dtag"].toString()];
@@ -1411,8 +1413,8 @@ int main(int argc, char* argv[]){
    TFile* OutputFile = NULL;
    if(StoreInFile) OutputFile = new TFile(outFile.c_str(),"RECREATE");
    if(!doPlot){
-   	printf("\033[33m Progressing Bar              :0%%       20%%       40%%       60%%       80%%       100%%\n \033[0m");
-  	printf("\033[33m                             : \033[0m");
+   	printf("\033[32m Progressing Bar              :0%%       20%%       40%%       60%%       80%%       100%%\n \033[0m");
+  	printf("\033[32m                             : \033[0m");
    }
    int TreeStep = histlist.size()/50;if(TreeStep==0)TreeStep=1;
    string csvFile(outDir +"/histlist.csv");
@@ -1453,8 +1455,6 @@ int main(int argc, char* argv[]){
 
        if(!passMasking)continue;
 
-       system(("echo \"" + it->name + "\" >> " + csvFile).c_str());
-       TString itname = it->name;
 
        //debug
        //if(!itname.Contains("all_") && !itname.Contains("ee_") ) continue;
@@ -1466,14 +1466,20 @@ int main(int argc, char* argv[]){
        }
        if(skipChannel) continue;
 
-       //RJ, do not convert to Tex files
-/*
-       if(doTex && (it->name.find("eventflow")!=std::string::npos || it->name.find("evtflow")!=std::string::npos) 
-       		&& it->name.find("optim_eventflow")==std::string::npos)
-	{
-		ConvertToTex(Root,inDir,*it); 
-	}
-*/
+
+       system(("echo \"" + it->name + "\" >> " + csvFile).c_str());
+       TString itname = it->name;
+
+       //convert # of Events to Tex files
+
+       //if(doTex && (it->name.find("eventflow")!=std::string::npos || it->name.find("evtflow")!=std::string::npos) 
+       //		&& it->name.find("optim_eventflow")==std::string::npos)
+
+       //if(doTex && (it->name.find("zmass_WtCtrl")!=std::string::npos) )
+       //{
+       //		ConvertToTex(Root,inDir,*it); 
+       //}
+
 
        if(doPlot && do2D  && !it->type){                      if(!splitCanvas){ Draw2DHistogram(Root,inDir,*it);}else{Draw2DHistogramSplitCanvas(Root,inDir,*it);}}
        if(doPlot && do1D  &&  it->type){                                        Draw1DHistogram(Root,inDir,*it); }	
@@ -1489,6 +1495,7 @@ int main(int argc, char* argv[]){
    
    system(("python ${CMSSW_BASE}/src/CMGTools/HiggsAna2l2v/data/html/generateJSONplotterFromList.py -i " + csvFile + " -o "+outDir+"/plotter.json").c_str());
    //system(("rm " + csvFile).c_str());
+   system("python ${CMSSW_BASE}/src/CMGTools/HiggsAna2l2v/data/html/generatehtml.py");
    system(("cp ${CMSSW_BASE}/src/CMGTools/HiggsAna2l2v/data/html/index.html " + outDir).c_str());
    printf("\033[31m You can browse the results using %sindex.html \033[0m\n",outDir.c_str());
 }

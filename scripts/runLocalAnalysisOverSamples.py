@@ -99,6 +99,19 @@ for proc in procList :
 	tag = getByLabel(desc,'tag','') #RJ
 	print tag
 
+	mytag = tag
+	mytag = mytag.replace("#","")
+	mytag = mytag.replace(" ","")
+	mytag = mytag.replace("(","")
+	mytag = mytag.replace(")","")
+	mytag = mytag.replace("{","")
+	mytag = mytag.replace("}","")
+	mytag = mytag.replace("+","")
+        ## split jobs by tag name
+        SCRIPT_Temp = open('/tmp/'+who+'/SCRIPT_Local_'+mytag+'.sh',"w")
+        SCRIPT_Temp.writelines('#!bin/sh \n\n')
+        SCRIPT_Temp.writelines('cd $CMSSW_BASE/src/CMGTools/HiggsAna2l2v/; \n\n')
+
         data = desc['data']
         for d in data :
             origdtag = getByLabel(d,'dtag','')
@@ -113,6 +126,21 @@ for proc in procList :
             if(xsec>0 and not isdata) :
                 for ibr in br :  xsec = xsec*ibr
             split=getByLabel(d,'split',1)
+
+
+            mydtag = dtag
+            mydtag = mydtag.replace("#","")
+            mydtag = mydtag.replace(" ","")
+            mydtag = mydtag.replace("(","")
+            mydtag = mydtag.replace(")","")
+            mydtag = mydtag.replace("{","")
+            mydtag = mydtag.replace("}","")
+            mydtag = mydtag.replace("+","")
+            ## split jobs by dtag name
+            SCRIPT_DTag = open('/tmp/'+who+'/SCRIPT_Local_'+mydtag+'.sh',"w")
+            SCRIPT_DTag.writelines('#!bin/sh \n\n')
+            SCRIPT_DTag.writelines('cd $CMSSW_BASE/src/CMGTools/HiggsAna2l2v/; \n\n')
+
 
 	    for segment in range(0,split) :
                 if(split==1): 
@@ -156,17 +184,46 @@ for proc in procList :
 			SCRIPT.writelines('submit2batch.sh -q'+queue+' -G'+queuelog+'/'+dtag+str(segment)+'.log'+' -R"' + requirementtoBatch + '" -J' + dtag + str(segment) + ' ${CMSSW_BASE}/bin/${SCRAM_ARCH}/wrapLocalAnalysisRun.sh ' + theExecutable + ' ' + cfgfile + '\n\n')
 			SCRIPT_L.writelines(theExecutable + ' ' + cfgfile + ' >& '+queuelog+'/'+dtag+str(segment)+'.log'+' & \n\n')
 			count = count + 1
-			if count % 10 == 0: SCRIPT_L.writelines('sleep 25\n\n')
+			if count % 30 == 0: SCRIPT_L.writelines('sleep 25\n\n')
+
+			SCRIPT_Temp.writelines(theExecutable + ' ' + cfgfile + ' >& '+queuelog+'/'+dtag+str(segment)+'.log'+' & \n\n')
+			SCRIPT_DTag.writelines(theExecutable + ' ' + cfgfile + ' >& '+queuelog+'/'+dtag+str(segment)+'.log'+' & \n\n')
 			#sys.exit(0)
 			#os.system('submit2batch.sh -q'+queue+' -G'+queuelog+'/'+dtag+str(segment)+'.log'+' -R"' + requirementtoBatch + '" -J' + dtag + str(segment) + ' ${CMSSW_BASE}/bin/${SCRAM_ARCH}/wrapLocalAnalysisRun.sh ' + theExecutable + ' ' + cfgfile)
-    
+
+            SCRIPT_DTag.writelines('cd -;')
+            SCRIPT_DTag.close()
+            os.system('chmod u+x,g-r,o-r '+'/tmp/'+who+'/SCRIPT_Local_'+mydtag+'.sh ')
+	    os.system('mkdir -p '+queuelog+'/split/')
+            os.system('mv /tmp/'+who+'/SCRIPT_Local_'+mydtag+'.sh '+queuelog+'/split')
+
+        SCRIPT_Temp.writelines('cd -;')
+        SCRIPT_Temp.close() 
+	os.system('chmod u+x,g-r,o-r '+'/tmp/'+who+'/SCRIPT_Local_'+mytag+'.sh ')
+	os.system('mkdir -p '+queuelog+'/combine/')
+        os.system('mv /tmp/'+who+'/SCRIPT_Local_'+mytag+'.sh '+queuelog+'/combine/')
 
 SCRIPT.close()
 SCRIPT_L.writelines('cd -;')
 SCRIPT_L.close()
 os.system('chmod u+x,g-r,o-r '+'/tmp/'+who+'/SCRIPT_Submit2batch.sh '+'/tmp/'+who+'/SCRIPT_Local.sh ')
-os.system('mv /tmp/'+who+'/SCRIPT_Submit2batch.sh '+queuelog+'/')
-os.system('mv /tmp/'+who+'/SCRIPT_Local.sh '+queuelog+'/')
+os.system('mkdir -p '+queuelog+'/all/')
+os.system('mv /tmp/'+who+'/SCRIPT_Submit2batch.sh '+queuelog+'/all/')
+os.system('mv /tmp/'+who+'/SCRIPT_Local.sh '+queuelog+'/all/')
+os.system('cp $CMSSW_BASE/src/CMGTools/HiggsAna2l2v/scripts/splitlocaljobs.py '+queuelog+'/all/')
+
+
+##get good script for local run
+#os.system('cp '+queuelog+'/combine/SCRIPT_Local_ZZ*.sh '+queuelog+'/')
+#os.system('cp '+queuelog+'/combine/SCRIPT_Local_WZ*.sh '+queuelog+'/')
+#os.system('cp '+queuelog+'/combine/SCRIPT_Local_Wjets*.sh '+queuelog+'/')
+#os.system('cp '+queuelog+'/combine/SCRIPT_Local_WW*.sh '+queuelog+'/')
+#os.system('cp '+queuelog+'/combine/SCRIPT_Local_Singletop.sh '+queuelog+'/')
+#os.system('cp '+queuelog+'/combine/SCRIPT_Local_tbart.sh '+queuelog+'/')
+#os.system('cp '+queuelog+'/combine/SCRIPT_Local_HZZd*.sh '+queuelog+'/')
+#os.system('cp '+queuelog+'/split/SCRIPT_Local_Data8TeV_*.sh '+queuelog+'/')
+#os.system('cp '+queuelog+'/split/SCRIPT_Local_MC8TeV_DY*.sh '+queuelog+'/')
+
 
 #run plotter over results
 #if(not subtoBatch) :
