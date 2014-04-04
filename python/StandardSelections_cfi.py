@@ -73,7 +73,8 @@ BaseVertexSelection = cms.PSet( source = cms.InputTag("goodOfflinePrimaryVertice
 # |_|  |_|\__,_|\___/|_| |_|
 #
 # base values for loose muon selection ----------------------------------------------
-BaseMuonsSelection = cms.PSet( source = cms.InputTag("selectedPatMuonsTriggerMatch"), 
+BaseMuonsSelection = cms.PSet( #source = cms.InputTag("selectedPatMuonsTriggerMatch"), 
+			       source = cms.InputTag("MuScleFit"), # Apr.04
                                sourceIsPF = cms.bool(False),
                                rho25Neut = cms.InputTag("kt6PFJetsCentralNeutral:rho"), #but using BaseJetSelection:rho
                                minPt = cms.double(10),
@@ -126,7 +127,9 @@ BaseSoftMuonsSelection = BaseMuonsSelection.clone( minPt = cms.double(3),
 # |______|_|\___|\___|\__|_|  \___/|_| |_|
 #  
 # base values for electron selection ----------------------------------------------
-BaseElectronsSelection = cms.PSet( source = cms.InputTag("selectedPatElectronsPFlowHeep"),
+BaseElectronsSelection = cms.PSet( #source = cms.InputTag("selectedPatElectronsPFlowHeep"),
+				   #source = cms.InputTag("selectedPatElectronsWithTrigger"), #Apr02 changed 
+				   source = cms.InputTag("calibratedPatElectrons"), #Apr04 
                                    id=cms.string("veto"),
                                    #cf. https://twiki.cern.ch/twiki/bin/view/CMS/RegressionSCCorrections
                                    scCorrector = cms.string("${CMSSW_BASE}/src/CMGTools/HiggsAna2l2v/data/EleEnRegress.root"),

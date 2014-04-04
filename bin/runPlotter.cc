@@ -86,7 +86,6 @@ struct NameAndType{
  };
 
 
-
 TObject* GetObjectFromPath(TDirectory* File, std::string Path, bool GetACopy=false)
 {
    size_t pos = Path.find("/");
@@ -1289,6 +1288,72 @@ TString getChannelName(std::string SaveName){
 }
 
 
+
+void getYieldsandErrors(JSONWrapper::Object& Root, std::string RootDir, NameAndType HistoProperties){
+    if(HistoProperties.isIndexPlot && cutIndex<0)return;
+    
+    FILE* pFile = NULL;
+    
+    std::vector<TObject*> ObjectToDelete;
+    TH1* stack = NULL;
+    std::vector<JSONWrapper::Object> Process = Root["proc"].daughters();
+    for(unsigned int i=0;i<Process.size();i++){
+        TH1* hist = NULL;
+        std::vector<JSONWrapper::Object> Samples = (Process[i])["data"].daughters();
+        
+        for(unsigned int j=0;j<Samples.size();j++){
+            double Weight = 1.0;
+            if(!Process[i]["isdata"].toBool()  && !Process[i]["isdatadriven"].toBool())Weight*= iLumi;
+            string filtExt("");
+            if(Process[i].isTag("mctruthmode") ) { char buf[255]; sprintf(buf,"_filt%d",(int)Process[i]["mctruthmode"].toInt()); filtExt += buf; }
+            if(Samples[j].isTag("xsec")     )Weight*= Samples[j]["xsec"].toDouble();
+            std::vector<JSONWrapper::Object> BR = Samples[j]["br"].daughters();for(unsigned int b=0;b<BR.size();b++){Weight*=BR[b].toDouble();}
+            stSampleInfo& sampleInfo = sampleInfoMap[(Samples[j])["dtag"].toString()];
+            Weight /= sampleInfo.initialNumberOfEvents;
+            
+            if(HistoProperties.name.find("puup"  )!=string::npos){Weight *= sampleInfo.PURescale_up  ;}
+            if(HistoProperties.name.find("pudown")!=string::npos){Weight *= sampleInfo.PURescale_down;}
+            
+            
+            int split = 1;
+            if(Samples[j].isTag("split"))split = Samples[j]["split"].toInt();
+            TH1* tmphist = NULL;
+            for(int s=0;s<split;s++){
+                string segmentExt; if(split>1) { char buf[255]; sprintf(buf,"_%i",s); segmentExt += buf; }
+                
+                string FileName = RootDir + (Samples[j])["dtag"].toString() + ((Samples[j].isTag("suffix"))?(Samples[j])["suffix"].toString():string("")) + segmentExt + filtExt + ".root";
+                if(!FileExist[FileName])continue;
+                TFile* File = new TFile(FileName.c_str());
+                if(!File || File->IsZombie() || !File->IsOpen() || File->TestBit(TFile::kRecovered) )continue;
+                TH1* tmptmphist = NULL;
+                if(HistoProperties.isIndexPlot && cutIndex>=0){
+                    TH2* tmp2D = (TH2*) GetObjectFromPath(File,HistoProperties.name);
+                    if(tmp2D){tmptmphist = tmp2D->ProjectionY("_py",cutIndex,cutIndex); delete tmp2D;}
+                }else if(!HistoProperties.isIndexPlot){
+                    tmptmphist = (TH1*) GetObjectFromPath(File,HistoProperties.name);
+                }
+                if(!tmptmphist){delete File;continue;}
+                if(!tmphist){gROOT->cd(); tmphist = (TH1*)tmptmphist->Clone(tmptmphist->GetName());}else{tmphist->Add(tmptmphist);}
+                delete tmptmphist;
+                delete File;
+            }
+            if(!tmphist)continue;
+            if(!hist){gROOT->cd(); hist = (TH1*)tmphist->Clone(tmphist->GetName());hist->Scale(Weight);}else{hist->Add(tmphist,Weight);}
+            delete tmphist;
+        }
+        if(!hist)continue;
+        
+        ObjectToDelete.push_back(hist);
+        
+	cout << "+++++++++++++++++++++++++++" << endl;
+        cout << Process[i]["tag"].c_str() << " " << hist->Integral() << endl;
+        cout << "+++++++++++++++++++++++++++" << endl;
+    }
+
+    for(unsigned int d=0;d<ObjectToDelete.size();d++){delete ObjectToDelete[d];}ObjectToDelete.clear();
+}
+
+
 int main(int argc, char* argv[]){
    setTDRStyle();  
    gStyle->SetPadTopMargin   (0.06);
@@ -1466,20 +1531,16 @@ int main(int argc, char* argv[]){
        }
        if(skipChannel) continue;
 
-
        system(("echo \"" + it->name + "\" >> " + csvFile).c_str());
        TString itname = it->name;
 
        //convert # of Events to Tex files
-
        //if(doTex && (it->name.find("eventflow")!=std::string::npos || it->name.find("evtflow")!=std::string::npos) 
        //		&& it->name.find("optim_eventflow")==std::string::npos)
-
-       //if(doTex && (it->name.find("zmass_WtCtrl")!=std::string::npos) )
+       //if(doTex && (it->name.find("zmass_WtCtrl_2")!=std::string::npos) )
        //{
-       //		ConvertToTex(Root,inDir,*it); 
+       //		getYieldsandErrors(Root,inDir,*it); 
        //}
-
 
        if(doPlot && do2D  && !it->type){                      if(!splitCanvas){ Draw2DHistogram(Root,inDir,*it);}else{Draw2DHistogramSplitCanvas(Root,inDir,*it);}}
        if(doPlot && do1D  &&  it->type){                                        Draw1DHistogram(Root,inDir,*it); }	

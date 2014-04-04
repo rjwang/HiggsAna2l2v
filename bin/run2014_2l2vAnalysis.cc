@@ -216,16 +216,26 @@ int main(int argc, char* argv[])
 
 
     // data-driven WW/ttbar/Wt/tautau background
-    mon.addHistogram( new TH1F( "zmass_WtCtrl_1", ";M^{ll} [GeV];Events", 100,40,250) );
-    mon.addHistogram( new TH1F( "zmass_WtCtrl_2", ";M^{ll} [GeV];Events", 100,40,250) );
-    mon.addHistogram( new TH1F( "zmass_WtCtrl_3", ";M^{ll} [GeV];Events", 100,40,250) );
-    mon.addHistogram( new TH1F( "zmass_WtCtrl_4", ";M^{ll} [GeV];Events", 100,40,250) );
-    mon.addHistogram( new TH1F( "zmass_WtCtrl_5", ";M^{ll} [GeV];Events", 100,40,250) );
-    mon.addHistogram( new TH1F( "zmass_WtCtrl_6", ";M^{ll} [GeV];Events", 100,40,250) );
-    mon.addHistogram( new TH1F( "zmass_WtCtrl_7", ";M^{ll} [GeV];Events", 100,40,250) );
-    mon.addHistogram( new TH1F( "zmass_WtCtrl_8", ";M^{ll} [GeV];Events", 100,40,250) );
-    mon.addHistogram( new TH1F( "zmass_WtCtrl_9", ";M^{ll} [GeV];Events", 100,40,250) );
-    mon.addHistogram( new TH1F( "zmass_WtCtrl_10", ";M^{ll} [GeV];Events", 100,40,250) );
+    mon.addHistogram( new TH1F( "zmass_WtCtrl_1", ";M^{ll} [GeV];Events", 1,40,250) );
+    mon.addHistogram( new TH1F( "zmass_WtCtrl_2", ";M^{ll} [GeV];Events", 1,40,250) );
+    mon.addHistogram( new TH1F( "zmass_WtCtrl_3", ";M^{ll} [GeV];Events", 1,40,250) );
+    mon.addHistogram( new TH1F( "zmass_WtCtrl_4", ";M^{ll} [GeV];Events", 1,40,250) );
+    mon.addHistogram( new TH1F( "zmass_WtCtrl_5", ";M^{ll} [GeV];Events", 1,40,250) );
+    mon.addHistogram( new TH1F( "zmass_WtCtrl_6", ";M^{ll} [GeV];Events", 1,40,250) );
+    mon.addHistogram( new TH1F( "zmass_WtCtrl_7", ";M^{ll} [GeV];Events", 1,40,250) );
+    mon.addHistogram( new TH1F( "zmass_WtCtrl_8", ";M^{ll} [GeV];Events", 1,40,250) );
+    mon.addHistogram( new TH1F( "zmass_WtCtrl_9", ";M^{ll} [GeV];Events", 1,40,250) );
+    mon.addHistogram( new TH1F( "zmass_WtCtrl_10", ";M^{ll} [GeV];Events",1,40,250) );
+    mon.addHistogram( new TH1F( "zmass_WtCtrl_11", ";M^{ll} [GeV];Events",1,40,250) );
+    mon.addHistogram( new TH1F( "zmass_WtCtrl_12", ";M^{ll} [GeV];Events",1,40,250) );
+    mon.addHistogram( new TH1F( "zmass_WtCtrl_13", ";M^{ll} [GeV];Events",1,40,250) );
+    mon.addHistogram( new TH1F( "zmass_WtCtrl_14", ";M^{ll} [GeV];Events",1,40,250) );
+
+    mon.addHistogram( new TH1F( "Lep1pt", ";#it{p}^{l1}_{T} [GeV];Events", 100,0,200) );
+    mon.addHistogram( new TH1F( "Lep2pt", ";#it{p}^{l2}_{T} [GeV];Events", 100,0,200) );
+    mon.addHistogram( new TH1F( "Lep1eta", ";#eta^{l1};Events", 50,-2.6,2.6) );
+    mon.addHistogram( new TH1F( "Lep2eta", ";#eta^{l2};Events", 50,-2.6,2.6) );
+
 
     // WW/ttbar/Wt/tautau control plots
     mon.addHistogram( new TH1F( "zpt_WWCtrl",	";#it{p}_{T}^{ll} [GeV];Events", 50,0,300) );
@@ -638,8 +648,9 @@ int main(int argc, char* argv[])
             continue;
         }
 
-        //if(isMC && mctruthmode==1 && !isDYToLL(ev.mccat) ) continue;
-        //if(isMC && mctruthmode==2 && !isDYToTauTau(ev.mccat) ) continue;
+	//split inclusive DY sample into DYToLL and DYToTauTau
+        if(isMC && mctruthmode==1 && !isDYToLL(ev.mccat) ) continue;
+        if(isMC && mctruthmode==2 && !isDYToTauTau(ev.mccat) ) continue;
 
         //require compatibilitiy of the event with the PD
         bool hasTrigger(false);
@@ -1019,7 +1030,9 @@ int main(int argc, char* argv[])
         //passDphijmet=(mindphijmet>0.5);
         //if(nAJetsGood30==0) passDphijmet=(mindphijmet15>0.5);
         //passBalanceCut=(zvvs[0].pt()/zll.pt()>0.8 && zvvs[0].pt()/zll.pt()<1.2);
-        passBalanceCut=(zvvs[0].pt()/zll.pt()>0.75 && zvvs[0].pt()/zll.pt()<1.25); //Guillelmo's method
+        passBalanceCut=(zvvs[0].pt()/zll.pt()>0.75 && zvvs[0].pt()/zll.pt()<1.25);
+	bool passBalanceCut05=(zvvs[0].pt()/zll.pt()>0.5 && zvvs[0].pt()/zll.pt()<1.5);
+	bool passBalanceCut075=(zvvs[0].pt()/zll.pt()>0.25 && zvvs[0].pt()/zll.pt()<1.75);
         //bool passBalanceCutWWCtrl=(zvvs[0].pt()/zll.pt()>0.4 && zvvs[0].pt()/zll.pt()<1.8);
 
 
@@ -1040,9 +1053,9 @@ int main(int argc, char* argv[])
         //double clusteredMetT=aRedMetOut.a_t*aClusteredMet2;
         passMetCut=(zvvs[0].pt()>120); //ReducedMET: aRedMet.pt(); PFMET: zvvs[0].pt()
 
-	bool passMetCut90=(zvvs[0].pt()>90);
+	bool passMetCut60=(zvvs[0].pt()>60);
+	bool passMetCut80=(zvvs[0].pt()>80);
 	bool passMetCut100=(zvvs[0].pt()>100);
-	bool passMetCut110=(zvvs[0].pt()>110);
 	bool passMetCut120=(zvvs[0].pt()>120);
 
         //bool passMetCutWWCtrl=(aRedMet.pt()>65);
@@ -1057,6 +1070,8 @@ int main(int argc, char* argv[])
         //double dphiMet_mvaMet=fabs(deltaPhi(mvaMetP4.phi(),zvvs[0].phi()));
         //double dphiZllredMet=fabs(deltaPhi(zll.phi(),aRedMet.phi()));
         bool passdphiZllmetCut(dphiZllmet>2.7);///2.6);
+	bool passdphiZllmetCut20(dphiZllmet>2.0);
+	bool passdphiZllmetCut24(dphiZllmet>2.4);
         //bool passdphiMetmvaMet(dphiMet_mvaMet<0.2);
 
         //transverse masses
@@ -1186,21 +1201,29 @@ int main(int argc, char* argv[])
         //#############################
         // new method of data-driven WW/ttbar/Wt/tautau background
         //#############################
+         
         if(passZmass) mon.fillHisto("zmass_WtCtrl_1",tags,zll.mass(),weight);
         if(passZmass && passZpt) mon.fillHisto("zmass_WtCtrl_2",tags,zll.mass(),weight);
         if(passZmass && passZpt && pass3dLeptonVeto) mon.fillHisto("zmass_WtCtrl_3",tags,zll.mass(),weight);
         if(passZmass && passZpt && pass3dLeptonVeto && passBveto) mon.fillHisto("zmass_WtCtrl_4",tags,zll.mass(),weight);
-        if(passZmass && passZpt && pass3dLeptonVeto && passBveto && passdphiZllmetCut) mon.fillHisto("zmass_WtCtrl_5",tags,zll.mass(),weight);
-        if(passZmass && passZpt && pass3dLeptonVeto && passBveto && passdphiZllmetCut && passBalanceCut) mon.fillHisto("zmass_WtCtrl_6",tags,zll.mass(),weight);
-        if(passZmass && passZpt && pass3dLeptonVeto && passBveto && passdphiZllmetCut && passBalanceCut && passMetCut90) mon.fillHisto("zmass_WtCtrl_7",tags,zll.mass(),weight);
-        if(passZmass && passZpt && pass3dLeptonVeto && passBveto && passdphiZllmetCut && passBalanceCut && passMetCut100) mon.fillHisto("zmass_WtCtrl_8",tags,zll.mass(),weight);
-        if(passZmass && passZpt && pass3dLeptonVeto && passBveto && passdphiZllmetCut && passBalanceCut && passMetCut110) mon.fillHisto("zmass_WtCtrl_9",tags,zll.mass(),weight);
-        if(passZmass && passZpt && pass3dLeptonVeto && passBveto && passdphiZllmetCut && passBalanceCut && passMetCut120) mon.fillHisto("zmass_WtCtrl_10",tags,zll.mass(),weight);
+        if(passZmass && passZpt && pass3dLeptonVeto && passBveto && passdphiZllmetCut20) mon.fillHisto("zmass_WtCtrl_5",tags,zll.mass(),weight);
+        if(passZmass && passZpt && pass3dLeptonVeto && passBveto && passdphiZllmetCut24) mon.fillHisto("zmass_WtCtrl_6",tags,zll.mass(),weight);
+        if(passZmass && passZpt && pass3dLeptonVeto && passBveto && passdphiZllmetCut) mon.fillHisto("zmass_WtCtrl_7",tags,zll.mass(),weight);
+        if(passZmass && passZpt && pass3dLeptonVeto && passBveto && passdphiZllmetCut && passBalanceCut075) mon.fillHisto("zmass_WtCtrl_8",tags,zll.mass(),weight);
+        if(passZmass && passZpt && pass3dLeptonVeto && passBveto && passdphiZllmetCut && passBalanceCut05) mon.fillHisto("zmass_WtCtrl_9",tags,zll.mass(),weight);
+        if(passZmass && passZpt && pass3dLeptonVeto && passBveto && passdphiZllmetCut && passBalanceCut) mon.fillHisto("zmass_WtCtrl_10",tags,zll.mass(),weight);
+        if(passZmass && passZpt && pass3dLeptonVeto && passBveto && passdphiZllmetCut && passBalanceCut && passMetCut60) mon.fillHisto("zmass_WtCtrl_11",tags,zll.mass(),weight);
+        if(passZmass && passZpt && pass3dLeptonVeto && passBveto && passdphiZllmetCut && passBalanceCut && passMetCut80) mon.fillHisto("zmass_WtCtrl_12",tags,zll.mass(),weight);
+        if(passZmass && passZpt && pass3dLeptonVeto && passBveto && passdphiZllmetCut && passBalanceCut && passMetCut100) mon.fillHisto("zmass_WtCtrl_13",tags,zll.mass(),weight);
+        if(passZmass && passZpt && pass3dLeptonVeto && passBveto && passdphiZllmetCut && passBalanceCut && passMetCut120) mon.fillHisto("zmass_WtCtrl_14",tags,zll.mass(),weight);
 
 
-
-
-
+	if(passZmass && passZpt && pass3dLeptonVeto && passBveto && passdphiZllmetCut && passBalanceCut && passMetCut60){
+		mon.fillHisto("Lep1pt",tags,lep1.pt(),weight);
+		mon.fillHisto("Lep2pt",tags,lep2.pt(),weight);
+		mon.fillHisto("Lep1eta",tags,lep1.eta(),weight);
+		mon.fillHisto("Lep2eta",tags,lep2.eta(),weight);
+	}
 
         //##############################################
         //########  Main Event Selection        ########

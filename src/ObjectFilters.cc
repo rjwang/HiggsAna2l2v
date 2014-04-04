@@ -694,6 +694,7 @@ std::vector<int> getDileptonCandidate(vector<CandidatePtr> &selLeptons,  const e
 	    //build the dilepton candidate
 	    if(lep1Ptr->pt() < minLegPt) continue;
 	    if(lep2Ptr->pt() < minLegPt) continue;
+	    if((lep1Ptr->charge())*(lep2Ptr->charge()) > 0) continue; //opposite sign dilepton
 	    double candsumpt=lep1Ptr->pt()+lep2Ptr->pt(); //this is correct
 	    
 	    //if a candidate is already available take this if leading in sum pT
