@@ -16,6 +16,16 @@ process.options   = cms.untracked.PSet( wantSummary = cms.untracked.bool(False),
                                         SkipEvent = cms.untracked.vstring('ProductNotFound')
                                         )
 
+
+# Random generator
+process.RandomNumberGeneratorService = cms.Service("RandomNumberGeneratorService",
+    calibratedPatElectrons = cms.PSet(
+        initialSeed = cms.untracked.uint32(1),
+        engineName = cms.untracked.string('TRandom3')
+    )
+)
+
+
 ## Input Module Configuration
 process.source = cms.Source("PoolSource",fileNames = cms.untracked.vstring())
 #if(len(inputList)==0) : 
@@ -25,7 +35,7 @@ process.source = cms.Source("PoolSource",fileNames = cms.untracked.vstring())
 #	inputList = cms.untracked.vstring('/store/data/Run2012D/DoubleMuParked/AOD/22Jan2013-v1/20000/002E1374-5F84-E211-83C4-20CF305616D0.root')
 #print inputList
 process.source.fileNames=inputList
-
+print inputList
 process.maxEvents = cms.untracked.PSet( input = cms.untracked.int32(-1) )
 #process.maxEvents = cms.untracked.PSet( input = cms.untracked.int32(50) ) ## for testing
 
@@ -159,9 +169,37 @@ process.eidMVASequence = cms.Sequence(  process.mvaTrigV0 + process.mvaNonTrigV0
 process.patElectronsPFlow.electronIDSources.mvaTrigV0    = cms.InputTag("mvaTrigV0")
 process.patElectronsPFlow.electronIDSources.mvaNonTrigV0 = cms.InputTag("mvaNonTrigV0")
 
+
+# https://twiki.cern.ch/twiki/bin/viewauth/CMS/EgammaElectronEnergyScale#Electron_energy_scale_and_resolu
+## Electron Regression
+process.load('EgammaAnalysis/ElectronTools/electronRegressionEnergyProducer_cfi')
+process.eleRegressionEnergy.inputElectronsTag = cms.InputTag('selectedPatElectronsWithTrigger')
+process.eleRegressionEnergy.debug = cms.untracked.bool(False)
+process.eleRegressionEnergy.inputCollectionType = cms.uint32(1)
+process.eleRegressionEnergy.energyRegressionType = cms.uint32(2)
+#
+process.load("EgammaAnalysis/ElectronTools/calibratedPatElectrons_cfi")
+if(isMC): 
+	  process.calibratedPatElectrons.inputDataset = cms.string("Summer12_LegacyPaper")   # MC
+	  process.calibratedPatElectrons.isMC = cms.bool(True)
+else:    
+	  process.calibratedPatElectrons.inputDataset = cms.string("22Jan2013ReReco") # Jan 22 re-reco data
+	  process.calibratedPatElectrons.isMC = cms.bool(False)
+# dataset to correct
+process.calibratedPatElectrons.updateEnergyError = cms.bool(True)
+process.calibratedPatElectrons.correctionsType = cms.int32(2)
+process.calibratedPatElectrons.combinationType = cms.int32(3)
+process.calibratedPatElectrons.lumiRatio = cms.double(1.0)
+process.calibratedPatElectrons.verbose = cms.bool(True)
+process.calibratedPatElectrons.synchronization = cms.bool(False)
+process.calibratedPatElectrons.applyLinearityCorrection = cms.bool(True)
+
+
+
 from SHarper.HEEPAnalyzer.HEEPSelectionCuts_cfi import *
 process.selectedPatElectronsPFlowHeep = cms.EDProducer("HEEPAttStatusToPAT",
-                                                       eleLabel = cms.InputTag("selectedPatElectronsWithTrigger"),
+                                                       #eleLabel = cms.InputTag("selectedPatElectronsWithTrigger"),
+						       eleLabel = cms.InputTag("calibratedPatElectrons"),
                                                        barrelCuts = cms.PSet(heepBarrelCuts),
                                                        endcapCuts = cms.PSet(heepEndcapCuts),
                                                        applyRhoCorrToEleIsol = cms.bool(True),
@@ -176,6 +214,21 @@ process.selectedPatElectronsPFlowHeep = cms.EDProducer("HEEPAttStatusToPAT",
 #custom muons
 process.patMuonsPFlow.pfMuonSource = cms.InputTag("pfSelectedMuonsPFlow")
 process.muonMatchPFlow.src = cms.InputTag("pfSelectedMuonsPFlow")
+
+#https://twiki.cern.ch/twiki/bin/viewauth/CMS/MuScleFitMuonMomentumCorrections
+process.MuScleFit = cms.EDProducer("MuScleFitPATMuonCorrector",
+                                   src = cms.InputTag("selectedPatMuonsTriggerMatch"),
+                                   debug = cms.bool(True),
+                                  )
+if(isMC):
+	process.MuScleFit.identifier = cms.string("Summer12_DR53X_smearReReco")
+	process.MuScleFit.applySmearing = cms.bool(True)
+	process.MuScleFit.fakeSmearing = cms.bool(True)
+else:
+        process.MuScleFit.identifier = cms.string("Data2012_53X_ReReco")
+        process.MuScleFit.applySmearing = cms.bool(False)
+        process.MuScleFit.fakeSmearing = cms.bool(False)
+
 
 #custom jets for CHS
 process.pfPileUpPFlow.checkClosestZVertex = cms.bool(False)
@@ -274,9 +327,15 @@ process.p = cms.Path( process.startCounter
                       *process.qgSequence
                       *process.type0PFMEtCorrection*process.producePFMETCorrections#*process.pfMEtSysShiftCorrSequence
 		      	*process.patDefaultSequence
-                      *process.selectedPatElectronsWithTrigger*process.selectedPatElectronsPFlowHeep
+		      *process.selectedPatElectronsWithTrigger 
                       *process.selectedPatMuonsTriggerMatch
 		      ######
+                      *process.eleRegressionEnergy 
+                      *process.calibratedPatElectrons
+		      ##*process.selectedPatElectronsPFlowHeep # not use at all
+		      #######
+		      *process.MuScleFit
+		      #######
 		      #*process.ak5PFJetsL1L2L3ForMVAMET
                       #*process.ClusteredPFMetProducer
                       *process.dataAnalyzer
