@@ -798,6 +798,8 @@ int main(int argc, char* argv[])
         LorentzVector genZP4(0,0,0,0); // for checks on Sherpa ZZ
         int genmatchid[2] = {-1, -1};
         double genmatchdr[2] = {0.1, 0.1};
+
+        // loop dilepton begin
         for(int ilep=0; ilep<2; ilep++) {
             TString lepStr( fabs(phys.leptons[ilep].id)==13 ? "mu" : "e");
 
@@ -820,7 +822,7 @@ int main(int argc, char* argv[])
 
             //id and isolation
             int lpid=phys.leptons[ilep].pid;
-            float relIso2011    = phys.leptons[ilep].relIsoRho(ev.rho);
+            float relIso2011 = phys.leptons[ilep].relIsoRho(ev.rho);
             float relIso = (lepStr=="mu") ?
                            phys.leptons[ilep].pfRelIsoDbeta() :
                            phys.leptons[ilep].ePFRelIsoCorrected2012(ev.rho,ev.en_sceta[lpid]); //RENJIE
@@ -837,7 +839,7 @@ int main(int argc, char* argv[])
                     passIsos[1]=(relIso<0.2);
                     if(!use2011Id) {
                         hasGoodId=true;
-                        isIso=passIsos[0];
+                        isIso=passIsos[1]; //is this a bug? passIsos[0]
                     }
                 }
                 if( hasObjectId(ev.mn_idbits[lpid], MID_VBTF2011) ) {
@@ -917,7 +919,7 @@ int main(int argc, char* argv[])
                     mon.fillHisto(lepStr+"reliso",     tags, use2011Id? relIso2011 : relIso,   weight);
                 }
             }
-        }
+        } // loop dilepton end
 
         tags.push_back(tag_cat);
         if(tag_cat=="mumu" || tag_cat=="ee") tags.push_back("ll");
