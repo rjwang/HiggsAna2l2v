@@ -1124,15 +1124,19 @@ int main(int argc, char* argv[])
         //#########################################################
 
         if(isMC && use2011Id) weight *= llScaleFactor*llTriggerEfficiency;
+
         if(hasTrigger)                 {
             mon.fillHisto("eventflow",tags,0,weight);
         }
+
         if(hasTrigger && passId)       {
             mon.fillHisto("eventflow",tags,1,weight);
         }
+
         if(hasTrigger && passIdAndIso) {
             mon.fillHisto("eventflow",tags,2,weight);
-        } else continue;
+        }
+	else continue;
 
         //event category
         int eventSubCat  = eventCategoryInst.Get(phys,&aGoodIdJets);
