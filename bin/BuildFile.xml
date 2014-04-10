@@ -6,6 +6,7 @@
 
  <bin name="runPlotter" file="runPlotter.cc"></bin>
  <bin name="run2014_2l2vAnalysis" file="run2014_2l2vAnalysis.cc"></bin>  <!-- new analyzer -->
+ <bin name="run2014_dijetAnalysis" file="run2014_dijetAnalysis.cc"></bin> <!-- dijet control sample -->
 
 </environment>
 <Flags CXXFLAGS="-g -std=c++0x"/>
