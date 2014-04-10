@@ -27,13 +27,13 @@ print 'CMSSW version %s - selection adapted for %d'%(os.environ['CMSSW_BASE'],se
 #               __/ | __/ |                                    
 #              |___/ |___/                                  
 # 
-MuonTrigs, ElectronTrigs = getTriggerPaths(version=selVersion)
+MuonTrigs, ElectronTrigs, mcTrigs = getTriggerPaths(version=selVersion)
 
 # base values for trigger event
 BaseTriggerSelection = cms.PSet( source = cms.InputTag("TriggerResults::HLT"),
                                  triggerPaths = cms.PSet( Mu=cms.vstring(MuonTrigs),
                                                           Ele=cms.vstring(ElectronTrigs)
-                                                        )
+                                                         )
                                )
 #met filters
 BaseMetFilters = cms.PSet( metfilters=cms.vstring('HBHENoiseFilter',
@@ -141,12 +141,12 @@ BaseElectronsSelection = cms.PSet( #source = cms.InputTag("selectedPatElectronsP
                                    )
 
 # base values for loose electron selection ----------------------------------------------
-BaseLooseElectronsSelection = BaseElectronsSelection.clone(minPt = cms.double(8))
+BaseLooseElectronsSelection = BaseElectronsSelection.clone(minPt = cms.double(10))
 
 
 
 
-# base values for the dilepton System selection ------------------------------------------
+## base values for the dilepton System selection ------------------------------------------
 BaseDileptonSelection = cms.PSet( minDileptonMass = cms.double(0),
                                   maxDileptonMass = cms.double(7000),
 				  minLegPt = cms.double(20),

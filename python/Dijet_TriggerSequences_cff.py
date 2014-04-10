@@ -10,6 +10,14 @@ def getTriggerPaths(version=2012) :
     # 2012 triggers #
     #################
     if(version==2012) :
+	mcTrigs = ['HLT_Mu8_v',
+		   'HLT_Mu12_v',
+		   'HLT_Mu17_v',
+		   'HLT_Mu24_',
+		   'HLT_IsoMu24_',
+		   'HLT_Ele8_',
+		   'HLT_Ele8_CaloIdL_CaloIsoVL_v',
+		   'HLT_Ele17_CaloIdL_CaloIsoVL_v']
         
 	Muon = ['HLT_Mu8_v',
 		'HLT_Mu12_v',
@@ -22,5 +30,5 @@ def getTriggerPaths(version=2012) :
 		    'HLT_Ele17_CaloIdL_CaloIsoVL_v']
 
     
-    return Muon, Electron
+    return Muon, Electron, mcTrigs
 

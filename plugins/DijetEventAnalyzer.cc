@@ -454,8 +454,9 @@ void DijetEventAnalyzer::analyze(const edm::Event &event, const edm::EventSetup 
 	  }
 	}
       }
-    if(triggerBits["singleMu"]==true && triggerBits["mumu"]==true) triggerBits["singleMu"]=false;   //veto overlaps: single muon triggers should be used exclusively 
-    if(triggerBits["singleEle"]==true && triggerBits["ee"]==true) triggerBits["singleEle"]=false;   //veto overlaps: single electron triggers should be used exclusively 
+    //change for Dijet Event analyzer 
+    //if(triggerBits["singleMu"]==true && triggerBits["mumu"]==true) triggerBits["singleMu"]=false;   //veto overlaps: single muon triggers should be used exclusively 
+    //if(triggerBits["singleEle"]==true && triggerBits["ee"]==true) triggerBits["singleEle"]=false;   //veto overlaps: single electron triggers should be used exclusively 
 	    
     //
     // vertex and beam spot
@@ -503,133 +504,29 @@ void DijetEventAnalyzer::analyze(const edm::Event &event, const edm::EventSetup 
     edm::Handle<reco::PFCandidateCollection> hPFCands;
     event.getByLabel("particleFlow",hPFCands);
     std::vector<ObjectIdSummary> eleSummary;
-    std::vector<CandidatePtr> selElectrons   = getGoodElectrons(hEle, hMu, hVtx_, *beamSpot, hConversions, &ecorr_, lazyTool, &eIsolator, hPFCands, *rho, objConfig_["Electrons"], iSetup, eleSummary, allTriggerNames);
+    std::vector<CandidatePtr> selElectrons   = getGoodElectrons(hEle, hMu, hVtx_, *beamSpot, hConversions, &ecorr_, lazyTool, &eIsolator, hPFCands, *rho, objConfig_["LooseElectrons"], iSetup, eleSummary, allTriggerNames);
 
-    //build the dilepton candidate
+
+    //same loose muon and electrons
     ev.cat = UNKNOWN;
     ev.ln=0; ev.mn=0; ev.en=0;
     std::vector<CandidatePtr> selLeptons = selMuons;
     selLeptons.insert(selLeptons.end(), selElectrons.begin(), selElectrons.end());
     std::vector<ObjectIdSummary> selLeptonsSummary = muonSummary;
     selLeptonsSummary.insert(selLeptonsSummary.end(), eleSummary.begin(), eleSummary.end());
-    std::vector<int> dileptonIdx = getDileptonCandidate(selLeptons, objConfig_["Dileptons"], iSetup);
-    if(dileptonIdx.size()==2)
+
+    if(selLeptonsSummary.size() < 1) return;
+    if(triggerBits["Mu"]==false && triggerBits["Ele"]==false) return;
+
+    for(size_t ilep=0; ilep<selLeptonsSummary.size(); ilep++)
       {
-	int l1idx(dileptonIdx[0]), l2idx(dileptonIdx[1]);
-	ev.cat = getDileptonId(selLeptons[l1idx],selLeptons[l2idx]);
-	
-	//require trigger for each event category
-	ev.triggerType=0;
-	//if(event.isRealData())
-	  {
-	    if(ev.cat==EE   && triggerBits["singleEle"]==false && triggerBits["ee"]==false)   return;
-	    if(ev.cat==MUMU && triggerBits["singleMu"]==false && triggerBits["mumu"]==false) return;  
-	    //if(ev.cat==EMU  && triggerBits["emu"]==false)  return; //is this complete?
-	    if(ev.cat==EMU  && triggerBits["emu"]==false && (triggerBits["singleEle"]==false || triggerBits["singleMu"]==false) )  return; // add singleElectron and singleMuon, although no big changes
+        ev.triggerType=0;
+	ev.triggerType = (triggerBits["Mu"] << 0 ) |
+			 (triggerBits["Ele"] << 1 );
 
-	    ev.triggerType = (triggerBits["ee"] << 0 ) |
-	      (triggerBits["mumu"] << 1 ) |
-	      (triggerBits["emu"] << 2 ) |
-	      (triggerBits["singleMu"] << 3 ) |
-	      (triggerBits["singleEle"] << 4 );
+	ObjectIdSummary &lep=selLeptonsSummary[ilep];
+	//if(fabs(lep.id*lep.charge)!= 11 && fabs(lep.id*lep.charge)!= 13) return;
 
-	  }
-
-	//leading lepton
-	ev.l1_px                   = selLeptonsSummary[l1idx].p4.px();
-	ev.l1_py                   = selLeptonsSummary[l1idx].p4.py();
-	ev.l1_pz                   = selLeptonsSummary[l1idx].p4.pz();
-	ev.l1_en                   = selLeptonsSummary[l1idx].p4.energy();
-	ev.l1_id                   = selLeptonsSummary[l1idx].id*selLeptonsSummary[l1idx].charge;
-	ev.l1_ptErr                = selLeptonsSummary[l1idx].p4.pt()*selLeptonsSummary[l1idx].ensferr;
-	ev.l1_genid                = selLeptonsSummary[l1idx].genid;
-	ev.l1_gIso                 = selLeptonsSummary[l1idx].isoVals[G_ISO]; 
-	ev.l1_nhIso                = selLeptonsSummary[l1idx].isoVals[N_ISO]; 
-	ev.l1_chIso                = selLeptonsSummary[l1idx].isoVals[C_ISO];
-	ev.l1_puchIso              = selLeptonsSummary[l1idx].isoVals[CPU_ISO];
-	ev.l1_ecalIso              = selLeptonsSummary[l1idx].isoVals[ECAL_ISO]; 
-	ev.l1_hcalIso              = selLeptonsSummary[l1idx].isoVals[HCAL_ISO]; 
-	ev.l1_trkIso               = selLeptonsSummary[l1idx].isoVals[TRACKER_ISO];
-	ev.l1_d0                   = selLeptonsSummary[l1idx].trkd0;
-	ev.l1_dZ                   = selLeptonsSummary[l1idx].trkdZ;
-	ev.l1_ip3d                 = selLeptonsSummary[l1idx].trkip3d;
-	ev.l1_ip3dsig              = selLeptonsSummary[l1idx].trkip3dsig;
-	ev.l1_trkpt                = selLeptonsSummary[l1idx].trkpt;
-	ev.l1_trketa               = selLeptonsSummary[l1idx].trketa;
-	ev.l1_trkphi               = selLeptonsSummary[l1idx].trkphi;
-	ev.l1_trkchi2              = selLeptonsSummary[l1idx].trkchi2;
-	ev.l1_trkValidPixelHits    = selLeptonsSummary[l1idx].trkValidPixelHits;
-	ev.l1_trkValidTrackerHits  = selLeptonsSummary[l1idx].trkValidTrackerHits;
-	ev.l1_trkLostInnerHits     = selLeptonsSummary[l1idx].trkLostInnerHits;
-	ev.l1_ensf                 = selLeptonsSummary[l1idx].ensf;
-	ev.l1_ensferr              = selLeptonsSummary[l1idx].ensferr;
-	ev.l1_pid                  = addPidSummary(selLeptonsSummary[l1idx]);
-
-	//trailer lepton
-	ev.l2_px                   = selLeptonsSummary[l2idx].p4.px();
-	ev.l2_py                   = selLeptonsSummary[l2idx].p4.py();
-	ev.l2_pz                   = selLeptonsSummary[l2idx].p4.pz();
-	ev.l2_en                   = selLeptonsSummary[l2idx].p4.energy();
-	ev.l2_id                   = selLeptonsSummary[l2idx].id*selLeptonsSummary[l2idx].charge;
-	ev.l2_ptErr                = selLeptonsSummary[l2idx].p4.pt()*selLeptonsSummary[l2idx].ensferr;
-	ev.l2_genid                = selLeptonsSummary[l2idx].genid;
-	ev.l2_gIso                 = selLeptonsSummary[l2idx].isoVals[G_ISO]; 
-	ev.l2_nhIso                = selLeptonsSummary[l2idx].isoVals[N_ISO]; 
-	ev.l2_chIso                = selLeptonsSummary[l2idx].isoVals[C_ISO];
-	ev.l2_puchIso              = selLeptonsSummary[l2idx].isoVals[CPU_ISO];
-	ev.l2_ecalIso              = selLeptonsSummary[l2idx].isoVals[ECAL_ISO]; 
-	ev.l2_hcalIso              = selLeptonsSummary[l2idx].isoVals[HCAL_ISO]; 
-	ev.l2_trkIso               = selLeptonsSummary[l2idx].isoVals[TRACKER_ISO];
-	ev.l2_d0                   = selLeptonsSummary[l2idx].trkd0;
-	ev.l2_dZ                   = selLeptonsSummary[l2idx].trkdZ;
-	ev.l2_ip3d                 = selLeptonsSummary[l2idx].trkip3d;
-	ev.l2_ip3dsig              = selLeptonsSummary[l2idx].trkip3dsig;
-	ev.l2_trkpt                = selLeptonsSummary[l2idx].trkpt;
-	ev.l2_trketa               = selLeptonsSummary[l2idx].trketa;
-	ev.l2_trkphi               = selLeptonsSummary[l2idx].trkphi;
-	ev.l2_trkchi2              = selLeptonsSummary[l2idx].trkchi2;
-	ev.l2_trkValidPixelHits    = selLeptonsSummary[l2idx].trkValidPixelHits;
-	ev.l2_trkValidTrackerHits  = selLeptonsSummary[l2idx].trkValidTrackerHits;
-	ev.l2_trkLostInnerHits     = selLeptonsSummary[l2idx].trkLostInnerHits;
-	ev.l2_ensf                 = selLeptonsSummary[l2idx].ensf;
-	ev.l2_ensferr              = selLeptonsSummary[l2idx].ensferr;
-	ev.l2_pid                  = addPidSummary( selLeptonsSummary[l2idx] );
-      }
-    else{
-	return; //clean trashes of dileptonIdx.size() == 0 case
-    }
-    
-    //save extra leptons (including softer ones)
-    std::vector<ObjectIdSummary> looseMuonSummary;
-    std::vector<CandidatePtr>    looseMuons = getGoodMuons(hMu, primVertex, *rho, objConfig_["SoftMuons"], iSetup, looseMuonSummary, allTriggerNames);
-    std::vector<ObjectIdSummary> looseEleSummary;
-    std::vector<CandidatePtr>    looseElectrons = getGoodElectrons(hEle, hMu, hVtx_, *beamSpot, hConversions, &ecorr_,  lazyTool, &eIsolator, hPFCands, *rho, objConfig_["LooseElectrons"], iSetup, looseEleSummary, allTriggerNames);
-    std::vector<ObjectIdSummary> selLooseLeptonsSummary = selLeptonsSummary;
-    selLooseLeptonsSummary.insert( selLooseLeptonsSummary.end(), looseMuonSummary.begin(), looseMuonSummary.end() );
-    selLooseLeptonsSummary.insert( selLooseLeptonsSummary.end(), looseEleSummary.begin(),  looseEleSummary.end() );
-    std::vector<CandidatePtr>     selLooseLeptons = selLeptons;
-    selLooseLeptons.insert( selLooseLeptons.end(), looseMuons.begin(),     looseMuons.end() );
-    selLooseLeptons.insert( selLooseLeptons.end(), looseElectrons.begin(), looseElectrons.end() );
-    std::vector<LorentzVector> savedLeptonsP4;
-    if(dileptonIdx.size()>0) 
-      {
-	savedLeptonsP4.push_back( selLeptonsSummary[dileptonIdx[0]].p4 ); 
-	savedLeptonsP4.push_back( selLeptonsSummary[dileptonIdx[1]].p4 ); 
-      }
-    for(size_t ilep=0; ilep<selLooseLeptonsSummary.size(); ilep++)
-      {
-	ObjectIdSummary &lep=selLooseLeptonsSummary[ilep];
-
-	//check if objects are not repeated...
-	bool veto(false);
-	for(size_t isavLep=0; isavLep<savedLeptonsP4.size(); isavLep++)
-	  {
-	    if( deltaR( savedLeptonsP4[isavLep],lep.p4)>0.1 ) continue;
-	    veto=true;
-	  }
-	if(veto) continue;
-	savedLeptonsP4.push_back(lep.p4);
-	
 	//save it
 	ev.ln_px[ev.ln]                  = lep.p4.px();
 	ev.ln_py[ev.ln]                  = lep.p4.py();
@@ -665,6 +562,7 @@ void DijetEventAnalyzer::analyze(const edm::Event &event, const edm::EventSetup 
     //
     // PHOTON SELECTION
     //
+/*
     edm::Handle<edm::View<reco::Candidate> > hPhoton;
     event.getByLabel( objConfig_["Photons"].getParameter<edm::InputTag>("source"), hPhoton );
     edm::Handle<std::vector<reco::Track> > hTracks;
@@ -703,7 +601,7 @@ void DijetEventAnalyzer::analyze(const edm::Event &event, const edm::EventSetup 
 
     //quit if no gamma or dilepton candidate
     if(ev.cat==UNKNOWN) return;
-
+*/
 
     //
     // JET SELECTION
