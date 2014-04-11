@@ -143,7 +143,7 @@ int main(int argc, char* argv[])
     }
     size_t nvarsToInclude=varNames.size();
 
-
+/*
     // Muon scale/resolution corrections
     TString fitParametersFile = "/afs/cern.ch/work/r/rewang/HiggsZZd/HZZ/CMSSW_5_3_11/src/CMGTools/HiggsAna2l2v/src/MuScleFitCorrector_v4_1/";
     if(use2011Id) {
@@ -157,7 +157,7 @@ int main(int argc, char* argv[])
         }
     }
     MuScleFitCorrector *corrector_ = new MuScleFitCorrector(fitParametersFile);
-
+*/
 
 
 
@@ -758,6 +758,7 @@ int main(int argc, char* argv[])
         //
         LorentzVector lep1=phys.leptons[0];
         LorentzVector lep2=phys.leptons[1];
+/*
         //Muon scale and resolution corrections
         if(fabs(phys.leptons[0].id)==13) {
             TLorentzVector tmpLep1(lep1.Px(), lep1.Py(), lep1.Pz(), lep1.E());
@@ -773,6 +774,7 @@ int main(int argc, char* argv[])
             if( isMC && (!use2011Id) ) corrector_->applyPtSmearing(tmpLep2, tmpCh2);
             lep2 = LorentzVector(tmpLep2.Px(), tmpLep2.Py(), tmpLep2.Pz(), tmpLep2.E());
         }
+*/
         LorentzVector zll(lep1+lep2);
         double dphi2l = fabs(deltaPhi(lep1.phi(),lep2.phi()));
         //bool passdphi2l(true);
@@ -970,6 +972,7 @@ int main(int argc, char* argv[])
             //Muon scale and resolution corrections
             // probably unnecessary
             LorentzVector tmpLep = phys.leptons[ilep];
+/*
             if(fabs(phys.leptons[ilep].id)==13) {
                 TLorentzVector tmpTLep(tmpLep.Px(), tmpLep.Py(), tmpLep.Pz(), tmpLep.E());
                 int tmpCh = phys.leptons[ilep].id < 0.0 ? -1 : 1; // "id" has same sign as charge here (opposite to "genid")
@@ -977,6 +980,7 @@ int main(int argc, char* argv[])
                 if( isMC && (!use2011Id) ) corrector_->applyPtSmearing(tmpTLep, tmpCh);
                 tmpLep = LorentzVector(tmpTLep.Px(), tmpTLep.Py(), tmpTLep.Pz(), tmpTLep.E());
             }
+*/
             if(isGood) extraLeptonsP4.push_back(tmpLep);
             if(isGood_WZ) extraLeptonsP4_WZ.push_back(tmpLep);
             //extraLeptonsP4.push_back( phys.leptons[ilep] );

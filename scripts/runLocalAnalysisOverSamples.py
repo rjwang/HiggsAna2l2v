@@ -45,7 +45,7 @@ except getopt.GetoptError:
      sys.exit(1)
 
 subtoBatch=False
-requirementtoBatch='type==SLC5_64&&pool>30000'
+requirementtoBatch='type==SLC6_64&&pool>30000'
 samplesDB=''
 theExecutable=''
 inputdir=''

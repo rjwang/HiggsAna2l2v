@@ -39,6 +39,9 @@
 
 using namespace std;
 
+std::vector<LorentzVector> checkDiMuonMass(std::vector<LorentzVector> leps);
+std::vector<LorentzVector> checkDiElectronMass(std::vector<LorentzVector> leps);
+
 int main(int argc, char* argv[])
 {
     //##################################################################################
@@ -400,10 +403,10 @@ int main(int argc, char* argv[])
         // LEPTON ANALYSIS
         //
 
-        std::vector<LorentzVector> looseMuons;
-        std::vector<LorentzVector> tightMuons;
-        std::vector<LorentzVector> looseElectrons;
-        std::vector<LorentzVector> tightElectrons;
+        std::vector<LorentzVector> looseMuons_raw;
+        std::vector<LorentzVector> tightMuons_raw;
+        std::vector<LorentzVector> looseElectrons_raw;
+        std::vector<LorentzVector> tightElectrons_raw;
 
 
 /*
@@ -455,10 +458,10 @@ int main(int argc, char* argv[])
 
             if(fabs(phys.leptons[ilep].id)==13) {
                 if( hasObjectId(ev.mn_idbits[lpid], MID_LOOSE) && relIso<0.2)    {
-		    looseMuons.push_back(phys.leptons[ilep]);
+		    looseMuons_raw.push_back(phys.leptons[ilep]);
                 }
                 if( hasObjectId(ev.mn_idbits[lpid], MID_TIGHT) && relIso<0.2)    {
-		    tightMuons.push_back(phys.leptons[ilep]);
+		    tightMuons_raw.push_back(phys.leptons[ilep]);
                 }
 
                 llScaleFactor *= lsf.getLeptonEfficiency(phys.leptons[ilep].pt(),fabs(phys.leptons[ilep].eta()),13).first;
@@ -476,10 +479,10 @@ int main(int argc, char* argv[])
                                       0., 0., 0.,
                                       !hasObjectId(ev.en_idbits[lpid], EID_CONVERSIONVETO),0,ev.rho);
                         if(passWp && iwp==2 && relIso<0.15) {
-			    looseElectrons.push_back(phys.leptons[ilep]);
+			    looseElectrons_raw.push_back(phys.leptons[ilep]);
                         }
 			if(passWp && iwp==1 && relIso<0.15) {
-			    tightElectrons.push_back(phys.leptons[ilep]);
+			    tightElectrons_raw.push_back(phys.leptons[ilep]);
 			}
                         if(!use2011Id) {
                             //llScaleFactor *= 1;
@@ -639,7 +642,14 @@ int main(int argc, char* argv[])
 	// dijet control sample
 	if(zvvs[0].pt()<20)
 	{
+
+		std::vector<LorentzVector> looseMuons = checkDiMuonMass(looseMuons_raw);
+		std::vector<LorentzVector> tightMuons = checkDiMuonMass(tightMuons_raw); 
+		std::vector<LorentzVector> looseElectrons = checkDiElectronMass(looseElectrons_raw);
+		std::vector<LorentzVector> tightElectrons = checkDiElectronMass(tightElectrons_raw); 
+
 		for(size_t j=0; j<looseElectrons.size(); j++){
+			
 			mon.fillHisto("eleLooseFake",tags, looseElectrons[j].pt(), weight);
         	}
 		for(size_t j=0; j<tightElectrons.size(); j++){
@@ -647,9 +657,16 @@ int main(int argc, char* argv[])
         	}
 
 		for(size_t j=0; j<looseMuons.size(); j++){
+	
+			double Wmt = METUtils::transverseMass(looseMuons[j],zvvs[0],false);
+			if (Wmt > 20) continue;
+					
 			mon.fillHisto("muLooseFake",tags, looseMuons[j].pt(), weight);
         	}
 		for(size_t j=0; j<tightMuons.size(); j++){
+			double Wmt = METUtils::transverseMass(tightMuons[j],zvvs[0],false);
+			if (Wmt > 20) continue;
+
 			mon.fillHisto("muTightFake",tags, tightMuons[j].pt(), weight);
         	}
 	}
@@ -686,5 +703,49 @@ int main(int argc, char* argv[])
 
 
 
+std::vector<LorentzVector> checkDiMuonMass(std::vector<LorentzVector> leps)
+{
+    if(leps.size() <= 1 ) return leps;
+    std::vector<LorentzVector> toSaveLeps;
+    for(size_t j=0; j<leps.size(); j++){
+	bool iskeep(true);
+	for(size_t k=0; k<leps.size(); k++)
+       	{
+	    if(k==j) continue;
+	    LorentzVector dilep(leps[j]+leps[k]);
+	    double mass = dilep.mass();
+	    if(mass < 20 || (mass > 76 && mass < 106))
+	    {
+		iskeep = false;
+		break;
+	    }
+        }
+	if(iskeep) toSaveLeps.push_back(leps[j]); 
+    }
+
+    return toSaveLeps;
+}
 
 
+std::vector<LorentzVector> checkDiElectronMass(std::vector<LorentzVector> leps)
+{
+    if(leps.size() <= 1 ) return leps;
+    std::vector<LorentzVector> toSaveLeps;
+    for(size_t j=0; j<leps.size(); j++){
+        bool iskeep(true);
+        for(size_t k=0; k<leps.size(); k++)
+        {
+            if(k==j) continue;
+            LorentzVector dilep(leps[j]+leps[k]);
+            double mass = dilep.mass();
+            if(mass < 20 || (mass > 60 && mass < 120))
+            {
+                iskeep = false;
+                break;
+            }
+        }
+        if(iskeep) toSaveLeps.push_back(leps[j]);  
+    }
+
+    return toSaveLeps;
+}
