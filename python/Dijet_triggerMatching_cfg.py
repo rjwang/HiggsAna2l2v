@@ -14,15 +14,9 @@ add all trigger matches to the leptons
 def addTriggerMatchingTo(process) :
 
     #triggers of interest
-    pathTrigger_Mu_1  = 'path("HLT_Mu8_v*")'
-    pathTrigger_Mu_2  = 'path("HLT_Mu12_v*")'
-    pathTrigger_Mu_3  = 'path("HLT_Mu17_v*")'
-    pathTrigger_Mu_4  = 'path("HLT_Mu24_*")'
-    pathTrigger_Mu_5  = 'path("HLT_IsoMu24_*")'
+    pathTrigger_Mu_1  = 'path("HLT_Mu17_v*")'
 
-    pathTrigger_Ele_1 = 'path("HLT_Ele8_*")'
-    pathTrigger_Ele_2 = 'path("HLT_Ele8_CaloIdL_CaloIsoVL_v*")'
-    pathTrigger_Ele_3 = 'path("HLT_Ele17_CaloIdL_CaloIsoVL_v*")'
+    pathTrigger_Ele_1 = 'path("HLT_Ele17_CaloIdT_CaloIsoVL_TrkIdVL_TrkIsoVL_v*")'
 
 
 
@@ -36,22 +30,14 @@ def addTriggerMatchingTo(process) :
                                                             resolveAmbiguities    = cms.bool( True ) ,
                                                             resolveByMatchQuality = cms.bool( True ) 
                                                             )
-    process.muonTriggerMatchHLTMu2  = process.muonTriggerMatchHLTMu1.clone( matchedCuts = cms.string( pathTrigger_Mu_2 ) )
-    process.muonTriggerMatchHLTMu3  = process.muonTriggerMatchHLTMu1.clone( matchedCuts = cms.string( pathTrigger_Mu_3 ) )
-    process.muonTriggerMatchHLTMu4  = process.muonTriggerMatchHLTMu1.clone( matchedCuts = cms.string( pathTrigger_Mu_4 ) )
-    process.muonTriggerMatchHLTMu5  = process.muonTriggerMatchHLTMu1.clone( matchedCuts = cms.string( pathTrigger_Mu_5 ) )
 
     process.selectedPatMuonsTriggerMatch = cms.EDProducer( "PATTriggerMatchMuonEmbedder",
                                                            src     = cms.InputTag( "selectedPatMuonsPFlow" ),
-                                                           matches = cms.VInputTag('muonTriggerMatchHLTMu1', 'muonTriggerMatchHLTMu2', 
-                                                                                   'muonTriggerMatchHLTMu3', 'muonTriggerMatchHLTMu4',
-                                                                                   'muonTriggerMatchHLTMu5'
+                                                           matches = cms.VInputTag('muonTriggerMatchHLTMu1' 
                                                                                    )
                                                            )
     switchOnTriggerMatchEmbedding(process,
-                                  triggerMatchers = [ 'muonTriggerMatchHLTMu1', 'muonTriggerMatchHLTMu2',
-                                                      'muonTriggerMatchHLTMu3', 'muonTriggerMatchHLTMu4',
-                                                      'muonTriggerMatchHLTMu5' ],
+                                  triggerMatchers = [ 'muonTriggerMatchHLTMu1' ],
                                   sequence='patDefaultSequencePFlow')
 
 
@@ -72,20 +58,15 @@ def addTriggerMatchingTo(process) :
                                                            resolveByMatchQuality = cms.bool( True )
                                                            )
 
-    process.eleTriggerMatchHLTEle2 = process.eleTriggerMatchHLTEle1.clone( matchedCuts = cms.string(pathTrigger_Ele_2) )
-    process.eleTriggerMatchHLTEle3 = process.eleTriggerMatchHLTEle1.clone( matchedCuts = cms.string(pathTrigger_Ele_3) )
     
     switchOnTriggerMatching( process,
-                             ['eleTriggerMatchHLTEle1',
-                              'eleTriggerMatchHLTEle2','eleTriggerMatchHLTEle3'],
+                             ['eleTriggerMatchHLTEle1'],
                              sequence ='patDefaultSequencePFlow',
                              hltProcess = '*' )
     
     process.selectedPatElectronsWithTrigger = cms.EDProducer("PATTriggerMatchElectronEmbedder",
                                                              src     = cms.InputTag("selectedPatElectronsPFlow"),
-                                                             matches = cms.VInputTag( cms.InputTag('eleTriggerMatchHLTEle1'),
-                                                                                      cms.InputTag('eleTriggerMatchHLTEle2'),
-                                                                                      cms.InputTag('eleTriggerMatchHLTEle3')
+                                                             matches = cms.VInputTag( cms.InputTag('eleTriggerMatchHLTEle1')
                                                                                       )
                                                              )
     

@@ -73,7 +73,7 @@ BaseMuonsSelection = cms.PSet( #source = cms.InputTag("selectedPatMuonsTriggerMa
 			       source = cms.InputTag("MuScleFit"), # Apr.04
                                sourceIsPF = cms.bool(False),
                                rho25Neut = cms.InputTag("kt6PFJetsCentralNeutral:rho"), #but using BaseJetSelection:rho
-                               minPt = cms.double(10),
+                               minPt = cms.double(20),
                                maxEta = cms.double(2.5),
                                id = cms.string("loose"),
                                vbtf2011 = cms.PSet( id = cms.string(""),

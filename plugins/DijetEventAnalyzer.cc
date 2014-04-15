@@ -504,7 +504,7 @@ void DijetEventAnalyzer::analyze(const edm::Event &event, const edm::EventSetup 
     edm::Handle<reco::PFCandidateCollection> hPFCands;
     event.getByLabel("particleFlow",hPFCands);
     std::vector<ObjectIdSummary> eleSummary;
-    std::vector<CandidatePtr> selElectrons   = getGoodElectrons(hEle, hMu, hVtx_, *beamSpot, hConversions, &ecorr_, lazyTool, &eIsolator, hPFCands, *rho, objConfig_["LooseElectrons"], iSetup, eleSummary, allTriggerNames);
+    std::vector<CandidatePtr> selElectrons   = getGoodElectrons(hEle, hMu, hVtx_, *beamSpot, hConversions, &ecorr_, lazyTool, &eIsolator, hPFCands, *rho, objConfig_["Electrons"], iSetup, eleSummary, allTriggerNames);
 
 
     //same loose muon and electrons
