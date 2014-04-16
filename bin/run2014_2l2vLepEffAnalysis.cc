@@ -130,24 +130,6 @@ int main(int argc, char* argv[])
     //ZHinvisible reweighting file input
     //ZHUtils myZHUtils(runProcess);
 
-    //systematics
-    bool runSystematics                        = runProcess.getParameter<bool>("runSystematics");
-    std::vector<TString> varNames(1,"");
-    if(runSystematics){
-      	cout << "Systematics will be computed for this analysis" << endl;
-      	varNames.push_back("_jerup");    varNames.push_back("_jerdown");
-      	varNames.push_back("_jesup");    varNames.push_back("_jesdown");
-      	varNames.push_back("_umetup");   varNames.push_back("_umetdown");
-      	varNames.push_back("_lesup");    varNames.push_back("_lesdown");
-      	varNames.push_back("_puup");     varNames.push_back("_pudown");
-      	varNames.push_back("_btagup");   varNames.push_back("_btagdown");
-	// will need to add ZZ and WZ shape uncertainty
-      	//if(isMC_ZZ)             { varNames.push_back("_zzptup");   varNames.push_back("_zzptdown");     }
-      	//if(isMC_WZ)             { varNames.push_back("_wzptup");   varNames.push_back("_wzptdown");     }
-    }
-    //size_t nvarsToInclude=varNames.size();
-
-
 
 
     //##################################################################################
@@ -413,8 +395,6 @@ int main(int argc, char* argv[])
         //
         LorentzVector rawMetP4=phys.met[1];
         if(use2011Id) rawMetP4=phys.met[0];
-        //LorentzVector fullTypeIMetP4=phys.met[0];
-        //LorentzVector mvaMetP4=phys.met[7];
 
         //apply JER base corrections to jets (and compute associated variations on the MET variable)
         // std PF
@@ -434,38 +414,13 @@ int main(int argc, char* argv[])
         std::vector<LorentzVector> looseElectrons_raw;
         std::vector<LorentzVector> tightElectrons_raw;
 
-
-
         LorentzVector lep1=phys.leptons[0];
         LorentzVector lep2=phys.leptons[1];
         LorentzVector zll(lep1+lep2);
 	bool passtightZmass(fabs(zll.mass()-91)<5); 
-/*
-        double dphi2l = fabs(deltaPhi(lep1.phi(),lep2.phi()));
-        //bool passdphi2l(true);
-        //bool passdphi2l(cos(dphi2l)>0);
 
-        //two opposite sign leptons
-        int  id1=phys.leptons[0].id;
-        int  id2=phys.leptons[1].id;
-        bool passOppositeSign((id1*id2)<0);
-
-        bool passId(true);
-        passId &= passOppositeSign;
-        bool passIdAndIso(true);
-        passIdAndIso &= passOppositeSign;
-        bool passZmass(fabs(zll.mass()-91)<15); //RJ changed
-
-        bool isZsideBand( (zll.mass()>40 && zll.mass()<70) || (zll.mass()>110 && zll.mass()<200));
-        bool isZsideBandPlus( (zll.mass()>110 && zll.mass()<200));
-        bool passZpt(zll.pt()>50); //for Gamma+Jets, can also be used for control plots
-*/
         //check alternative selections for the dilepton
         double llScaleFactor(1.0),llTriggerEfficiency(1.0);
-        //LorentzVector genZP4(0,0,0,0); // for checks on Sherpa ZZ
-        //int genmatchid[2] = {-1, -1};
-        //double genmatchdr[2] = {0.1, 0.1};
-
 
 
         // looping leptons (what I want)  begin
@@ -537,18 +492,9 @@ int main(int argc, char* argv[])
         //
         //STD PF JET ANALYSIS
         //
-        //bool passJetveto(true);
-        //bool passBveto(true);
-        //bool passMetCut(true);
-        //bool passDphijmet(true);
-        //bool passBalanceCut(true);
         PhysicsObjectJetCollection &aJets = ( useJERsmearing ? variedAJets[0] : recoJets );
         PhysicsObjectJetCollection aGoodIdJets;
-        //LorentzVector aClusteredMetP4(zll);
-        //aClusteredMetP4 *= -1;
-        //LorentzVector Recoil(zvvs[0]);
-        //Recoil *= -1;
-        //Recoil -= zll;
+
         int nABtags(0),nAJetsGood30(0),nAJetsGood15(0), nCSVMtags(0), nCSVTtags(0);
         float mindphijmet(999999.),mindphijmet15(999999.);
         for(size_t ijet=0; ijet<aJets.size(); ijet++) {
@@ -563,9 +509,6 @@ int main(int argc, char* argv[])
             if(usePUsubJetId) isGoodJet = hasObjectId(aJets[ijet].pid,JETID_CUTBASED_LOOSE);
             if(!isGoodJet) continue;
 
-
-            //aClusteredMetP4 -= aJets[ijet];
-
             if(useJetsOnlyInTracker && fabs(aJets[ijet].eta())>2.5) continue;
 
             aGoodIdJets.push_back(aJets[ijet]);
@@ -575,75 +518,7 @@ int main(int argc, char* argv[])
             if(aJets[ijet].pt()>20 /*&& fabs(aJets[ijet].eta())<2.5*/)  nCSVMtags += (aJets[ijet].btag6>0.679);
             if(aJets[ijet].pt()>20 /*&& fabs(aJets[ijet].eta())<2.5*/)  nCSVTtags += (aJets[ijet].btag6>0.898);
         }
-        //passJetveto=(nAJetsGood30==0);
-        //passBveto=(nABtags==0);
-        //bool passMBveto=(nCSVMtags==0);
-        //bool passTBveto=(nCSVTtags==0);
-        //passDphijmet=(mindphijmet>0.5);
-        //if(nAJetsGood30==0) passDphijmet=(mindphijmet15>0.5);
-        //passBalanceCut=(zvvs[0].pt()/zll.pt()>0.8 && zvvs[0].pt()/zll.pt()<1.2);
-        //passBalanceCut=(zvvs[0].pt()/zll.pt()>0.75 && zvvs[0].pt()/zll.pt()<1.25);
-	//bool passBalanceCut05=(zvvs[0].pt()/zll.pt()>0.5 && zvvs[0].pt()/zll.pt()<1.5);
-	//bool passBalanceCut075=(zvvs[0].pt()/zll.pt()>0.25 && zvvs[0].pt()/zll.pt()<1.75);
-        //bool passBalanceCutWWCtrl=(zvvs[0].pt()/zll.pt()>0.4 && zvvs[0].pt()/zll.pt()<1.8);
 
-
-        //ad-hoc cut for obvious correlations between MET and a lepton
-        //double dphil1met=fabs(deltaPhi(lep1.phi(),zvvs[0].phi()));
-        //double dphil2met=fabs(deltaPhi(lep2.phi(),zvvs[0].phi()));
-        //bool passLMetVeto(true);
-        //if(!use2011Id && zvvs[0].pt()>60 && min(dphil1met,dphil2met)<0.2) passLMetVeto=false;
-
-        //other mets
-        //METUtils::stRedMET aRedMetOut;
-        LorentzVector null(0,0,0,0);
-        //LorentzVector aRedMet=METUtils::redMET(METUtils::INDEPENDENTLYMINIMIZED, zll, 0, null, 0, aClusteredMetP4, zvvs[0], true, &aRedMetOut);
-        //double aRedMetL=aRedMetOut.redMET_l;
-        //double aRedMetT=aRedMetOut.redMET_t;
-        //TVector2 aClusteredMet2(aClusteredMetP4.px(),aClusteredMetP4.py());
-        //double clusteredMetL=aRedMetOut.a_l*aClusteredMet2;
-        //double clusteredMetT=aRedMetOut.a_t*aClusteredMet2;
-        //passMetCut=(zvvs[0].pt()>120); //ReducedMET: aRedMet.pt(); PFMET: zvvs[0].pt()
-	/*
-	bool passMetCut60=(zvvs[0].pt()>60);
-	bool passMetCut80=(zvvs[0].pt()>80);
-	bool passMetCut100=(zvvs[0].pt()>100);
-	bool passMetCut120=(zvvs[0].pt()>120);
-	*/
-        //bool passMetCutWWCtrl=(aRedMet.pt()>65);
-
-        //TVector2 RecoilMet2(Recoil.px(),Recoil.py());
-        //double RecoilMetL=aRedMetOut.a_l*RecoilMet2;
-        //double RecoilMetT=aRedMetOut.a_t*RecoilMet2;
-
-
-        // compute dphi(zpt,redMet)
-        //double dphiZllmet=fabs(deltaPhi(zll.phi(),zvvs[0].phi()));
-        //double dphiMet_mvaMet=fabs(deltaPhi(mvaMetP4.phi(),zvvs[0].phi()));
-        //double dphiZllredMet=fabs(deltaPhi(zll.phi(),aRedMet.phi()));
-        //bool passdphiZllmetCut(dphiZllmet>2.7);///2.6);
-	//bool passdphiZllmetCut20(dphiZllmet>2.0);
-	//bool passdphiZllmetCut24(dphiZllmet>2.4);
-        //bool passdphiMetmvaMet(dphiMet_mvaMet<0.2);
-
-/*
-        //transverse masses
-        double aMT=METUtils::transverseMass(zll,zvvs[0],true);
-        double aMTmassless=METUtils::transverseMass(zll,zvvs[0],false);
-	double mtless_MetLLp = METUtils::transverseMass(lep1,zvvs[0],false);
-	double mtless_MetTLp = METUtils::transverseMass(lep2,zvvs[0],false);
-        double balanceDif=fabs(zvvs[0].pt()-zll.pt())/zll.pt();
-        TVector2 dil2(zll.px(),zll.py());
-        TVector2 met2(zvvs[0].px(),zvvs[0].py());
-        double axialMet=dil2*met2;
-        axialMet /= -zll.pt();
-        //double pfMetCompL = aRedMetOut.a_l*met2;
-        //double pfMetCompT = aRedMetOut.a_t*met2;
-
-
-        bool passMTcut(aMT>220 && aMT<1200);
-
-*/
 
 
 
