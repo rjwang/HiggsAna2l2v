@@ -160,34 +160,34 @@ int main(int argc, char* argv[])
     double fakePt[13]= {10,15,20,25,30,35,40,45,50,60,70,80,100};
     double fakeEta[9]= {-2.5,-2.,-1.479,-1.,0.,1.,1.479,2.,2.5};
     
-    mon.addHistogram( new TH1F( "eleLooseFakePt",       ";Loose #it{p}_{T}^{e} [GeV];Events", 12,fakePt) );
-    mon.addHistogram( new TH1F( "eleTightFakePt",       ";Tight #it{p}_{T}^{e} [GeV];Events", 12,fakePt) );
-    mon.addHistogram( new TH1F( "eleLooseFakeEta",       ";Loose #it{p}_{T}^{e} [GeV];Events", 8,fakeEta) );
-    mon.addHistogram( new TH1F( "eleTightFakeEta",       ";Tight #it{p}_{T}^{e} [GeV];Events", 8,fakeEta) );
+    mon.addHistogram( new TH1F( "eleLooseLepEffPt",       ";Loose #it{p}_{T}^{e} [GeV];Events", 12,fakePt) );
+    mon.addHistogram( new TH1F( "eleTightLepEffPt",       ";Tight #it{p}_{T}^{e} [GeV];Events", 12,fakePt) );
+    mon.addHistogram( new TH1F( "eleLooseLepEffEta",       ";Loose #it{p}_{T}^{e} [GeV];Events", 8,fakeEta) );
+    mon.addHistogram( new TH1F( "eleTightLepEffEta",       ";Tight #it{p}_{T}^{e} [GeV];Events", 8,fakeEta) );
 
-    mon.addHistogram( new TH1F( "eleLooseFake_etabin1",       ";Loose #it{p}_{T}^{e} [GeV];Events", 12,fakePt) );
-    mon.addHistogram( new TH1F( "eleTightFake_etabin1",       ";Tight #it{p}_{T}^{e} [GeV];Events", 12,fakePt) );
-    mon.addHistogram( new TH1F( "eleLooseFake_etabin2",       ";Loose #it{p}_{T}^{e} [GeV];Events", 12,fakePt) );
-    mon.addHistogram( new TH1F( "eleTightFake_etabin2",       ";Tight #it{p}_{T}^{e} [GeV];Events", 12,fakePt) );
-    mon.addHistogram( new TH1F( "eleLooseFake_etabin3",       ";Loose #it{p}_{T}^{e} [GeV];Events", 12,fakePt) );
-    mon.addHistogram( new TH1F( "eleTightFake_etabin3",       ";Tight #it{p}_{T}^{e} [GeV];Events", 12,fakePt) );
-    mon.addHistogram( new TH1F( "eleLooseFake_etabin4",       ";Loose #it{p}_{T}^{e} [GeV];Events", 12,fakePt) );
-    mon.addHistogram( new TH1F( "eleTightFake_etabin4",       ";Tight #it{p}_{T}^{e} [GeV];Events", 12,fakePt) );
+    mon.addHistogram( new TH1F( "eleLooseLepEff_etabin1",       ";Loose #it{p}_{T}^{e} [GeV];Events", 12,fakePt) );
+    mon.addHistogram( new TH1F( "eleTightLepEff_etabin1",       ";Tight #it{p}_{T}^{e} [GeV];Events", 12,fakePt) );
+    mon.addHistogram( new TH1F( "eleLooseLepEff_etabin2",       ";Loose #it{p}_{T}^{e} [GeV];Events", 12,fakePt) );
+    mon.addHistogram( new TH1F( "eleTightLepEff_etabin2",       ";Tight #it{p}_{T}^{e} [GeV];Events", 12,fakePt) );
+    mon.addHistogram( new TH1F( "eleLooseLepEff_etabin3",       ";Loose #it{p}_{T}^{e} [GeV];Events", 12,fakePt) );
+    mon.addHistogram( new TH1F( "eleTightLepEff_etabin3",       ";Tight #it{p}_{T}^{e} [GeV];Events", 12,fakePt) );
+    mon.addHistogram( new TH1F( "eleLooseLepEff_etabin4",       ";Loose #it{p}_{T}^{e} [GeV];Events", 12,fakePt) );
+    mon.addHistogram( new TH1F( "eleTightLepEff_etabin4",       ";Tight #it{p}_{T}^{e} [GeV];Events", 12,fakePt) );
 
 
-    mon.addHistogram( new TH1F( "muLooseFakePt",        ";Loose #it{p}_{T}^{#mu} [GeV];Events", 12,fakePt) );
-    mon.addHistogram( new TH1F( "muTightFakePt",        ";Tight #it{p}_{T}^{#mu} [GeV];Events", 12,fakePt) );
-    mon.addHistogram( new TH1F( "muLooseFakeEta",        ";Loose #it{p}_{T}^{#mu} [GeV];Events", 8,fakeEta) );
-    mon.addHistogram( new TH1F( "muTightFakeEta",        ";Tight #it{p}_{T}^{#mu} [GeV];Events", 8,fakeEta) );
+    mon.addHistogram( new TH1F( "muLooseLepEffPt",        ";Loose #it{p}_{T}^{#mu} [GeV];Events", 12,fakePt) );
+    mon.addHistogram( new TH1F( "muTightLepEffPt",        ";Tight #it{p}_{T}^{#mu} [GeV];Events", 12,fakePt) );
+    mon.addHistogram( new TH1F( "muLooseLepEffEta",        ";Loose #it{p}_{T}^{#mu} [GeV];Events", 8,fakeEta) );
+    mon.addHistogram( new TH1F( "muTightLepEffEta",        ";Tight #it{p}_{T}^{#mu} [GeV];Events", 8,fakeEta) );
 
-    mon.addHistogram( new TH1F( "muLooseFake_etabin1",       ";Loose #it{p}_{T}^{#mu} [GeV];Events", 12,fakePt) );
-    mon.addHistogram( new TH1F( "muTightFake_etabin1",       ";Tight #it{p}_{T}^{#mu} [GeV];Events", 12,fakePt) );
-    mon.addHistogram( new TH1F( "muLooseFake_etabin2",       ";Loose #it{p}_{T}^{#mu} [GeV];Events", 12,fakePt) );
-    mon.addHistogram( new TH1F( "muTightFake_etabin2",       ";Tight #it{p}_{T}^{#mu} [GeV];Events", 12,fakePt) );
-    mon.addHistogram( new TH1F( "muLooseFake_etabin3",       ";Loose #it{p}_{T}^{#mu} [GeV];Events", 12,fakePt) );
-    mon.addHistogram( new TH1F( "muTightFake_etabin3",       ";Tight #it{p}_{T}^{#mu} [GeV];Events", 12,fakePt) );
-    mon.addHistogram( new TH1F( "muLooseFake_etabin4",       ";Loose #it{p}_{T}^{#mu} [GeV];Events", 12,fakePt) );
-    mon.addHistogram( new TH1F( "muTightFake_etabin4",       ";Tight #it{p}_{T}^{#mu} [GeV];Events", 12,fakePt) );
+    mon.addHistogram( new TH1F( "muLooseLepEff_etabin1",       ";Loose #it{p}_{T}^{#mu} [GeV];Events", 12,fakePt) );
+    mon.addHistogram( new TH1F( "muTightLepEff_etabin1",       ";Tight #it{p}_{T}^{#mu} [GeV];Events", 12,fakePt) );
+    mon.addHistogram( new TH1F( "muLooseLepEff_etabin2",       ";Loose #it{p}_{T}^{#mu} [GeV];Events", 12,fakePt) );
+    mon.addHistogram( new TH1F( "muTightLepEff_etabin2",       ";Tight #it{p}_{T}^{#mu} [GeV];Events", 12,fakePt) );
+    mon.addHistogram( new TH1F( "muLooseLepEff_etabin3",       ";Loose #it{p}_{T}^{#mu} [GeV];Events", 12,fakePt) );
+    mon.addHistogram( new TH1F( "muTightLepEff_etabin3",       ";Tight #it{p}_{T}^{#mu} [GeV];Events", 12,fakePt) );
+    mon.addHistogram( new TH1F( "muLooseLepEff_etabin4",       ";Loose #it{p}_{T}^{#mu} [GeV];Events", 12,fakePt) );
+    mon.addHistogram( new TH1F( "muTightLepEff_etabin4",       ";Tight #it{p}_{T}^{#mu} [GeV];Events", 12,fakePt) );
 
 
 
@@ -564,23 +564,23 @@ int main(int argc, char* argv[])
 			for(size_t j=0; j<looseElectrons.size(); j++){
 
 				double eta = looseElectrons[j].eta();
-				mon.fillHisto("eleLooseFakePt",tags, looseElectrons[j].pt(), weight);
-				mon.fillHisto("eleLooseFakeEta",tags, eta, weight);
-				if(fabs(eta)<1.0)        mon.fillHisto("eleLooseFake_etabin1",tags, looseElectrons[j].pt(), weight);
-				else if(fabs(eta)<1.479) mon.fillHisto("eleLooseFake_etabin2",tags, looseElectrons[j].pt(), weight); 
-				else if(fabs(eta)<2.00)  mon.fillHisto("eleLooseFake_etabin3",tags, looseElectrons[j].pt(), weight);
-				else 			 mon.fillHisto("eleLooseFake_etabin4",tags, looseElectrons[j].pt(), weight);
+				mon.fillHisto("eleLooseLepEffPt",tags, looseElectrons[j].pt(), weight);
+				mon.fillHisto("eleLooseLepEffEta",tags, eta, weight);
+				if(fabs(eta)<1.0)        mon.fillHisto("eleLooseLepEff_etabin1",tags, looseElectrons[j].pt(), weight);
+				else if(fabs(eta)<1.479) mon.fillHisto("eleLooseLepEff_etabin2",tags, looseElectrons[j].pt(), weight); 
+				else if(fabs(eta)<2.00)  mon.fillHisto("eleLooseLepEff_etabin3",tags, looseElectrons[j].pt(), weight);
+				else 			 mon.fillHisto("eleLooseLepEff_etabin4",tags, looseElectrons[j].pt(), weight);
 			
         		}
 			for(size_t j=0; j<tightElectrons.size(); j++){
 			
 				double eta = tightElectrons[j].eta();
-				mon.fillHisto("eleTightFakePt",tags, tightElectrons[j].pt(), weight);
-				mon.fillHisto("eleTightFakeEta",tags, eta, weight);
-                        	if(fabs(eta)<1.0) 	 mon.fillHisto("eleTightFake_etabin1",tags, tightElectrons[j].pt(), weight);
-                        	else if(fabs(eta)<1.479) mon.fillHisto("eleTightFake_etabin2",tags, tightElectrons[j].pt(), weight);
-                        	else if(fabs(eta)<2.00)  mon.fillHisto("eleTightFake_etabin3",tags, tightElectrons[j].pt(), weight);
-                        	else 			 mon.fillHisto("eleTightFake_etabin4",tags, tightElectrons[j].pt(), weight);
+				mon.fillHisto("eleTightLepEffPt",tags, tightElectrons[j].pt(), weight);
+				mon.fillHisto("eleTightLepEffEta",tags, eta, weight);
+                        	if(fabs(eta)<1.0) 	 mon.fillHisto("eleTightLepEff_etabin1",tags, tightElectrons[j].pt(), weight);
+                        	else if(fabs(eta)<1.479) mon.fillHisto("eleTightLepEff_etabin2",tags, tightElectrons[j].pt(), weight);
+                        	else if(fabs(eta)<2.00)  mon.fillHisto("eleTightLepEff_etabin3",tags, tightElectrons[j].pt(), weight);
+                        	else 			 mon.fillHisto("eleTightLepEff_etabin4",tags, tightElectrons[j].pt(), weight);
 
         		}
 		}
@@ -589,22 +589,22 @@ int main(int argc, char* argv[])
 			for(size_t j=0; j<looseMuons.size(); j++){
 
 				double eta = looseMuons[j].eta();
-				mon.fillHisto("muLooseFakePt",tags, looseMuons[j].pt(), weight);
-				mon.fillHisto("muLooseFakeEta",tags, eta, weight);
-				if(fabs(eta)<1.0)        mon.fillHisto("muLooseFake_etabin1",tags, looseMuons[j].pt(), weight);
-				else if(fabs(eta)<1.479) mon.fillHisto("muLooseFake_etabin2",tags, looseMuons[j].pt(), weight); 
-				else if(fabs(eta)<2.00)  mon.fillHisto("muLooseFake_etabin3",tags, looseMuons[j].pt(), weight);
-				else 			 mon.fillHisto("muLooseFake_etabin4",tags, looseMuons[j].pt(), weight);
+				mon.fillHisto("muLooseLepEffPt",tags, looseMuons[j].pt(), weight);
+				mon.fillHisto("muLooseLepEffEta",tags, eta, weight);
+				if(fabs(eta)<1.0)        mon.fillHisto("muLooseLepEff_etabin1",tags, looseMuons[j].pt(), weight);
+				else if(fabs(eta)<1.479) mon.fillHisto("muLooseLepEff_etabin2",tags, looseMuons[j].pt(), weight); 
+				else if(fabs(eta)<2.00)  mon.fillHisto("muLooseLepEff_etabin3",tags, looseMuons[j].pt(), weight);
+				else 			 mon.fillHisto("muLooseLepEff_etabin4",tags, looseMuons[j].pt(), weight);
 	        	}
 			for(size_t j=0; j<tightMuons.size(); j++){
 			
 				double eta = tightMuons[j].eta();
-				mon.fillHisto("muTightFakePt",tags, tightMuons[j].pt(), weight);
-				mon.fillHisto("muTightFakeEta",tags, eta, weight);
-                        	if(fabs(eta)<1.0)        mon.fillHisto("muTightFake_etabin1",tags, tightMuons[j].pt(), weight);
-                        	else if(fabs(eta)<1.479) mon.fillHisto("muTightFake_etabin2",tags, tightMuons[j].pt(), weight);     
-                        	else if(fabs(eta)<2.00)  mon.fillHisto("muTightFake_etabin3",tags, tightMuons[j].pt(), weight);
-                        	else                     mon.fillHisto("muTightFake_etabin4",tags, tightMuons[j].pt(), weight);
+				mon.fillHisto("muTightLepEffPt",tags, tightMuons[j].pt(), weight);
+				mon.fillHisto("muTightLepEffEta",tags, eta, weight);
+                        	if(fabs(eta)<1.0)        mon.fillHisto("muTightLepEff_etabin1",tags, tightMuons[j].pt(), weight);
+                        	else if(fabs(eta)<1.479) mon.fillHisto("muTightLepEff_etabin2",tags, tightMuons[j].pt(), weight);     
+                        	else if(fabs(eta)<2.00)  mon.fillHisto("muTightLepEff_etabin3",tags, tightMuons[j].pt(), weight);
+                        	else                     mon.fillHisto("muTightLepEff_etabin4",tags, tightMuons[j].pt(), weight);
         		}
 		}
 	}
