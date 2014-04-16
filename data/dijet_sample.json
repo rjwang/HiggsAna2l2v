@@ -1,0 +1,151 @@
+{
+  "proc": [
+    {
+      "isdata": true, 
+      "color": 1, 
+      "tag": "Data", 
+      "marker": 20, 
+      "data": [
+        {
+          "dtag": "Data8TeV_DoubleElectron2012A", 
+          "split": 5
+        }, 
+        {
+          "dtag": "Data8TeV_DoubleElectron2012B", 
+          "split": 10
+        }, 
+        {
+          "dtag": "Data8TeV_DoubleElectron2012C", 
+          "split": 10
+        }, 
+        {
+          "dtag": "Data8TeV_DoubleElectron2012D", 
+          "split": 10
+        }, 
+        {
+          "dtag": "Data8TeV_DoubleMu2012A", 
+          "split": 5
+        }, 
+        {
+          "dtag": "Data8TeV_DoubleMu2012B", 
+          "split": 10
+        }, 
+        {
+          "dtag": "Data8TeV_DoubleMu2012C", 
+          "split": 10
+        }, 
+        {
+          "dtag": "Data8TeV_DoubleMu2012D", 
+          "split": 10
+        }
+      ], 
+      "fill": 0
+    }, 
+    {
+      "isdata": false, 
+      "color": "901", 
+      "lcolor": "1", 
+      "tag": "Z+jets", 
+      "marker": 901, 
+      "data": [
+        {
+          "dtag": "MC8TeV_DYJetsToLL_50toInf", 
+          "xsec": 3503.71, 
+          "split": 20, 
+          "br": [
+            1.0
+          ]
+        }, 
+        {
+          "dtag": "MC8TeV_DY1JetsToLL_50toInf", 
+          "xsec": 3503.71, 
+          "split": 20, 
+          "br": [
+            0.1901694915
+          ]
+        }, 
+        {
+          "dtag": "MC8TeV_DY2JetsToLL_50toInf", 
+          "xsec": 3503.71, 
+          "split": 20, 
+          "br": [
+            0.0613559322
+          ]
+        }, 
+        {
+          "dtag": "MC8TeV_DY3JetsToLL_50toInf", 
+          "xsec": 3503.71, 
+          "split": 20, 
+          "br": [
+            0.0173220339
+          ]
+        }, 
+        {
+          "dtag": "MC8TeV_DY4JetsToLL_50toInf", 
+          "xsec": 3503.71, 
+          "split": 20, 
+          "br": [
+            0.0078101695
+          ]
+        }, 
+        {
+          "dtag": "MC8TeV_DYJetsToLL_10to50", 
+          "xsec": 860.5, 
+          "split": 10, 
+          "br": [
+            1.0
+          ]
+        }
+      ]
+    }, 
+    {
+      "isdata": false, 
+      "color": "400", 
+      "lcolor": "1", 
+      "tag": "W+jets", 
+      "marker": 400, 
+      "data": [
+        {
+          "dtag": "MC8TeV_WJets", 
+          "xsec": 37509, 
+          "split": 10, 
+          "br": [
+            1.0
+          ]
+        }, 
+        {
+          "dtag": "MC8TeV_W1Jets", 
+          "xsec": 37509, 
+          "split": 10, 
+          "br": [
+            0.178
+          ]
+        }, 
+        {
+          "dtag": "MC8TeV_W2Jets", 
+          "xsec": 37509, 
+          "split": 10, 
+          "br": [
+            0.058
+          ]
+        }, 
+        {
+          "dtag": "MC8TeV_W3Jets", 
+          "xsec": 37509, 
+          "split": 10, 
+          "br": [
+            0.017
+          ]
+        }, 
+        {
+          "dtag": "MC8TeV_W4Jets", 
+          "xsec": 37509, 
+          "split": 10, 
+          "br": [
+            0.007
+          ]
+        }
+      ]
+    }
+  ]
+}
