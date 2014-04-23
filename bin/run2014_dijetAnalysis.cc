@@ -181,19 +181,32 @@ int main(int argc, char* argv[])
     // all plots
     mon.addHistogram( new TH1F( "pfmet_raw",        ";E_{T}^{miss} [GeV];Events", 50,0,100) );
 
+
     // electron channel
-    mon.addHistogram( new TH1F( "elepfmet_raw",        ";E_{T}^{miss} [GeV];Events", 50,0,100) );
-    mon.addHistogram( new TH1F( "elewmt_raw",          ";#it{m}_{T} [GeV];Events", 50,0,100) );
-    mon.addHistogram( new TH1F( "elept_raw",          ";#it{p}_{T} [GeV];Events", 50,0,100) );
-    mon.addHistogram( new TH1F( "elewmt_metgep50",          ";#it{m}_{T} [GeV];Events", 50,0,100) );
-    mon.addHistogram( new TH1F( "eledphilepj_raw",     ";#Delta#phi(l,j) [rad];Events", 50,0,TMath::Pi()) );
+    mon.addHistogram( new TH1F( "elepfmet_raw_L",        ";E_{T}^{miss} [GeV];Events", 50,0,100) );
+    mon.addHistogram( new TH1F( "elewmt_raw_L",          ";#it{m}_{T} [GeV];Events", 50,0,100) );
+    mon.addHistogram( new TH1F( "elept_raw_L",          ";#it{p}^{e}_{T} [GeV];Events", 50,20,100) );
+    mon.addHistogram( new TH1F( "elewmt_metgep50_L",          ";#it{m}_{T} [GeV];Events", 50,0,100) );
+    mon.addHistogram( new TH1F( "eledphilepj_raw_L",     ";#Delta#phi(l,j) [rad];Events", 50,0,TMath::Pi()) );
+
+    mon.addHistogram( new TH1F( "elepfmet_raw_T",        ";E_{T}^{miss} [GeV];Events", 50,0,100) );
+    mon.addHistogram( new TH1F( "elewmt_raw_T",          ";#it{m}_{T} [GeV];Events", 50,0,100) );
+    mon.addHistogram( new TH1F( "elept_raw_T",          ";#it{p}^{e}_{T} [GeV];Events", 50,20,100) );
+    mon.addHistogram( new TH1F( "elewmt_metgep50_T",          ";#it{m}_{T} [GeV];Events", 50,0,100) );
+    mon.addHistogram( new TH1F( "eledphilepj_raw_T",     ";#Delta#phi(l,j) [rad];Events", 50,0,TMath::Pi()) );
 	
     // muon channel 
-    mon.addHistogram( new TH1F( "mupfmet_raw",        ";E_{T}^{miss} [GeV];Events", 50,0,100) );
-    mon.addHistogram( new TH1F( "muwmt_raw",          ";#it{m}_{T} [GeV];Events", 50,0,100) );
-    mon.addHistogram( new TH1F( "mupt_raw",          ";#it{p}_{T} [GeV];Events", 50,0,100) );
-    mon.addHistogram( new TH1F( "muwmt_metgep50",          ";#it{m}_{T} [GeV];Events", 50,0,100) );
-    mon.addHistogram( new TH1F( "mudphilepj_raw",     ";#Delta#phi(l,j) [rad];Events", 50,0,TMath::Pi()) );
+    mon.addHistogram( new TH1F( "mupfmet_raw_L",        ";E_{T}^{miss} [GeV];Events", 50,0,100) );
+    mon.addHistogram( new TH1F( "muwmt_raw_L",          ";#it{m}_{T} [GeV];Events", 50,0,100) );
+    mon.addHistogram( new TH1F( "mupt_raw_L",          ";#it{p}^{#mu}_{T} [GeV];Events", 50,20,100) );
+    mon.addHistogram( new TH1F( "muwmt_metgep50_L",          ";#it{m}_{T} [GeV];Events", 50,0,100) );
+    mon.addHistogram( new TH1F( "mudphilepj_raw_L",     ";#Delta#phi(l,j) [rad];Events", 50,0,TMath::Pi()) );
+
+    mon.addHistogram( new TH1F( "mupfmet_raw_T",        ";E_{T}^{miss} [GeV];Events", 50,0,100) );
+    mon.addHistogram( new TH1F( "muwmt_raw_T",          ";#it{m}_{T} [GeV];Events", 50,0,100) );
+    mon.addHistogram( new TH1F( "mupt_raw_T",          ";#it{p}^{#mu}_{T} [GeV];Events", 50,20,100) );
+    mon.addHistogram( new TH1F( "muwmt_metgep50_T",          ";#it{m}_{T} [GeV];Events", 50,0,100) );
+    mon.addHistogram( new TH1F( "mudphilepj_raw_T",     ";#Delta#phi(l,j) [rad];Events", 50,0,TMath::Pi()) );
    
 
 
@@ -687,32 +700,75 @@ int main(int argc, char* argv[])
 	}
 
 
+	bool passLooseEle(looseElectrons_raw.size()>0 && aGoodIdJets.size()>0);
+ 	bool passTightEle(tightElectrons_raw.size()>0 && aGoodIdJets.size()>0);
+	bool passLooseMu(looseMuons_raw.size()>0 && aGoodIdJets.size()>0);
+	bool passTightMu(tightMuons_raw.size()>0 && aGoodIdJets.size()>0);
 
-	if( hasEtrigger && ( isMC || (!isMC && fType==EE) ) && looseElectrons_raw.size()>0 && aGoodIdJets.size()>0)
+
+
+	if( hasEtrigger && ( isMC || (!isMC && fType==EE) ) && passLooseEle)
 	{
-		mon.fillHisto("elepfmet_raw"                       ,tags, zvvs[0].pt(), weight);
+		mon.fillHisto("elepfmet_raw_L"                       ,tags, zvvs[0].pt(), weight);
 		for(size_t j=0; j<looseElectrons_raw.size(); j++){
 			double Wmt = METUtils::transverseMass(looseElectrons_raw[j],zvvs[0],false);
 			double dphi=fabs(deltaPhi(looseElectrons_raw[j].phi(),LeadingJet.phi()));
-			mon.fillHisto("eledphilepj_raw",tags, dphi, weight);	
-			mon.fillHisto("elewmt_raw",tags, Wmt, weight);
-			mon.fillHisto("elept_raw",tags, looseElectrons_raw[j].pt(), weight);
-			if(zvvs[0].pt()>50) mon.fillHisto("elewmt_metgep50",tags, Wmt, weight);
+			mon.fillHisto("eledphilepj_raw_L",tags, dphi, weight);	
+			mon.fillHisto("elewmt_raw_L",tags, Wmt, weight);
+			mon.fillHisto("elept_raw_L",tags, looseElectrons_raw[j].pt(), weight);
+			if(zvvs[0].pt()>50) mon.fillHisto("elewmt_metgep50_L",tags, Wmt, weight);
 		}
 	}
 
-	if( hasMtrigger && (isMC || (!isMC && fType==MUMU) ) && looseMuons_raw.size()>0 && aGoodIdJets.size()>0) 
+	if( hasEtrigger && ( isMC || (!isMC && fType==EE) ) && passTightEle)
 	{
-		mon.fillHisto("mupfmet_raw"                       ,tags, zvvs[0].pt(), weight);
+		mon.fillHisto("elepfmet_raw_T"                       ,tags, zvvs[0].pt(), weight);
+		for(size_t j=0; j<tightElectrons_raw.size(); j++){
+			double Wmt = METUtils::transverseMass(tightElectrons_raw[j],zvvs[0],false);
+			double dphi=fabs(deltaPhi(tightElectrons_raw[j].phi(),LeadingJet.phi()));
+			mon.fillHisto("eledphilepj_raw_T",tags, dphi, weight);	
+			mon.fillHisto("elewmt_raw_T",tags, Wmt, weight);
+			mon.fillHisto("elept_raw_T",tags, tightElectrons_raw[j].pt(), weight);
+			if(zvvs[0].pt()>50) mon.fillHisto("elewmt_metgep50_T",tags, Wmt, weight);
+		}
+	}
+
+
+
+
+	if( hasMtrigger && (isMC || (!isMC && fType==MUMU) ) && passLooseMu) 
+	{
+		mon.fillHisto("mupfmet_raw_L"                       ,tags, zvvs[0].pt(), weight);
 		for(size_t j=0; j<looseMuons_raw.size(); j++){
 			double Wmt = METUtils::transverseMass(looseMuons_raw[j],zvvs[0],false);
 			double dphi=fabs(deltaPhi(looseMuons_raw[j].phi(),LeadingJet.phi()));
-			mon.fillHisto("mudphilepj_raw",tags, dphi, weight);
-			mon.fillHisto("muwmt_raw",tags, Wmt, weight);
-			mon.fillHisto("mupt_raw",tags, looseMuons_raw[j].pt(), weight);
-			if(zvvs[0].pt()>50) mon.fillHisto("muwmt_metgep50",tags, Wmt, weight);
+			mon.fillHisto("mudphilepj_raw_L",tags, dphi, weight);
+			mon.fillHisto("muwmt_raw_L",tags, Wmt, weight);
+			mon.fillHisto("mupt_raw_L",tags, looseMuons_raw[j].pt(), weight);
+			if(zvvs[0].pt()>50) mon.fillHisto("muwmt_metgep50_L",tags, Wmt, weight);
 		}
 	} 
+
+	if( hasMtrigger && (isMC || (!isMC && fType==MUMU) ) && passTightMu) 
+	{
+		mon.fillHisto("mupfmet_raw_T"                       ,tags, zvvs[0].pt(), weight);
+		for(size_t j=0; j<tightMuons_raw.size(); j++){
+			double Wmt = METUtils::transverseMass(tightMuons_raw[j],zvvs[0],false);
+			double dphi=fabs(deltaPhi(tightMuons_raw[j].phi(),LeadingJet.phi()));
+			mon.fillHisto("mudphilepj_raw_T",tags, dphi, weight);
+			mon.fillHisto("muwmt_raw_T",tags, Wmt, weight);
+			mon.fillHisto("mupt_raw_T",tags, tightMuons_raw[j].pt(), weight);
+			if(zvvs[0].pt()>50) mon.fillHisto("muwmt_metgep50_T",tags, Wmt, weight);
+		}
+	} 
+
+
+
+
+
+
+
+
 
 
 
