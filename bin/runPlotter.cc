@@ -58,6 +58,7 @@ bool onlyCutIndex = false;
 bool nosig = false;
 double scaleSignal=1.0;
 double scaleYMax = 1.0;
+double scaleYMin = 1.0;
 string inDir   = "OUTNew/";
 string jsonFile = "../../data/beauty-samples.json";
 string outDir  = "Img/";
@@ -734,7 +735,7 @@ void Draw1DHistogram(JSONWrapper::Object& Root, std::string RootDir, NameAndType
       fixExtremities(hist,true,true);
       hist->SetTitle("");
       hist->SetStats(kFALSE);
-      hist->SetMinimum(2e-2);//5e-1);//2e-2);
+      hist->SetMinimum(2e-2*scaleYMin);//5e-1);//2e-2);
       //hist->SetMaximum(1E6);
       hist->SetMaximum(hist->GetBinContent(hist->GetMaximumBin())*1.10);
       //TString tSaveName = hist->GetName();
@@ -843,8 +844,6 @@ void Draw1DHistogram(JSONWrapper::Object& Root, std::string RootDir, NameAndType
 	 if(noLog)
 	   {
 	     stack->SetMaximum(maximumFound);
-	     stack->GetYaxis()->SetNoExponent(kTRUE); 
-	     TGaxis::SetMaxDigits(3);
 	   }
        }
      ObjectToDelete.push_back(stack);
@@ -1387,40 +1386,47 @@ int main(int argc, char* argv[]){
      //printf("--- %i - %s\n",i,argv[i]);
 
      if(arg.find("--help")!=string::npos){
-        printf("--help   --> print this helping text\n");
+	printf("\033[35m");
+	printf("%s\n",std::string(100,'-').c_str());
+        printf("--%18s --> print this helping text\n","help");
 
-        printf("--iLumi   --> integrated luminosity to be used for the MC rescale\n");
-        printf("--iEcm    --> center of mass energy (TeV) = 8 TeV by default\n");
-        printf("--isSim   --> print CMS Simulation instead of the standard title\n");
-        printf("--inDir   --> path to the directory containing the .root files to process\n");
-        printf("--outDir  --> path of the directory that will contains the output plots and tables\n");
-        printf("--outFile --> path of the output summary .root file\n");
-        printf("--json    --> containing list of process (and associated style) to process to process\n");
-        printf("--only    --> processing only the objects containing the following argument in their name\n");
-        printf("--OnlyStartWith  --> processing only the objects starting with the following argument in their name\n");
-	printf("--NoPlotwith  --> processing only the objects starting without the following argument in their name\n");
-        printf("--channel --> processing only the objects with channel name\n");
-        printf("--index   --> will do the projection on that index for histos of type cutIndex\n");
-        printf("--chi2    --> show the data/MC chi^2\n"); 
-        printf("--showUnc --> show stat uncertainty (if number is given use it as relative bin by bin uncertainty (e.g. lumi)\n"); 
-	printf("--noLog   --> use linear scale\n");
-        printf("--no1D   --> Skip processing of 1D objects\n");
-        printf("--no2D   --> Skip processing of 2D objects\n");
-        printf("--noTex  --> Do not create latex table (when possible)\n");
-        printf("--noRoot --> Do not make a summary .root file\n");
-        printf("--noPlot --> Do not creates plot files (useful to speedup processing)\n");
-	printf("--plotExt --> extension to save\n");
-	printf("--cutflow --> name of the histogram with the original number of events (cutflow by default)\n");
-        printf("--splitCanvas --> (only for 2D plots) save all the samples in separated pltos\n");
-	printf("--rebin	 --> number of bin (default = 1) for rebinning histograms, combine --only option to rebin some specific histograms\n"); //RJ 
-	printf("--isDataBlind --> Blind the Data point from 1D Histograms\n"); //RJ
-	printf("--addcutLine1 --> Add cut Line 1\n"); //RJ
-	printf("--addcutLine2 --> Add cut Line 2\n"); //RJ
-	printf("--addleftcutLine --> Add left cut Line \n"); //RJ
-	printf("--addrightcutLine --> Add right cut Line \n"); //RJ
-	printf("--scaleSignal --> Scale the signal with a number \n");
-
+	printf("--%18s --> integrated luminosity to be used for the MC rescale\n","iLumi");
+	printf("--%18s --> center of mass energy (TeV) = 8 TeV by default\n","iEcm");
+        printf("--%18s --> print CMS Simulation instead of the standard title\n","isSim");
+        printf("--%18s --> path to the directory containing the .root files to process\n","inDir");
+        printf("--%18s --> path of the directory that will contains the output plots and tables\n","outDir");
+        printf("--%18s --> path of the output summary .root file\n","outFile");
+        printf("--%18s --> containing list of process (and associated style) to process to process\n","json");
+        printf("--%18s --> processing only the objects containing the following argument in their name\n","only");
+        printf("--%18s --> processing only the objects starting with the following argument in their name\n","OnlyStartWith");
+	printf("--%18s --> processing only the objects starting without the following argument in their name\n","NoPlotwith");
+        printf("--%18s --> processing only the objects with channel name\n","channel");
+        printf("--%18s --> will do the projection on that index for histos of type cutIndex\n","index");
+        printf("--%18s --> show the data/MC chi^2\n","chi2"); 
+        printf("--%18s --> show stat uncertainty (if number is given use it as relative bin by bin uncertainty (e.g. lumi)\n","showUnc"); 
+	printf("--%18s --> use linear scale\n","noLog");
+        printf("--%18s --> Skip processing of 1D objects\n","no1D");
+        printf("--%18s --> Skip processing of 2D objects\n","no2D");
+        printf("--%18s --> Do not create latex table (when possible)\n","noTex");
+        printf("--%18s --> Do not make a summary .root file\n","noRoot");
+        printf("--%18s --> Do not creates plot files (useful to speedup processing)\n","noPlot");
+	printf("--%18s --> extension to save\n","plotExt");
+	printf("--%18s --> name of the histogram with the original number of events (cutflow by default)\n","cutflow");
+        printf("--%18s --> (only for 2D plots) save all the samples in separated pltos\n","splitCanvas");
+	printf("--%18s --> number of bin (default = 1) for rebinning histograms, combine --only option to rebin some specific histograms\n","rebin"); 
+	printf("--%18s --> Blind the Data point from 1D Histograms\n","isDataBlind");
+	printf("--%18s --> Add cut Line 1\n","addcutLine1");
+	printf("--%18s --> Add cut Line 2\n","addcutLine2");
+	printf("--%18s --> Add left cut Line \n","addleftcutLine");
+	printf("--%18s --> Add right cut Line \n","addrightcutLine");
+	printf("--%18s --> Scale the signal with a number \n","scaleSignal");
+	printf("--%18s --> Scale Ymax for 1D Histogram \n","scaleYMax");
+	printf("--%18s --> Scale Ymin for 1D Histogram \n","scaleYMix");
+	printf("%s\n",std::string(100,'-').c_str());
+	printf("\033[0m");
+	printf("\033[33m");
         printf("command line example: runPlotter --json ../data/beauty-samples.json --iLumi 2007 --inDir OUT/ --outDir OUT/plots/ --outFile plotter.root --noRoot --noPlot\n");
+	printf("\033[0m");
 	return 0;
      }
 
@@ -1469,6 +1475,7 @@ int main(int argc, char* argv[]){
      if(arg.find("--rebin"  )!=string::npos && i+1<argc) { sscanf(argv[i+1],"%d",&rebin); i++; printf("rebin = %d\n", rebin); } //RJ
      if(arg.find("--scaleSignal")!=string::npos && i+1<argc){ sscanf(argv[i+1],"%lf",&scaleSignal); i++; printf("scaleSignal = %f\n", scaleSignal); }
      if(arg.find("--scaleYMax")  !=string::npos && i+1<argc){ sscanf(argv[i+1],"%lf",&scaleYMax); i++; printf("scaleYMax = %f\n", scaleYMax); }
+     if(arg.find("--scaleYMin")  !=string::npos && i+1<argc){ sscanf(argv[i+1],"%lf",&scaleYMin); i++; printf("scaleYMin = %f\n", scaleYMin); }
 
    } 
    system( (string("mkdir -p ") + outDir).c_str());
