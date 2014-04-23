@@ -146,6 +146,63 @@
           ]
         }
       ]
+    }, 
+    {
+      "isdata": false, 
+      "color": "0", 
+      "lcolor": "1", 
+      "tag": "Multijets", 
+      "marker": 0, 
+      "data": [
+        {
+          "dtag": "MC8TeV_QCDPt30to80", 
+          "xsec": 74330000, 
+          "split": 1, 
+          "br": [
+            0.0621
+          ]
+        }, 
+        {
+          "dtag": "MC8TeV_QCDPt80to170", 
+          "xsec": 1191000, 
+          "split": 5, 
+          "br": [
+            0.1539
+          ]
+        }, 
+        {
+          "dtag": "MC8TeV_QCDPt170to250", 
+          "xsec": 30990, 
+          "split": 5, 
+          "br": [
+            0.148
+          ]
+        }, 
+        {
+          "dtag": "MC8TeV_QCDPt250to350", 
+          "xsec": 4250, 
+          "split": 5, 
+          "br": [
+            0.131
+          ]
+        }, 
+        {
+          "dtag": "MC8TeV_QCDPt350toInf", 
+          "xsec": 810, 
+          "split": 5, 
+          "br": [
+            0.11
+          ]
+        }, 
+        {
+          "dtag": "MC8TeV_QCDMuPt20toInf", 
+          "xsec": 364000000, 
+          "split": 20, 
+          "br": [
+            0.00037
+          ]
+        }
+      ]
     }
   ]
 }

@@ -29,6 +29,7 @@
 #include "THStack.h"
 #include "Rtypes.h"
 #include "TList.h"
+#include "TGaxis.h"
 
 #include "TLatex.h"
 #include "TPad.h"
@@ -56,6 +57,7 @@ bool splitCanvas = false;
 bool onlyCutIndex = false;
 bool nosig = false;
 double scaleSignal=1.0;
+double scaleYMax = 1.0;
 string inDir   = "OUTNew/";
 string jsonFile = "../../data/beauty-samples.json";
 string outDir  = "Img/";
@@ -148,7 +150,7 @@ void GetListOfObject(JSONWrapper::Object& Root, std::string RootDir, std::list<N
 	      if(split>1) { char buf[255]; sprintf(buf,"_%i",0); segmentExt += buf; }
               string FileName = RootDir + (Samples[id])["dtag"].toString() +  (Samples[id].isTag("suffix")?(Samples[id])["suffix"].toString():string("")) + segmentExt + filtExt + ".root";
 
-              printf("\033[33m Adding all objects from %25s to the list of considered objects \033[0m \n",  FileName.c_str());
+              printf("\033[33mAdding all objects from %25s to the list of considered objects\033[0m\n",  FileName.c_str());
 	      TFile* file = new TFile(FileName.c_str());
 	      if(file->IsZombie())
 		{
@@ -232,7 +234,7 @@ void GetInitialNumberOfEvents(JSONWrapper::Object& Root, std::string RootDir, Na
          double PUUpnorm       =  1; if(tmphist->GetBinContent(5)>0)PUUpnorm       = tmphist->GetBinContent(3) / tmphist->GetBinContent(5);
          sampleInfo.PURescale_down = PUDownnorm;
          sampleInfo.PURescale_up   = PUUpnorm;
-         if(isMC)printf("\033[35m PU Renormalization %25s Shift Down --> %6.2f  Central = %6.2f  Up Down --> %6.2f \033[0m \n",(Samples[j])["dtag"].toString().c_str(),PUDownnorm, PUCentralnnorm, PUUpnorm);	
+         if(isMC)printf("\033[35mPU Renormalization %30s Shift Down --> %6.2f  Central = %6.2f  Up Down --> %6.2f\033[0m\n",(Samples[j])["dtag"].toString().c_str(),PUDownnorm, PUCentralnnorm, PUUpnorm);	
 
 
          double cnorm = 1.0;
@@ -835,11 +837,14 @@ void Draw1DHistogram(JSONWrapper::Object& Root, std::string RootDir, NameAndType
          if(tSaveName.Contains("npfjets")) maximumFound*= 50;
          if(tSaveName.Contains("npfbjets")) maximumFound*= 50;
 	 if(tSaveName.Contains("_WWCtrl")) maximumFound*= 50;
+	 maximumFound *= scaleYMax;
 
 	 stack->SetMaximum(maximumFound);
 	 if(noLog)
 	   {
 	     stack->SetMaximum(maximumFound);
+	     stack->GetYaxis()->SetNoExponent(kTRUE); 
+	     TGaxis::SetMaxDigits(3);
 	   }
        }
      ObjectToDelete.push_back(stack);
@@ -912,10 +917,15 @@ void Draw1DHistogram(JSONWrapper::Object& Root, std::string RootDir, NameAndType
    T->SetFillStyle(0);  T->SetLineColor(0);
    T->SetTextAlign(22);
    char Buffer[1024]; 
-   if(isSim) sprintf(Buffer, "CMS simulation, #it{ZH #rightarrow l^{+}l^{-}+#slash{E}_{T}}, #sqrt{s}=%.1f TeV, L=%.1f fb^{-1}", iEcm, iLumi/1000);
-   //else      sprintf(Buffer, "CMS Preliminary, #it{ZH #rightarrow l^{+}l^{-}+#slash{E}_{T}}, #sqrt{s}=%.1f TeV, L=%.1f fb^{-1}", iEcm, iLumi/1000);
-   //else      sprintf(Buffer, "CMS Preliminary, #it{H #rightarrow ZZ_{d} #rightarrow l^{+}l^{-}+#slash{E}_{T}}, #sqrt{s}=%.1f TeV, L=%.1f fb^{-1}", iEcm, iLumi/1000);
-   else      sprintf(Buffer, "CMS Preliminary, #sqrt{s}=%.1f TeV, L=%.1f fb^{-1}", iEcm, iLumi/1000);
+   if(iLumi>1000){
+   	if(isSim) sprintf(Buffer, "CMS simulation, #it{ZH #rightarrow l^{+}l^{-}+#slash{E}_{T}}, #sqrt{s}=%.1f TeV, L=%.1f fb^{-1}", iEcm, iLumi/1000);
+   	//else      sprintf(Buffer, "CMS Preliminary, #it{ZH #rightarrow l^{+}l^{-}+#slash{E}_{T}}, #sqrt{s}=%.1f TeV, L=%.1f fb^{-1}", iEcm, iLumi/1000);
+   	//else      sprintf(Buffer, "CMS Preliminary, #it{H #rightarrow ZZ_{d} #rightarrow l^{+}l^{-}+#slash{E}_{T}}, #sqrt{s}=%.1f TeV, L=%.1f fb^{-1}", iEcm, iLumi/1000);
+   	else      sprintf(Buffer, "CMS Preliminary, #sqrt{s}=%.1f TeV, L=%.2f fb^{-1}", iEcm, iLumi/1000);
+   }else{
+	if(isSim) sprintf(Buffer, "CMS simulation, #it{ZH #rightarrow l^{+}l^{-}+#slash{E}_{T}}, #sqrt{s}=%.1f TeV, L=%.2f pb^{-1}", iEcm, iLumi);
+	else      sprintf(Buffer, "CMS Preliminary, #sqrt{s}=%.1f TeV, L=%.2f pb^{-1}", iEcm, iLumi);
+   }
 
    T->AddText(Buffer);
    T->Draw("same");
@@ -928,7 +938,7 @@ void Draw1DHistogram(JSONWrapper::Object& Root, std::string RootDir, NameAndType
    T2->SetTextAlign(22);
    TString savename = getChannelName(SaveName);
    T2->AddText(savename);
-   T2->Draw("same");
+   if(savename!="") T2->Draw("same");
 
    //RJ
    TGraph *leftcut;
@@ -1292,10 +1302,10 @@ TString getChannelName(std::string SaveName){
 void getYieldsandErrors(JSONWrapper::Object& Root, std::string RootDir, NameAndType HistoProperties){
     if(HistoProperties.isIndexPlot && cutIndex<0)return;
     
-    FILE* pFile = NULL;
+    //FILE* pFile = NULL;
     
     std::vector<TObject*> ObjectToDelete;
-    TH1* stack = NULL;
+    //TH1* stack = NULL;
     std::vector<JSONWrapper::Object> Process = Root["proc"].daughters();
     for(unsigned int i=0;i<Process.size();i++){
         TH1* hist = NULL;
@@ -1458,6 +1468,7 @@ int main(int argc, char* argv[]){
      if(arg.find("--ctrlSample" )!=string::npos && i+1<argc){ ctrlSample   = argv[i+1];  i++;  printf("Control Sample = %s\n", ctrlSample.c_str());  }
      if(arg.find("--rebin"  )!=string::npos && i+1<argc) { sscanf(argv[i+1],"%d",&rebin); i++; printf("rebin = %d\n", rebin); } //RJ
      if(arg.find("--scaleSignal")!=string::npos && i+1<argc){ sscanf(argv[i+1],"%lf",&scaleSignal); i++; printf("scaleSignal = %f\n", scaleSignal); }
+     if(arg.find("--scaleYMax")  !=string::npos && i+1<argc){ sscanf(argv[i+1],"%lf",&scaleYMax); i++; printf("scaleYMax = %f\n", scaleYMax); }
 
    } 
    system( (string("mkdir -p ") + outDir).c_str());
@@ -1558,6 +1569,6 @@ int main(int argc, char* argv[]){
    //system(("rm " + csvFile).c_str());
    system("python ${CMSSW_BASE}/src/CMGTools/HiggsAna2l2v/data/html/generatehtml.py");
    system(("cp ${CMSSW_BASE}/src/CMGTools/HiggsAna2l2v/data/html/index.html " + outDir).c_str());
-   printf("\033[31m You can browse the results using %sindex.html \033[0m\n",outDir.c_str());
+   printf("\033[31mYou can browse the results using %sindex.html\033[0m\n",outDir.c_str());
 }
 

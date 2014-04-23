@@ -45,6 +45,30 @@ int main(int argc, char* argv[])
     //##########################    GLOBAL INITIALIZATION     ##########################
     //##################################################################################
 
+    TTree *llvv_tree = new TTree("llvv_tree","Tree for TagandProbe");
+
+    bool tag_elepassTight(false);
+    bool tag_elepassLoose(false);
+    bool tag_mupassTight(false);
+    bool tag_mupassLoose(false);
+    bool probe_elepassTight(false);
+    bool probe_elepassLoose(false);
+    bool probe_mupassTight(false);
+    bool probe_mupassLoose(false);
+
+    llvv_tree->Branch("tag_ele_passTight", &tag_elepassTight ,"tag_ele_passTight/O");
+    llvv_tree->Branch("tag_ele_passLoose", &tag_elepassLoose ,"tag_ele_passLoose/O");
+    llvv_tree->Branch("tag_mu_passTight", &tag_mupassTight ,"tag_mu_passTight/O");
+    llvv_tree->Branch("tag_mu_passLoose", &tag_mupassLoose ,"tag_mu_passLoose/O");
+    llvv_tree->Branch("probe_ele_passTight", &probe_elepassTight ,"probe_ele_passTight/O");
+    llvv_tree->Branch("probe_ele_passLoose", &probe_elepassLoose ,"probe_ele_passLoose/O");
+    llvv_tree->Branch("probe_mu_passTight", &probe_mupassTight ,"probe_mu_passTight/O");
+    llvv_tree->Branch("probe_mu_passLoose", &probe_mupassLoose ,"probe_mu_passLoose/O");
+
+
+
+
+
     // check arguments
     if(argc<2) {
         std::cout << "Usage : " << argv[0] << " parameters_cfg.py" << std::endl;
@@ -157,37 +181,37 @@ int main(int argc, char* argv[])
 
 
 
-    double fakePt[13]= {10,15,20,25,30,35,40,45,50,60,70,80,100};
+    double fakePt[11]= {20,25,30,35,40,45,50,60,70,80,100};
     double fakeEta[9]= {-2.5,-2.,-1.479,-1.,0.,1.,1.479,2.,2.5};
     
-    mon.addHistogram( new TH1F( "eleLooseLepEffPt",       ";Loose #it{p}_{T}^{e} [GeV];Events", 12,fakePt) );
-    mon.addHistogram( new TH1F( "eleTightLepEffPt",       ";Tight #it{p}_{T}^{e} [GeV];Events", 12,fakePt) );
+    mon.addHistogram( new TH1F( "eleLooseLepEffPt",       ";Loose #it{p}_{T}^{e} [GeV];Events", 10,fakePt) );
+    mon.addHistogram( new TH1F( "eleTightLepEffPt",       ";Tight #it{p}_{T}^{e} [GeV];Events", 10,fakePt) );
     mon.addHistogram( new TH1F( "eleLooseLepEffEta",       ";Loose #it{p}_{T}^{e} [GeV];Events", 8,fakeEta) );
     mon.addHistogram( new TH1F( "eleTightLepEffEta",       ";Tight #it{p}_{T}^{e} [GeV];Events", 8,fakeEta) );
 
-    mon.addHistogram( new TH1F( "eleLooseLepEff_etabin1",       ";Loose #it{p}_{T}^{e} [GeV];Events", 12,fakePt) );
-    mon.addHistogram( new TH1F( "eleTightLepEff_etabin1",       ";Tight #it{p}_{T}^{e} [GeV];Events", 12,fakePt) );
-    mon.addHistogram( new TH1F( "eleLooseLepEff_etabin2",       ";Loose #it{p}_{T}^{e} [GeV];Events", 12,fakePt) );
-    mon.addHistogram( new TH1F( "eleTightLepEff_etabin2",       ";Tight #it{p}_{T}^{e} [GeV];Events", 12,fakePt) );
-    mon.addHistogram( new TH1F( "eleLooseLepEff_etabin3",       ";Loose #it{p}_{T}^{e} [GeV];Events", 12,fakePt) );
-    mon.addHistogram( new TH1F( "eleTightLepEff_etabin3",       ";Tight #it{p}_{T}^{e} [GeV];Events", 12,fakePt) );
-    mon.addHistogram( new TH1F( "eleLooseLepEff_etabin4",       ";Loose #it{p}_{T}^{e} [GeV];Events", 12,fakePt) );
-    mon.addHistogram( new TH1F( "eleTightLepEff_etabin4",       ";Tight #it{p}_{T}^{e} [GeV];Events", 12,fakePt) );
+    mon.addHistogram( new TH1F( "eleLooseLepEff_etabin1",       ";Loose #it{p}_{T}^{e} [GeV];Events", 10,fakePt) );
+    mon.addHistogram( new TH1F( "eleTightLepEff_etabin1",       ";Tight #it{p}_{T}^{e} [GeV];Events", 10,fakePt) );
+    mon.addHistogram( new TH1F( "eleLooseLepEff_etabin2",       ";Loose #it{p}_{T}^{e} [GeV];Events", 10,fakePt) );
+    mon.addHistogram( new TH1F( "eleTightLepEff_etabin2",       ";Tight #it{p}_{T}^{e} [GeV];Events", 10,fakePt) );
+    mon.addHistogram( new TH1F( "eleLooseLepEff_etabin3",       ";Loose #it{p}_{T}^{e} [GeV];Events", 10,fakePt) );
+    mon.addHistogram( new TH1F( "eleTightLepEff_etabin3",       ";Tight #it{p}_{T}^{e} [GeV];Events", 10,fakePt) );
+    mon.addHistogram( new TH1F( "eleLooseLepEff_etabin4",       ";Loose #it{p}_{T}^{e} [GeV];Events", 10,fakePt) );
+    mon.addHistogram( new TH1F( "eleTightLepEff_etabin4",       ";Tight #it{p}_{T}^{e} [GeV];Events", 10,fakePt) );
 
 
-    mon.addHistogram( new TH1F( "muLooseLepEffPt",        ";Loose #it{p}_{T}^{#mu} [GeV];Events", 12,fakePt) );
-    mon.addHistogram( new TH1F( "muTightLepEffPt",        ";Tight #it{p}_{T}^{#mu} [GeV];Events", 12,fakePt) );
+    mon.addHistogram( new TH1F( "muLooseLepEffPt",        ";Loose #it{p}_{T}^{#mu} [GeV];Events", 10,fakePt) );
+    mon.addHistogram( new TH1F( "muTightLepEffPt",        ";Tight #it{p}_{T}^{#mu} [GeV];Events", 10,fakePt) );
     mon.addHistogram( new TH1F( "muLooseLepEffEta",        ";Loose #it{p}_{T}^{#mu} [GeV];Events", 8,fakeEta) );
     mon.addHistogram( new TH1F( "muTightLepEffEta",        ";Tight #it{p}_{T}^{#mu} [GeV];Events", 8,fakeEta) );
 
-    mon.addHistogram( new TH1F( "muLooseLepEff_etabin1",       ";Loose #it{p}_{T}^{#mu} [GeV];Events", 12,fakePt) );
-    mon.addHistogram( new TH1F( "muTightLepEff_etabin1",       ";Tight #it{p}_{T}^{#mu} [GeV];Events", 12,fakePt) );
-    mon.addHistogram( new TH1F( "muLooseLepEff_etabin2",       ";Loose #it{p}_{T}^{#mu} [GeV];Events", 12,fakePt) );
-    mon.addHistogram( new TH1F( "muTightLepEff_etabin2",       ";Tight #it{p}_{T}^{#mu} [GeV];Events", 12,fakePt) );
-    mon.addHistogram( new TH1F( "muLooseLepEff_etabin3",       ";Loose #it{p}_{T}^{#mu} [GeV];Events", 12,fakePt) );
-    mon.addHistogram( new TH1F( "muTightLepEff_etabin3",       ";Tight #it{p}_{T}^{#mu} [GeV];Events", 12,fakePt) );
-    mon.addHistogram( new TH1F( "muLooseLepEff_etabin4",       ";Loose #it{p}_{T}^{#mu} [GeV];Events", 12,fakePt) );
-    mon.addHistogram( new TH1F( "muTightLepEff_etabin4",       ";Tight #it{p}_{T}^{#mu} [GeV];Events", 12,fakePt) );
+    mon.addHistogram( new TH1F( "muLooseLepEff_etabin1",       ";Loose #it{p}_{T}^{#mu} [GeV];Events", 10,fakePt) );
+    mon.addHistogram( new TH1F( "muTightLepEff_etabin1",       ";Tight #it{p}_{T}^{#mu} [GeV];Events", 10,fakePt) );
+    mon.addHistogram( new TH1F( "muLooseLepEff_etabin2",       ";Loose #it{p}_{T}^{#mu} [GeV];Events", 10,fakePt) );
+    mon.addHistogram( new TH1F( "muTightLepEff_etabin2",       ";Tight #it{p}_{T}^{#mu} [GeV];Events", 10,fakePt) );
+    mon.addHistogram( new TH1F( "muLooseLepEff_etabin3",       ";Loose #it{p}_{T}^{#mu} [GeV];Events", 10,fakePt) );
+    mon.addHistogram( new TH1F( "muTightLepEff_etabin3",       ";Tight #it{p}_{T}^{#mu} [GeV];Events", 10,fakePt) );
+    mon.addHistogram( new TH1F( "muLooseLepEff_etabin4",       ";Loose #it{p}_{T}^{#mu} [GeV];Events", 10,fakePt) );
+    mon.addHistogram( new TH1F( "muTightLepEff_etabin4",       ";Tight #it{p}_{T}^{#mu} [GeV];Events", 10,fakePt) );
 
 
 
@@ -318,8 +342,8 @@ int main(int argc, char* argv[])
         }
 
 	//split inclusive DY sample into DYToLL and DYToTauTau
-        //if(isMC && mctruthmode==1 && !isDYToLL(ev.mccat) ) continue;
-        //if(isMC && mctruthmode==2 && !isDYToTauTau(ev.mccat) ) continue;
+        if(isMC && mctruthmode==1 && !isDYToLL(ev.mccat) ) continue;
+        if(isMC && mctruthmode==2 && !isDYToTauTau(ev.mccat) ) continue;
 
         //require compatibilitiy of the event with the PD
         bool hasTrigger(false);
@@ -423,8 +447,23 @@ int main(int argc, char* argv[])
         double llScaleFactor(1.0),llTriggerEfficiency(1.0);
 
 
+
+
+
+	tag_elepassTight=false;
+    	tag_elepassLoose=false;
+	tag_mupassTight=false;
+    	tag_mupassLoose=false;
+
+	probe_elepassTight=false;
+    	probe_elepassLoose=false;
+	probe_mupassTight=false;
+    	probe_mupassLoose=false;
+
+
         // looping leptons (what I want)  begin
         for(size_t ilep=0; ilep<2; ilep++) {
+
             TString lepStr( fabs(phys.leptons[ilep].id)==13 ? "mu" : "e");
 
             //id and isolation
@@ -452,9 +491,13 @@ int main(int argc, char* argv[])
 		    && relIso< 1.0 /*0.2*/ )
 		{
 		    looseMuons_raw.push_back(phys.leptons[ilep]);
+		    if(ilep==0) tag_mupassLoose=true;
+		    if(ilep==1) probe_mupassLoose=true;
                 }
                 if( hasObjectId(ev.mn_idbits[lpid], MID_TIGHT) && relIso<0.2)    {
 		    tightMuons_raw.push_back(phys.leptons[ilep]);
+		    if(ilep==0) tag_mupassTight=true;
+		    if(ilep==1) probe_mupassTight=true;
                 }
 
                 llScaleFactor *= lsf.getLeptonEfficiency(phys.leptons[ilep].pt(),fabs(phys.leptons[ilep].eta()),13).first;
@@ -473,9 +516,13 @@ int main(int argc, char* argv[])
                                       !hasObjectId(ev.en_idbits[lpid], EID_CONVERSIONVETO),0,ev.rho);
                         if(passWp && iwp==2) {
 			    looseElectrons_raw.push_back(phys.leptons[ilep]);
+			    if(ilep==0) tag_elepassLoose=true;
+			    if(ilep==1) probe_elepassLoose=true;
                         }
 			if(passWp && iwp==1 && relIso<0.15) {
 			    tightElectrons_raw.push_back(phys.leptons[ilep]);
+			    if(ilep==0) tag_elepassTight=true;
+			    if(ilep==1) probe_elepassTight=true;
 			}
                         if(!use2011Id) {
                             //llScaleFactor *= 1;
@@ -484,7 +531,11 @@ int main(int argc, char* argv[])
                 }
             }
 
+
         } // loop all leptons end
+
+
+	llvv_tree->Fill();
 
 
 
@@ -560,7 +611,7 @@ int main(int argc, char* argv[])
 		std::vector<LorentzVector> looseElectrons = looseElectrons_raw;
 		std::vector<LorentzVector> tightElectrons = tightElectrons_raw; 
 
-		if( isMC || (!isMC && fType==EE) ){
+		if( ((isMC && ev.cat==EE) || (!isMC && fType==EE)) && tightElectrons.size()>0 ){
 			for(size_t j=0; j<looseElectrons.size(); j++){
 
 				double eta = looseElectrons[j].eta();
@@ -583,9 +634,10 @@ int main(int argc, char* argv[])
                         	else 			 mon.fillHisto("eleTightLepEff_etabin4",tags, tightElectrons[j].pt(), weight);
 
         		}
+
 		}
 
-		if( isMC || (!isMC && fType==MUMU) ){
+		if( ((isMC && ev.cat==MUMU) || (!isMC && fType==MUMU)) && tightMuons.size()>0 ){
 			for(size_t j=0; j<looseMuons.size(); j++){
 
 				double eta = looseMuons[j].eta();
@@ -633,6 +685,7 @@ int main(int argc, char* argv[])
     //save all to the file
     TFile *ofile=TFile::Open(outUrl, "recreate");
     mon.Write();
+    llvv_tree->Write();
     ofile->Close();
 /*
     if(outTxtFile_full)fclose(outTxtFile_full);
