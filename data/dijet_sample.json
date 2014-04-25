@@ -195,6 +195,46 @@
           ]
         }, 
         {
+          "dtag": "MC8TeV_QCDEmPt20to30", 
+          "xsec": 288600000, 
+          "split": 2, 
+          "br": [
+            0.0101
+          ]
+        }, 
+        {
+          "dtag": "MC8TeV_QCDPt20to30BCtoE", 
+          "xsec": 288600000, 
+          "split": 1, 
+          "br": [
+            0.00058
+          ]
+        }, 
+        {
+          "dtag": "MC8TeV_QCDPt30to80BCtoE", 
+          "xsec": 74240000, 
+          "split": 1, 
+          "br": [
+            0.00225
+          ]
+        }, 
+        {
+          "dtag": "MC8TeV_QCDPt80to170BCtoE", 
+          "xsec": 1191000, 
+          "split": 1, 
+          "br": [
+            0.0109
+          ]
+        }, 
+        {
+          "dtag": "MC8TeV_QCDPt250to350BCtoE", 
+          "xsec": 4250, 
+          "split": 1, 
+          "br": [
+            0.0243
+          ]
+        }, 
+        {
           "dtag": "MC8TeV_QCDMuPt20toInf", 
           "xsec": 364000000, 
           "split": 20, 
