@@ -92,34 +92,8 @@ int main(int argc, char* argv[])
     if(url.Contains("MuEG"))      fType=EMU;
     if(url.Contains("SingleMu"))  fType=MUMU;
     if(url.Contains("SingleEle")) fType=EE;
-/*
-    bool isSingleMuPD(!isMC && url.Contains("SingleMu"));
-    bool isSingleElePD(!isMC && url.Contains("SingleEle"));
-    bool isMC_ZZ  = isMC && ( string(url.Data()).find("TeV_ZZ")  != string::npos);
-    bool isMC_WZ  = isMC && ( string(url.Data()).find("TeV_WZ")  != string::npos);
-    bool isMC_ZH  = isMC && ( string(url.Data()).find("TeV_ZH")  != string::npos);
-    bool isMC_HZZd= isMC && ( string(url.Data()).find("TeV_HZZd")  != string::npos);
-*/
+
     bool isV0JetsMC(isMC && (url.Contains("DYJetsToLL_50toInf") || url.Contains("WJets")));
-/*
-    bool isMC_DY  = isMC && ( (string(url.Data()).find("TeV_DYJetsToLL")!= string::npos)
-			|| (string(url.Data()).find("TeV_ZG")!= string::npos) );
-*/
-    // print out event information
-/*
-    TString outTxtUrl_full= outUrl + "/" + outFileUrl + "_FullList.txt";
-    FILE* outTxtFile_full = NULL;
-    outTxtFile_full = fopen(outTxtUrl_full.Data(), "w");
-    printf("TextFile URL = %s\n",outTxtUrl_full.Data());
-
-    TString outTxtUrl_final= outUrl + "/" + outFileUrl + "_FinalList.txt";
-    FILE* outTxtFile_final = NULL;
-    outTxtFile_final = fopen(outTxtUrl_final.Data(), "w");
-    printf("TextFile URL = %s\n",outTxtUrl_final.Data());
-
-    fprintf(outTxtFile_full,"run lumi event passId,passIdAndIso,passZmass,passZpt,pass3dLeptonVeto,passBveto,passLMetVeto,passdphiZllmetCut,passMet,passBalanceCut,passMTcut evCat \n");
-    //fprintf(outTxtFile_final,"run lumi event passId,passIdAndIso,passZmass,passZpt,pass3dLeptonVeto,passBveto,passLMetVeto,passdphiZllmetCut,passMet,passBalanceCut,passMTcut evCat \n");
-*/
 
     //tree info
     int evStart     = runProcess.getParameter<int>("evStart");
@@ -136,23 +110,7 @@ int main(int argc, char* argv[])
 
     //systematics
     bool runSystematics                        = runProcess.getParameter<bool>("runSystematics");
-    std::vector<TString> varNames(1,"");
-    if(runSystematics){
-      	cout << "Systematics will be computed for this analysis" << endl;
-      	varNames.push_back("_jerup");    varNames.push_back("_jerdown");
-      	varNames.push_back("_jesup");    varNames.push_back("_jesdown");
-      	varNames.push_back("_umetup");   varNames.push_back("_umetdown");
-      	varNames.push_back("_lesup");    varNames.push_back("_lesdown");
-      	varNames.push_back("_puup");     varNames.push_back("_pudown");
-      	varNames.push_back("_btagup");   varNames.push_back("_btagdown");
-	// will need to add ZZ and WZ shape uncertainty
-      	//if(isMC_ZZ)             { varNames.push_back("_zzptup");   varNames.push_back("_zzptdown");     }
-      	//if(isMC_WZ)             { varNames.push_back("_wzptup");   varNames.push_back("_wzptdown");     }
-    }
-    //size_t nvarsToInclude=varNames.size();
-
-
-
+    
 
     //##################################################################################
     //##########################    INITIATING HISTOGRAMS     ##########################
@@ -253,9 +211,6 @@ int main(int argc, char* argv[])
     mon.addHistogram( new TH1F( "muTightFake_etabin3",       ";Tight #it{p}_{T}^{#mu} [GeV];Events", 8,mufakePt) );
     mon.addHistogram( new TH1F( "muLooseFake_etabin4",       ";Loose #it{p}_{T}^{#mu} [GeV];Events", 8,mufakePt) );
     mon.addHistogram( new TH1F( "muTightFake_etabin4",       ";Tight #it{p}_{T}^{#mu} [GeV];Events", 8,mufakePt) );
-
-
-
 
 
 
@@ -373,22 +328,8 @@ int main(int argc, char* argv[])
         //event category
         //bool isSameFlavor(ev.cat==MUMU || ev.cat==EE);
         TString tag_cat;
-/*
-        switch(ev.cat) {
-        case MUMU :
-            tag_cat = "mumu";
-            break;
-        case EE   :
-            tag_cat = "ee";
-            break;
-        case EMU  :
-            tag_cat = "emu";
-            break;
-        default   :
-            continue;
-        }
-*/
-	//split inclusive DY sample into DYToLL and DYToTauTau
+
+        //split inclusive DY sample into DYToLL and DYToTauTau
         //if(isMC && mctruthmode==1 && !isDYToLL(ev.mccat) ) continue;
         //if(isMC && mctruthmode==2 && !isDYToTauTau(ev.mccat) ) continue;
 
@@ -423,15 +364,6 @@ int main(int argc, char* argv[])
 
 
 
-
-
-
-	// ewk correction for diboson processes
-	//if(isMC_ZH) weight *= myZHUtils.GetNLOZHWeight(phys);
-	//if(isMC_ZZ) weight *= myZHUtils.GetNLOZZWeight(phys);
-        //if(isMC_WZ) weight *= myZHUtils.GetNLOWZWeight(phys);
-
-
         //#########################################################################
         //#####################      Objects Selection       ######################
         //#########################################################################
@@ -441,9 +373,8 @@ int main(int argc, char* argv[])
         //
         LorentzVector rawMetP4=phys.met[1];
         if(use2011Id) rawMetP4=phys.met[0];
-        //LorentzVector fullTypeIMetP4=phys.met[0];
-        //LorentzVector mvaMetP4=phys.met[7];
 
+        
         //apply JER base corrections to jets (and compute associated variations on the MET variable)
         // std PF
         std::vector<PhysicsObjectJetCollection> variedAJets;
@@ -462,37 +393,8 @@ int main(int argc, char* argv[])
         std::vector<LorentzVector> looseElectrons_raw;
         std::vector<LorentzVector> tightElectrons_raw;
 
-
-/*
-        LorentzVector lep1=phys.leptons[0];
-        LorentzVector lep2=phys.leptons[1];
-        LorentzVector zll(lep1+lep2);
-        double dphi2l = fabs(deltaPhi(lep1.phi(),lep2.phi()));
-        //bool passdphi2l(true);
-        //bool passdphi2l(cos(dphi2l)>0);
-
-        //two opposite sign leptons
-        int  id1=phys.leptons[0].id;
-        int  id2=phys.leptons[1].id;
-        bool passOppositeSign((id1*id2)<0);
-
-        bool passId(true);
-        passId &= passOppositeSign;
-        bool passIdAndIso(true);
-        passIdAndIso &= passOppositeSign;
-        bool passZmass(fabs(zll.mass()-91)<15); //RJ changed
-
-        bool isZsideBand( (zll.mass()>40 && zll.mass()<70) || (zll.mass()>110 && zll.mass()<200));
-        bool isZsideBandPlus( (zll.mass()>110 && zll.mass()<200));
-        bool passZpt(zll.pt()>50); //for Gamma+Jets, can also be used for control plots
-*/
         //check alternative selections for the dilepton
         double llScaleFactor(1.0),llTriggerEfficiency(1.0);
-        //LorentzVector genZP4(0,0,0,0); // for checks on Sherpa ZZ
-        //int genmatchid[2] = {-1, -1};
-        //double genmatchdr[2] = {0.1, 0.1};
-
-
 
         // loop all leptons begin
         for(size_t ilep=0; ilep<phys.leptons.size(); ilep++) {
@@ -605,75 +507,9 @@ int main(int argc, char* argv[])
             if(aJets[ijet].pt()>20 /*&& fabs(aJets[ijet].eta())<2.5*/)  nCSVMtags += (aJets[ijet].btag6>0.679);
             if(aJets[ijet].pt()>20 /*&& fabs(aJets[ijet].eta())<2.5*/)  nCSVTtags += (aJets[ijet].btag6>0.898);
         }
-        //passJetveto=(nAJetsGood30==0);
-        //passBveto=(nABtags==0);
-        //bool passMBveto=(nCSVMtags==0);
-        //bool passTBveto=(nCSVTtags==0);
-        //passDphijmet=(mindphijmet>0.5);
-        //if(nAJetsGood30==0) passDphijmet=(mindphijmet15>0.5);
-        //passBalanceCut=(zvvs[0].pt()/zll.pt()>0.8 && zvvs[0].pt()/zll.pt()<1.2);
-        //passBalanceCut=(zvvs[0].pt()/zll.pt()>0.75 && zvvs[0].pt()/zll.pt()<1.25);
-	//bool passBalanceCut05=(zvvs[0].pt()/zll.pt()>0.5 && zvvs[0].pt()/zll.pt()<1.5);
-	//bool passBalanceCut075=(zvvs[0].pt()/zll.pt()>0.25 && zvvs[0].pt()/zll.pt()<1.75);
-        //bool passBalanceCutWWCtrl=(zvvs[0].pt()/zll.pt()>0.4 && zvvs[0].pt()/zll.pt()<1.8);
 
-
-        //ad-hoc cut for obvious correlations between MET and a lepton
-        //double dphil1met=fabs(deltaPhi(lep1.phi(),zvvs[0].phi()));
-        //double dphil2met=fabs(deltaPhi(lep2.phi(),zvvs[0].phi()));
-        //bool passLMetVeto(true);
-        //if(!use2011Id && zvvs[0].pt()>60 && min(dphil1met,dphil2met)<0.2) passLMetVeto=false;
-
-        //other mets
-        //METUtils::stRedMET aRedMetOut;
-        LorentzVector null(0,0,0,0);
-        //LorentzVector aRedMet=METUtils::redMET(METUtils::INDEPENDENTLYMINIMIZED, zll, 0, null, 0, aClusteredMetP4, zvvs[0], true, &aRedMetOut);
-        //double aRedMetL=aRedMetOut.redMET_l;
-        //double aRedMetT=aRedMetOut.redMET_t;
-        //TVector2 aClusteredMet2(aClusteredMetP4.px(),aClusteredMetP4.py());
-        //double clusteredMetL=aRedMetOut.a_l*aClusteredMet2;
-        //double clusteredMetT=aRedMetOut.a_t*aClusteredMet2;
-        //passMetCut=(zvvs[0].pt()>120); //ReducedMET: aRedMet.pt(); PFMET: zvvs[0].pt()
-	/*
-	bool passMetCut60=(zvvs[0].pt()>60);
-	bool passMetCut80=(zvvs[0].pt()>80);
-	bool passMetCut100=(zvvs[0].pt()>100);
-	bool passMetCut120=(zvvs[0].pt()>120);
-	*/
-        //bool passMetCutWWCtrl=(aRedMet.pt()>65);
-
-        //TVector2 RecoilMet2(Recoil.px(),Recoil.py());
-        //double RecoilMetL=aRedMetOut.a_l*RecoilMet2;
-        //double RecoilMetT=aRedMetOut.a_t*RecoilMet2;
-
-
-        // compute dphi(zpt,redMet)
-        //double dphiZllmet=fabs(deltaPhi(zll.phi(),zvvs[0].phi()));
-        //double dphiMet_mvaMet=fabs(deltaPhi(mvaMetP4.phi(),zvvs[0].phi()));
-        //double dphiZllredMet=fabs(deltaPhi(zll.phi(),aRedMet.phi()));
-        //bool passdphiZllmetCut(dphiZllmet>2.7);///2.6);
-	//bool passdphiZllmetCut20(dphiZllmet>2.0);
-	//bool passdphiZllmetCut24(dphiZllmet>2.4);
-        //bool passdphiMetmvaMet(dphiMet_mvaMet<0.2);
-
-/*
-        //transverse masses
-        double aMT=METUtils::transverseMass(zll,zvvs[0],true);
-        double aMTmassless=METUtils::transverseMass(zll,zvvs[0],false);
-	double mtless_MetLLp = METUtils::transverseMass(lep1,zvvs[0],false);
-	double mtless_MetTLp = METUtils::transverseMass(lep2,zvvs[0],false);
-        double balanceDif=fabs(zvvs[0].pt()-zll.pt())/zll.pt();
-        TVector2 dil2(zll.px(),zll.py());
-        TVector2 met2(zvvs[0].px(),zvvs[0].py());
-        double axialMet=dil2*met2;
-        axialMet /= -zll.pt();
-        //double pfMetCompL = aRedMetOut.a_l*met2;
-        //double pfMetCompT = aRedMetOut.a_t*met2;
-
-
-        bool passMTcut(aMT>220 && aMT<1200);
-
-*/
+        
+        
 
 
 
@@ -686,7 +522,7 @@ int main(int argc, char* argv[])
         if(hasTrigger)                 {
             mon.fillHisto("eventflow",tags,0,weight);
         }
-	else continue;
+        else continue;
 
 
 
@@ -834,41 +670,47 @@ int main(int argc, char* argv[])
 		std::vector<LorentzVector> looseElectrons = checkDiElectronMass(looseElectrons_raw);
 		std::vector<LorentzVector> tightElectrons = checkDiElectronMass(tightElectrons_raw); 
 
-		if(hasEtrigger){
-			for(size_t j=0; j<looseElectrons.size(); j++){
-				if(aGoodIdJets.size()>0){
-					double dphi=fabs(deltaPhi(looseElectrons[j].phi(),LeadingJet.phi()));
-					if(dphi<2) continue;
-				}
-				//double Wmt = METUtils::transverseMass(looseElectrons[j],zvvs[0],false);
-				//if (Wmt > 20) continue;
+		if(hasEtrigger)
+        {
+            if(passLooseEle)
+            {
+                for(size_t j=0; j<looseElectrons.size(); j++){
 
-				mon.fillHisto("eleLooseFakePt",tags, looseElectrons[j].pt(), weight);
-				double eta = looseElectrons[j].eta();
-				mon.fillHisto("eleLooseFakeEta",tags, eta, weight);
-				if(fabs(eta)<1.0)        mon.fillHisto("eleLooseFake_etabin1",tags, looseElectrons[j].pt(), weight);
-				else if(fabs(eta)<1.479) mon.fillHisto("eleLooseFake_etabin2",tags, looseElectrons[j].pt(), weight); 
-				else if(fabs(eta)<2.00)  mon.fillHisto("eleLooseFake_etabin3",tags, looseElectrons[j].pt(), weight);
-				else 			 mon.fillHisto("eleLooseFake_etabin4",tags, looseElectrons[j].pt(), weight);
-			
-        		}
-			for(size_t j=0; j<tightElectrons.size(); j++){
-				if(aGoodIdJets.size()>0){
-					double dphi=fabs(deltaPhi(tightElectrons[j].phi(),LeadingJet.phi()));
-					if(dphi<2) continue;
-				}
-				//double Wmt = METUtils::transverseMass(tightElectrons[j],zvvs[0],false);
-				//if (Wmt > 20) continue;
-				mon.fillHisto("eleTightFakePt",tags, tightElectrons[j].pt(), weight);
-                        	double eta = tightElectrons[j].eta();
-				mon.fillHisto("eleTightFakeEta",tags, eta, weight);
-                        	if(fabs(eta)<1.0) 	 mon.fillHisto("eleTightFake_etabin1",tags, tightElectrons[j].pt(), weight);
-                        	else if(fabs(eta)<1.479) mon.fillHisto("eleTightFake_etabin2",tags, tightElectrons[j].pt(), weight);
-                        	else if(fabs(eta)<2.00)  mon.fillHisto("eleTightFake_etabin3",tags, tightElectrons[j].pt(), weight);
-                        	else 			 mon.fillHisto("eleTightFake_etabin4",tags, tightElectrons[j].pt(), weight);
+                    double dphi=fabs(deltaPhi(looseElectrons[j].phi(),LeadingJet.phi()));
+                    if(dphi<2) continue;
 
-        		}
-		}
+                    //double Wmt = METUtils::transverseMass(looseElectrons[j],zvvs[0],false);
+                    //if (Wmt > 20) continue;
+
+                    mon.fillHisto("eleLooseFakePt",tags, looseElectrons[j].pt(), weight);
+                    double eta = looseElectrons[j].eta();
+                    mon.fillHisto("eleLooseFakeEta",tags, eta, weight);
+                    if(fabs(eta)<1.0)        mon.fillHisto("eleLooseFake_etabin1",tags, looseElectrons[j].pt(), weight);
+                    else if(fabs(eta)<1.479) mon.fillHisto("eleLooseFake_etabin2",tags, looseElectrons[j].pt(), weight);
+                    else if(fabs(eta)<2.00)  mon.fillHisto("eleLooseFake_etabin3",tags, looseElectrons[j].pt(), weight);
+                    else                     mon.fillHisto("eleLooseFake_etabin4",tags, looseElectrons[j].pt(), weight);
+        		} //loop looseElectrons
+            }//passLooseEle
+            
+            if(passTightEle)
+            {
+                for(size_t j=0; j<tightElectrons.size(); j++)
+                {
+                    double dphi=fabs(deltaPhi(tightElectrons[j].phi(),LeadingJet.phi()));
+                    if(dphi<2) continue;
+                    //double Wmt = METUtils::transverseMass(tightElectrons[j],zvvs[0],false);
+                    //if (Wmt > 20) continue;
+                    mon.fillHisto("eleTightFakePt",tags, tightElectrons[j].pt(), weight);
+                    double eta = tightElectrons[j].eta();
+                    mon.fillHisto("eleTightFakeEta",tags, eta, weight);
+                    if(fabs(eta)<1.0) 	      mon.fillHisto("eleTightFake_etabin1",tags, tightElectrons[j].pt(), weight);
+                    else if(fabs(eta)<1.479)  mon.fillHisto("eleTightFake_etabin2",tags, tightElectrons[j].pt(), weight);
+                    else if(fabs(eta)<2.00)   mon.fillHisto("eleTightFake_etabin3",tags, tightElectrons[j].pt(), weight);
+                    else                      mon.fillHisto("eleTightFake_etabin4",tags, tightElectrons[j].pt(), weight);
+        		}//loop tightElectrons
+            } //passTightEle
+            
+		} //hasEtrigger
 
 		if(hasMtrigger){
 			for(size_t j=0; j<looseMuons.size(); j++){
@@ -931,10 +773,7 @@ int main(int argc, char* argv[])
     TFile *ofile=TFile::Open(outUrl, "recreate");
     mon.Write();
     ofile->Close();
-/*
-    if(outTxtFile_full)fclose(outTxtFile_full);
-    if(outTxtFile_final)fclose(outTxtFile_final);
-*/
+
 }
 
 
