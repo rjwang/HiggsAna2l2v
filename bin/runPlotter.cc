@@ -59,6 +59,7 @@ bool nosig = false;
 double scaleSignal=1.0;
 double scaleYMax = 1.0;
 double scaleYMin = 1.0;
+bool useDataMinusMC = false;
 string inDir   = "OUTNew/";
 string jsonFile = "../../data/beauty-samples.json";
 string outDir  = "Img/";
@@ -817,9 +818,9 @@ void Draw1DHistogram(JSONWrapper::Object& Root, std::string RootDir, NameAndType
 	 if(isDataBlind) stack->GetXaxis()->SetTitle(hist->GetXaxis()->GetTitle());
 	 name_denRelUncH = hist->GetXaxis()->GetTitle();
 
-	 //Set YTitle, RJ
 	 float binsize = hist->GetBinWidth(1);
 	 std::ostringstream strs;
+	 strs.precision(2);
 	 strs << binsize;
 	 TString binSize = strs.str();
 	 if(name_denRelUncH.Contains("multiplicity")) stack->GetYaxis()->SetTitle("Events");
@@ -910,8 +911,7 @@ void Draw1DHistogram(JSONWrapper::Object& Root, std::string RootDir, NameAndType
        pave->Draw();
      }
    
-   //TPaveText* T = new TPaveText(0.1,0.995,0.84,0.95, "NDC");
-   TPaveText* T = new TPaveText(0.1,0.995,0.90,0.95, "NDC");
+   TPaveText* T = new TPaveText(0.1,0.994,0.90,0.94, "NDC");
    T->SetFillColor(0);
    T->SetFillStyle(0);  T->SetLineColor(0);
    T->SetTextAlign(22);
@@ -1042,6 +1042,7 @@ void Draw1DHistogram(JSONWrapper::Object& Root, std::string RootDir, NameAndType
 		llmax=denRelUncH->GetXaxis()->GetBinUpEdge(ibin);
 
 		denRelUnc->SetPoint(icutgRJ,denRelUncH->GetXaxis()->GetBinCenter(ibin),1);
+		if(useDataMinusMC) denRelUnc->SetPoint(icutgRJ,denRelUncH->GetXaxis()->GetBinCenter(ibin),0);
 		if(denRelUncH->GetBinContent(ibin) < 2e-2) continue;
 		denRelUnc->SetPointError(icutgRJ,denRelUncH->GetXaxis()->GetBinWidth(ibin)/2.0, denRelUncH->GetBinError(ibin)/denRelUncH->GetBinContent(ibin));
           	icutgRJ++;
@@ -1056,7 +1057,9 @@ void Draw1DHistogram(JSONWrapper::Object& Root, std::string RootDir, NameAndType
        denRelUncH->Draw();
        denRelUnc->Draw("2");
 
-       TLine *llbase = new TLine(llmin,1.,llmax,1.);
+       TLine *llbase;
+       llbase = new TLine(llmin,1.,llmax,1.);
+       if(useDataMinusMC) llbase = new TLine(llmin,0.,llmax,0.);
        llbase->SetLineWidth(1);
        llbase->SetLineStyle(1);
        llbase->SetLineColor(kBlue);
@@ -1065,8 +1068,11 @@ void Draw1DHistogram(JSONWrapper::Object& Root, std::string RootDir, NameAndType
 
        float yscale = (1.0-0.2)/(0.18-0);       
        denRelUncH->GetYaxis()->SetTitle("Data/MC");
+       if(useDataMinusMC) denRelUncH->GetYaxis()->SetTitle("#frac{Data-MC}{MC}");
        denRelUncH->SetMinimum(0.09);
        denRelUncH->SetMaximum(1.99);
+       if(useDataMinusMC) denRelUncH->SetMinimum(-1.99);
+       if(useDataMinusMC) denRelUncH->SetMaximum(1.99);
        //denRelUncH->GetXaxis()->SetTitle("");
        denRelUncH->GetXaxis()->SetTitle(name_denRelUncH); //RJ
        //denRelUncH->SetMinimum(0);
@@ -1085,6 +1091,7 @@ void Draw1DHistogram(JSONWrapper::Object& Root, std::string RootDir, NameAndType
 	 {
 	   TString name("CompHistogram"); name+=icd;
 	   TH1D *dataToObsH = (TH1D*)compDists[icd]->Clone(name);
+	   if(useDataMinusMC) dataToObsH->Add(mc,-1);
 	   dataToObsH->Divide(mc);
 	   dataToObsH->Draw("E1 same");
 	 }
@@ -1405,6 +1412,7 @@ int main(int argc, char* argv[]){
         printf("--%18s --> show the data/MC chi^2\n","chi2"); 
         printf("--%18s --> show stat uncertainty (if number is given use it as relative bin by bin uncertainty (e.g. lumi)\n","showUnc"); 
 	printf("--%18s --> use linear scale\n","noLog");
+	printf("--%18s --> use Ratio: (Data-MC)/MC\n","useDataMinusMC");
         printf("--%18s --> Skip processing of 1D objects\n","no1D");
         printf("--%18s --> Skip processing of 2D objects\n","no2D");
         printf("--%18s --> Do not create latex table (when possible)\n","noTex");
@@ -1459,6 +1467,7 @@ int main(int argc, char* argv[]){
      if(arg.find("--isDataBlind")!=string::npos){ isDataBlind = true; printf("isDataBlind\n");} //RJ
      if(arg.find("--nosig")!=string::npos){nosig = true; printf("noSig plot=1\n");}//RJ
      if(arg.find("--noLog")!=string::npos){ noLog = true;    }
+     if(arg.find("--useDataMinusMC")!=string::npos){ useDataMinusMC = true; }
      if(arg.find("--no2D"  )!=string::npos){ do2D = false;    }
      if(arg.find("--no1D"  )!=string::npos){ do1D = false;    }
      if(arg.find("--noTex" )!=string::npos){ doTex= false;    }
