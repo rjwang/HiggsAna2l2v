@@ -157,7 +157,7 @@ int main(int argc, char* argv[])
     //mon.addHistogram( new TH1F( "eleRelIso_raw_T",       ";Rel-Iso(e);Events",50,0,2.) );
     mon.addHistogram( new TH1F( "elewmt_metgep50_T",          ";#it{m}_{T}(e, E_{T}^{miss}) [GeV];Events", 50,0,150) );
     mon.addHistogram( new TH1F( "eledphilepj_raw_T",     ";#Delta#it{#phi}(e,j) [rad];Events", 50,0,TMath::Pi()) );
-    mon.addHistogram( new TH1F( "eleZmass_raw_T",        ";#it{m}_{ee} [GeV];Events", 60,0,120) );
+    mon.addHistogram( new TH1F( "eleZmass_raw_T",        ";#it{m}_{ee} [GeV];Events", 50,60,120) );
     mon.addHistogram( new TH1F( "eleLJetpt_raw_T",        ";#it{p}_{T}(Leading Jet) [GeV];Events", 50,15,200) );
 
 

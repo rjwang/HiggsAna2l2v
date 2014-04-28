@@ -814,9 +814,11 @@ void Draw1DHistogram(JSONWrapper::Object& Root, std::string RootDir, NameAndType
      stack->GetYaxis()->SetTitleSize(0.06);
 
      if(noratio){
-	stack->GetYaxis()->SetTitleOffset(1.5);
-	stack->GetXaxis()->SetTitleOffset(1.2);
+	stack->GetXaxis()->SetTitleOffset(0.85);
 	stack->GetXaxis()->SetTitleSize(0.06);
+	stack->GetYaxis()->SetTitleOffset(1.5);
+	stack->GetYaxis()->SetLabelSize(0.05);
+	stack->GetYaxis()->SetTitleSize(0.05);
      }
 
      TH1 *hist=(TH1*)stack->GetStack()->At(0);
@@ -919,7 +921,7 @@ void Draw1DHistogram(JSONWrapper::Object& Root, std::string RootDir, NameAndType
      }
    
    TPaveText* T = new TPaveText(0.1,0.994,0.90,0.94, "NDC");
-   if(isDataBlind || noratio) T = new TPaveText(0.25,0.994,0.92,0.94, "NDC"); 
+   if(isDataBlind || noratio) T = new TPaveText(0.2,0.994,0.87,0.94, "NDC"); 
    T->SetFillColor(0);
    T->SetFillStyle(0);  T->SetLineColor(0);
    T->SetTextAlign(22);
@@ -1107,12 +1109,12 @@ void Draw1DHistogram(JSONWrapper::Object& Root, std::string RootDir, NameAndType
    else
      {
        //if not comparison resize the canvas
-       c1->SetWindowSize(700,700);
-       c1->SetCanvasSize(700,700);
+       c1->SetWindowSize(800,700);
+       c1->SetCanvasSize(800,700);
        t1->SetPad(0,0,1,1);
-       t1->SetBottomMargin(0.15);
+       t1->SetBottomMargin(0.12);
        t1->SetTopMargin(0.05);
-       t1->SetLeftMargin(0.2);
+       t1->SetLeftMargin(0.15);
        stack->GetXaxis()->SetTitle(name_denRelUncH);
      }
 
