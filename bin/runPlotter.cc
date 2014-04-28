@@ -56,6 +56,7 @@ bool doPlot = true;
 bool splitCanvas = false;
 bool onlyCutIndex = false;
 bool nosig = false;
+bool noratio = false;
 double scaleSignal=1.0;
 double scaleYMax = 1.0;
 double scaleYMin = 1.0;
@@ -639,19 +640,19 @@ void Draw1DHistogram(JSONWrapper::Object& Root, std::string RootDir, NameAndType
    //gStyle->SetLineWidth(2);
    TCanvas* c1 = new TCanvas("c1","c1",700,700); 
    TPad* t1 = new TPad();
-   if(isDataBlind) t1 = new TPad("t1","t1", 0.0, 0.0, 1.0, 1.0);
+   if(isDataBlind || noratio) t1 = new TPad("t1","t1", 0.0, 0.0, 1.0, 1.0);
    else t1 = new TPad("t1","t1", 0.0, 0.3, 1.0, 1.0);
 
    t1->Draw();
    t1->cd();
-   if(!isDataBlind) t1->SetBottomMargin(0);
+   if(!isDataBlind || noratio) t1->SetBottomMargin(0);
    TString name_denRelUncH;
    if(!noLog) t1->SetLogy(true);
    float maximumFound(noLog);
 
    TLegend* legA  = new TLegend();
-   if(!isDataBlind) legA  = new TLegend(0.45,0.7,0.9,0.95, "NDC");
-   else legA = new TLegend(0.55,0.78,0.9,0.95, "NDC");
+   if(!(isDataBlind||noratio)) legA  = new TLegend(0.45,0.7,0.9,0.95, "NDC");
+   else legA = new TLegend(0.45,0.78,0.9,0.98, "NDC");
 
    legA->SetNColumns(3);
    THStack* stack = new THStack("MC","MC");
@@ -812,10 +813,16 @@ void Draw1DHistogram(JSONWrapper::Object& Root, std::string RootDir, NameAndType
      stack->GetYaxis()->SetLabelSize(0.06);
      stack->GetYaxis()->SetTitleSize(0.06);
 
+     if(noratio){
+	stack->GetYaxis()->SetTitleOffset(1.5);
+	stack->GetXaxis()->SetTitleOffset(1.2);
+	stack->GetXaxis()->SetTitleSize(0.06);
+     }
+
      TH1 *hist=(TH1*)stack->GetStack()->At(0);
      if(stack->GetXaxis())
        {
-	 if(isDataBlind) stack->GetXaxis()->SetTitle(hist->GetXaxis()->GetTitle());
+	 if(isDataBlind || noratio) stack->GetXaxis()->SetTitle(hist->GetXaxis()->GetTitle());
 	 name_denRelUncH = hist->GetXaxis()->GetTitle();
 
 	 float binsize = hist->GetBinWidth(1);
@@ -912,6 +919,7 @@ void Draw1DHistogram(JSONWrapper::Object& Root, std::string RootDir, NameAndType
      }
    
    TPaveText* T = new TPaveText(0.1,0.994,0.90,0.94, "NDC");
+   if(isDataBlind || noratio) T = new TPaveText(0.25,0.994,0.92,0.94, "NDC"); 
    T->SetFillColor(0);
    T->SetFillStyle(0);  T->SetLineColor(0);
    T->SetTextAlign(22);
@@ -1009,7 +1017,7 @@ void Draw1DHistogram(JSONWrapper::Object& Root, std::string RootDir, NameAndType
    std::vector<TH1 *> compDists;
    if(data)                   compDists.push_back(data);
    else if(spimpose.size()>0) compDists=spimpose;
-   if(mc && compDists.size() && !isDataBlind)
+   if(mc && compDists.size() && !isDataBlind && !noratio)
      {
        c1->cd();
        TPad* t2 = new TPad("t2","t2", 0.0, 0.0, 1.0, 0.3);
@@ -1099,11 +1107,13 @@ void Draw1DHistogram(JSONWrapper::Object& Root, std::string RootDir, NameAndType
    else
      {
        //if not comparison resize the canvas
-       c1->SetWindowSize(600,400);
-       c1->SetCanvasSize(600,400);
+       c1->SetWindowSize(700,700);
+       c1->SetCanvasSize(700,700);
        t1->SetPad(0,0,1,1);
-       t1->SetBottomMargin(0.1);
-       stack->GetXaxis()->SetTitle(name_denRelUncH); //RJ
+       t1->SetBottomMargin(0.15);
+       t1->SetTopMargin(0.05);
+       t1->SetLeftMargin(0.2);
+       stack->GetXaxis()->SetTitle(name_denRelUncH);
      }
 
    t1->RedrawAxis();
@@ -1423,6 +1433,7 @@ int main(int argc, char* argv[]){
         printf("--%18s --> (only for 2D plots) save all the samples in separated pltos\n","splitCanvas");
 	printf("--%18s --> number of bin (default = 1) for rebinning histograms, combine --only option to rebin some specific histograms\n","rebin"); 
 	printf("--%18s --> Blind the Data point from 1D Histograms\n","isDataBlind");
+	printf("--%18s --> No ratio plots\n","noratio");
 	printf("--%18s --> Add cut Line 1\n","addcutLine1");
 	printf("--%18s --> Add cut Line 2\n","addcutLine2");
 	printf("--%18s --> Add left cut Line \n","addleftcutLine");
@@ -1465,6 +1476,7 @@ int main(int argc, char* argv[]){
      }
      if(arg.find("--isSim")!=string::npos){ isSim = true;    }
      if(arg.find("--isDataBlind")!=string::npos){ isDataBlind = true; printf("isDataBlind\n");} //RJ
+     if(arg.find("--noratio")!=string::npos){ noratio = true; printf("noratio\n");}
      if(arg.find("--nosig")!=string::npos){nosig = true; printf("noSig plot=1\n");}//RJ
      if(arg.find("--noLog")!=string::npos){ noLog = true;    }
      if(arg.find("--useDataMinusMC")!=string::npos){ useDataMinusMC = true; }
