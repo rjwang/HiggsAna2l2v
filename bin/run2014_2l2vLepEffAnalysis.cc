@@ -91,32 +91,32 @@ int main(int argc, char* argv[])
     if(url.Contains("SingleEle")) fType=EE;
     bool isSingleMuPD(!isMC && url.Contains("SingleMu"));
     bool isSingleElePD(!isMC && url.Contains("SingleEle"));
-/*
-    bool isMC_ZZ  = isMC && ( string(url.Data()).find("TeV_ZZ")  != string::npos);
-    bool isMC_WZ  = isMC && ( string(url.Data()).find("TeV_WZ")  != string::npos);
-    bool isMC_ZH  = isMC && ( string(url.Data()).find("TeV_ZH")  != string::npos);
-    bool isMC_HZZd= isMC && ( string(url.Data()).find("TeV_HZZd")  != string::npos);
-*/
+    /*
+        bool isMC_ZZ  = isMC && ( string(url.Data()).find("TeV_ZZ")  != string::npos);
+        bool isMC_WZ  = isMC && ( string(url.Data()).find("TeV_WZ")  != string::npos);
+        bool isMC_ZH  = isMC && ( string(url.Data()).find("TeV_ZH")  != string::npos);
+        bool isMC_HZZd= isMC && ( string(url.Data()).find("TeV_HZZd")  != string::npos);
+    */
     bool isV0JetsMC(isMC && (url.Contains("DYJetsToLL_50toInf") || url.Contains("WJets")));
-/*
-    bool isMC_DY  = isMC && ( (string(url.Data()).find("TeV_DYJetsToLL")!= string::npos)
-			|| (string(url.Data()).find("TeV_ZG")!= string::npos) );
-*/
+    /*
+        bool isMC_DY  = isMC && ( (string(url.Data()).find("TeV_DYJetsToLL")!= string::npos)
+    			|| (string(url.Data()).find("TeV_ZG")!= string::npos) );
+    */
     // print out event information
-/*
-    TString outTxtUrl_full= outUrl + "/" + outFileUrl + "_FullList.txt";
-    FILE* outTxtFile_full = NULL;
-    outTxtFile_full = fopen(outTxtUrl_full.Data(), "w");
-    printf("TextFile URL = %s\n",outTxtUrl_full.Data());
+    /*
+        TString outTxtUrl_full= outUrl + "/" + outFileUrl + "_FullList.txt";
+        FILE* outTxtFile_full = NULL;
+        outTxtFile_full = fopen(outTxtUrl_full.Data(), "w");
+        printf("TextFile URL = %s\n",outTxtUrl_full.Data());
 
-    TString outTxtUrl_final= outUrl + "/" + outFileUrl + "_FinalList.txt";
-    FILE* outTxtFile_final = NULL;
-    outTxtFile_final = fopen(outTxtUrl_final.Data(), "w");
-    printf("TextFile URL = %s\n",outTxtUrl_final.Data());
+        TString outTxtUrl_final= outUrl + "/" + outFileUrl + "_FinalList.txt";
+        FILE* outTxtFile_final = NULL;
+        outTxtFile_final = fopen(outTxtUrl_final.Data(), "w");
+        printf("TextFile URL = %s\n",outTxtUrl_final.Data());
 
-    fprintf(outTxtFile_full,"run lumi event passId,passIdAndIso,passZmass,passZpt,pass3dLeptonVeto,passBveto,passLMetVeto,passdphiZllmetCut,passMet,passBalanceCut,passMTcut evCat \n");
-    //fprintf(outTxtFile_final,"run lumi event passId,passIdAndIso,passZmass,passZpt,pass3dLeptonVeto,passBveto,passLMetVeto,passdphiZllmetCut,passMet,passBalanceCut,passMTcut evCat \n");
-*/
+        fprintf(outTxtFile_full,"run lumi event passId,passIdAndIso,passZmass,passZpt,pass3dLeptonVeto,passBveto,passLMetVeto,passdphiZllmetCut,passMet,passBalanceCut,passMTcut evCat \n");
+        //fprintf(outTxtFile_final,"run lumi event passId,passIdAndIso,passZmass,passZpt,pass3dLeptonVeto,passBveto,passLMetVeto,passdphiZllmetCut,passMet,passBalanceCut,passMTcut evCat \n");
+    */
 
     //tree info
     int evStart     = runProcess.getParameter<int>("evStart");
@@ -149,40 +149,48 @@ int main(int argc, char* argv[])
 
     float probe_mu_pt;
     float probe_mu_eta;
+    float probe_mu_abseta;
     float tag_mu_pt;
     float tag_mu_eta;
-    float TandP_mu_Zmass;
+    float tag_mu_abseta;
+
+    float mass;
 
     float probe_ele_pt;
     float probe_ele_eta;
+    float probe_ele_abseta;
     float tag_ele_pt;
     float tag_ele_eta;
-    float TandP_ele_Zmass;
+    float tag_ele_abseta;
 
-    if(fType==EE){
-    	llvv_tree->Branch("tag_ele_passTight", &tag_elepassTight ,"tag_ele_passTight/I");
-    	llvv_tree->Branch("tag_ele_passLoose", &tag_elepassLoose ,"tag_ele_passLoose/I");
-    	llvv_tree->Branch("probe_ele_passTight", &probe_elepassTight ,"probe_ele_passTight/I");
-    	llvv_tree->Branch("probe_ele_passLoose", &probe_elepassLoose ,"probe_ele_passLoose/I");
+    if(fType==EE) {
+        llvv_tree->Branch("tag_ele_passTight", &tag_elepassTight ,"tag_ele_passTight/I");
+        llvv_tree->Branch("tag_ele_passLoose", &tag_elepassLoose ,"tag_ele_passLoose/I");
+        llvv_tree->Branch("probe_ele_passTight", &probe_elepassTight ,"probe_ele_passTight/I");
+        llvv_tree->Branch("probe_ele_passLoose", &probe_elepassLoose ,"probe_ele_passLoose/I");
 
-    	llvv_tree->Branch("probe_ele_pt", &probe_ele_pt ,"probe_ele_pt/F");
-    	llvv_tree->Branch("probe_ele_eta", &probe_ele_eta ,"probe_ele_eta/F");
-    	llvv_tree->Branch("tag_ele_pt", &tag_ele_pt ,"tag_ele_pt/F");
-    	llvv_tree->Branch("tag_ele_eta", &tag_ele_eta ,"tag_ele_eta/F");
-    	llvv_tree->Branch("TandP_ele_Zmass", &TandP_ele_Zmass, "TandP_ele_Zmass/F");
+        llvv_tree->Branch("probe_ele_pt", &probe_ele_pt ,"probe_ele_pt/F");
+        llvv_tree->Branch("probe_ele_eta", &probe_ele_eta ,"probe_ele_eta/F");
+        llvv_tree->Branch("probe_ele_abseta", &probe_ele_abseta ,"probe_ele_abseta/F");
+        llvv_tree->Branch("tag_ele_pt", &tag_ele_pt ,"tag_ele_pt/F");
+        llvv_tree->Branch("tag_ele_eta", &tag_ele_eta ,"tag_ele_eta/F");
+        llvv_tree->Branch("tag_ele_abseta", &tag_ele_abseta ,"tag_ele_abseta/F");
+        llvv_tree->Branch("mass", &mass, "mass/F");
     }
 
-    if(fType==MUMU){
-    	llvv_tree->Branch("tag_mu_passTight", &tag_mupassTight ,"tag_mu_passTight/I");
-    	llvv_tree->Branch("tag_mu_passLoose", &tag_mupassLoose ,"tag_mu_passLoose/I");
-    	llvv_tree->Branch("probe_mu_passTight", &probe_mupassTight ,"probe_mu_passTight/I");
-    	llvv_tree->Branch("probe_mu_passLoose", &probe_mupassLoose ,"probe_mu_passLoose/I");
+    if(fType==MUMU) {
+        llvv_tree->Branch("tag_mu_passTight", &tag_mupassTight ,"tag_mu_passTight/I");
+        llvv_tree->Branch("tag_mu_passLoose", &tag_mupassLoose ,"tag_mu_passLoose/I");
+        llvv_tree->Branch("probe_mu_passTight", &probe_mupassTight ,"probe_mu_passTight/I");
+        llvv_tree->Branch("probe_mu_passLoose", &probe_mupassLoose ,"probe_mu_passLoose/I");
 
-    	llvv_tree->Branch("probe_mu_pt", &probe_mu_pt ,"probe_mu_pt/F");
-    	llvv_tree->Branch("probe_mu_eta", &probe_mu_eta ,"probe_mu_eta/F");
-    	llvv_tree->Branch("tag_mu_pt", &tag_mu_pt ,"tag_mu_pt/F");
-    	llvv_tree->Branch("tag_mu_eta", &tag_mu_eta ,"tag_mu_eta/F");
-    	llvv_tree->Branch("TandP_mu_Zmass", &TandP_mu_Zmass, "TandP_mu_Zmass/F");
+        llvv_tree->Branch("probe_mu_pt", &probe_mu_pt ,"probe_mu_pt/F");
+        llvv_tree->Branch("probe_mu_eta", &probe_mu_eta ,"probe_mu_eta/F");
+        llvv_tree->Branch("probe_mu_abseta", &probe_mu_abseta ,"probe_mu_abseta/F");
+        llvv_tree->Branch("tag_mu_pt", &tag_mu_pt ,"tag_mu_pt/F");
+        llvv_tree->Branch("tag_mu_eta", &tag_mu_eta ,"tag_mu_eta/F");
+	llvv_tree->Branch("tag_mu_abseta", &tag_mu_abseta ,"tag_mu_abseta/F");
+        llvv_tree->Branch("mass", &mass, "mass/F");
     }
 
 
@@ -213,7 +221,7 @@ int main(int argc, char* argv[])
 
     double fakePt[11]= {20,25,30,35,40,45,50,60,70,80,100};
     double fakeEta[9]= {-2.5,-2.,-1.479,-1.,0.,1.,1.479,2.,2.5};
-    
+
     mon.addHistogram( new TH1F( "eleLooseLepEffPt",       ";Loose #it{p}_{T}^{e} [GeV];Events", 10,fakePt) );
     mon.addHistogram( new TH1F( "eleTightLepEffPt",       ";Tight #it{p}_{T}^{e} [GeV];Events", 10,fakePt) );
     mon.addHistogram( new TH1F( "eleLooseLepEffEta",       ";Loose #it{p}_{T}^{e} [GeV];Events", 8,fakeEta) );
@@ -348,7 +356,7 @@ int main(int argc, char* argv[])
             continue;
         }
 
-        if(isV0JetsMC){
+        if(isV0JetsMC) {
             if(ev.mc_nup>5) continue;
         }
 
@@ -371,7 +379,7 @@ int main(int argc, char* argv[])
             continue;
         }
 
-	//split inclusive DY sample into DYToLL and DYToTauTau
+        //split inclusive DY sample into DYToLL and DYToTauTau
         if(isMC && mctruthmode==1 && !isDYToLL(ev.mccat) ) continue;
         if(isMC && mctruthmode==2 && !isDYToTauTau(ev.mccat) ) continue;
 
@@ -434,9 +442,9 @@ int main(int argc, char* argv[])
 
 
 
-	// ewk correction for diboson processes
-	//if(isMC_ZH) weight *= myZHUtils.GetNLOZHWeight(phys);
-	//if(isMC_ZZ) weight *= myZHUtils.GetNLOZZWeight(phys);
+        // ewk correction for diboson processes
+        //if(isMC_ZH) weight *= myZHUtils.GetNLOZHWeight(phys);
+        //if(isMC_ZZ) weight *= myZHUtils.GetNLOZZWeight(phys);
         //if(isMC_WZ) weight *= myZHUtils.GetNLOWZWeight(phys);
 
 
@@ -471,21 +479,21 @@ int main(int argc, char* argv[])
         LorentzVector lep1=phys.leptons[0];
         LorentzVector lep2=phys.leptons[1];
         LorentzVector zll(lep1+lep2);
-	//bool passtightZmass(fabs(zll.mass()-91)<5); 
+        //bool passtightZmass(fabs(zll.mass()-91)<5);
 
         //check alternative selections for the dilepton
         double llScaleFactor(1.0),llTriggerEfficiency(1.0);
 
 
 
-	tag_elepassTight=0;
-    	tag_elepassLoose=0;
-	tag_mupassTight=0;
-    	tag_mupassLoose=0;
-	probe_elepassTight=0;
-    	probe_elepassLoose=0;
-	probe_mupassTight=0;
-    	probe_mupassLoose=0;
+        tag_elepassTight=0;
+        tag_elepassLoose=0;
+        tag_mupassTight=0;
+        tag_mupassLoose=0;
+        probe_elepassTight=0;
+        probe_elepassLoose=0;
+        probe_mupassTight=0;
+        probe_mupassLoose=0;
 
         // looping leptons (what I want)  begin
         for(size_t ilep=0; ilep<2; ilep++) {
@@ -505,34 +513,36 @@ int main(int argc, char* argv[])
             //bool hasGoodId(false), isIso(false);
 
             if(fabs(phys.leptons[ilep].id)==13) {
-                if( hasObjectId(ev.mn_idbits[lpid], MID_PF) 
-		    && hasObjectId(ev.mn_idbits[lpid], MID_GLOBAL)
-		    && phys.leptons[ilep].trkchi2 < 50/*10*/ 
-		    && ev.mn_validMuonHits[lpid] > 0 
-		    && ev.mn_nMatchedStations[lpid] > 1 
-                    && fabs(phys.leptons[ilep].d0)< 100/*0.2*/
-                    && fabs(phys.leptons[ilep].dZ)<0.5
-                    && phys.leptons[ilep].trkValidPixelHits>0
-                    && ev.mn_trkLayersWithMeasurement[lpid]>5
-		    //&& relIso< 1.0 /*0.2*/ 
-		){
-		    looseMuons_raw.push_back(phys.leptons[ilep]);
-		    if(ilep==0) {
-			tag_mupassLoose=1;
-			tag_mu_pt=phys.leptons[ilep].pt();
-			tag_mu_eta=phys.leptons[ilep].eta();
-		    }
-		    if(ilep==1) {
-			probe_mupassLoose=1;
-			probe_mu_pt=phys.leptons[ilep].pt();
-			probe_mu_eta=phys.leptons[ilep].eta();
-		    }
-		    TandP_mu_Zmass=(phys.leptons[0]+phys.leptons[1]).mass();
+                if( hasObjectId(ev.mn_idbits[lpid], MID_PF)
+                        && hasObjectId(ev.mn_idbits[lpid], MID_GLOBAL)
+                        && phys.leptons[ilep].trkchi2 < 50/*10*/
+                        && ev.mn_validMuonHits[lpid] > 0
+                        && ev.mn_nMatchedStations[lpid] > 1
+                        && fabs(phys.leptons[ilep].d0)< 100/*0.2*/
+                        && fabs(phys.leptons[ilep].dZ)<0.5
+                        && phys.leptons[ilep].trkValidPixelHits>0
+                        && ev.mn_trkLayersWithMeasurement[lpid]>5
+                        //&& relIso< 1.0 /*0.2*/
+                  ) {
+                    looseMuons_raw.push_back(phys.leptons[ilep]);
+                    if(ilep==0) {
+                        tag_mupassLoose=1;
+                        tag_mu_pt=phys.leptons[ilep].pt();
+                        tag_mu_eta=phys.leptons[ilep].eta();
+			tag_mu_abseta=fabs(phys.leptons[ilep].eta());
+                    }
+                    if(ilep==1) {
+                        probe_mupassLoose=1;
+                        probe_mu_pt=phys.leptons[ilep].pt();
+                        probe_mu_eta=phys.leptons[ilep].eta();
+                        probe_mu_abseta=fabs(phys.leptons[ilep].eta());
+                    }
+                    mass = (phys.leptons[0]+phys.leptons[1]).mass();
                 }
                 if( hasObjectId(ev.mn_idbits[lpid], MID_TIGHT) && relIso<0.2)    {
-		    tightMuons_raw.push_back(phys.leptons[ilep]);
-		    if(ilep==0) tag_mupassTight=1;
-		    if(ilep==1) probe_mupassTight=1;
+                    tightMuons_raw.push_back(phys.leptons[ilep]);
+                    if(ilep==0) tag_mupassTight=1;
+                    if(ilep==1) probe_mupassTight=1;
                 }
 
                 llScaleFactor *= lsf.getLeptonEfficiency(phys.leptons[ilep].pt(),fabs(phys.leptons[ilep].eta()),13).first;
@@ -546,36 +556,38 @@ int main(int argc, char* argv[])
                 llScaleFactor *= lsf.getLeptonEfficiency(phys.leptons[ilep].pt(),fabs(phys.leptons[ilep].eta()),11).first;
                 for(int iwp=0; iwp<4; iwp++) {
 
-                        bool passWp = EgammaCutBasedEleId::PassWP(EgammaCutBasedEleId::WorkingPoint(wps[iwp]),
-                                      (fabs(phys.leptons[ilep].eta())<1.4442),
-                                      phys.leptons[ilep].pt(), phys.leptons[ilep].eta(),
-                                      ev.en_detain[lpid],  ev.en_dphiin[lpid], ev.en_sihih[lpid], ev.en_hoe[lpid],
-                                      ev.en_ooemoop[lpid], phys.leptons[ilep].d0, phys.leptons[ilep].dZ,
-                                      0., 0., 0.,
-                                      !hasObjectId(ev.en_idbits[lpid], EID_CONVERSIONVETO),0,ev.rho);
-                        if(passWp && iwp==3) {
-			    looseElectrons_raw.push_back(phys.leptons[ilep]);
-			    if(ilep==0) {
-				tag_elepassLoose=1;
-				tag_ele_pt=phys.leptons[ilep].pt();
-				tag_ele_eta=phys.leptons[ilep].eta();
-			    }
-			    if(ilep==1) {
-				probe_elepassLoose=1;
-				probe_ele_pt=phys.leptons[ilep].pt();
-				probe_ele_eta=phys.leptons[ilep].eta();
-			    }
-			    TandP_ele_Zmass=(phys.leptons[0]+phys.leptons[1]).mass();
+                    bool passWp = EgammaCutBasedEleId::PassWP(EgammaCutBasedEleId::WorkingPoint(wps[iwp]),
+                                  (fabs(phys.leptons[ilep].eta())<1.4442),
+                                  phys.leptons[ilep].pt(), phys.leptons[ilep].eta(),
+                                  ev.en_detain[lpid],  ev.en_dphiin[lpid], ev.en_sihih[lpid], ev.en_hoe[lpid],
+                                  ev.en_ooemoop[lpid], phys.leptons[ilep].d0, phys.leptons[ilep].dZ,
+                                  0., 0., 0.,
+                                  !hasObjectId(ev.en_idbits[lpid], EID_CONVERSIONVETO),0,ev.rho);
+                    if(passWp && iwp==3) {
+                        looseElectrons_raw.push_back(phys.leptons[ilep]);
+                        if(ilep==0) {
+                            tag_elepassLoose=1;
+                            tag_ele_pt=phys.leptons[ilep].pt();
+                            tag_ele_eta=phys.leptons[ilep].eta();
+                            tag_ele_abseta=fabs(phys.leptons[ilep].eta());
                         }
-			if(passWp && iwp==1 && relIso<0.15) {
-			    tightElectrons_raw.push_back(phys.leptons[ilep]);
-			    if(ilep==0) tag_elepassTight=1;
-			    if(ilep==1) probe_elepassTight=1;
-			}
-                        if(!use2011Id) {
-                            //llScaleFactor *= 1;
-                            llTriggerEfficiency *= 1.0; //electronTriggerEfficiency(phys.leptons[ilep].pt(),fabs(phys.leptons[ilep].eta()),2012);
+                        if(ilep==1) {
+                            probe_elepassLoose=1;
+                            probe_ele_pt=phys.leptons[ilep].pt();
+                            probe_ele_eta=phys.leptons[ilep].eta();
+                            probe_ele_abseta=fabs(phys.leptons[ilep].eta());
                         }
+                        mass = (phys.leptons[0]+phys.leptons[1]).mass();
+                    }
+                    if(passWp && iwp==1 && relIso<0.15) {
+                        tightElectrons_raw.push_back(phys.leptons[ilep]);
+                        if(ilep==0) tag_elepassTight=1;
+                        if(ilep==1) probe_elepassTight=1;
+                    }
+                    if(!use2011Id) {
+                        //llScaleFactor *= 1;
+                        llTriggerEfficiency *= 1.0; //electronTriggerEfficiency(phys.leptons[ilep].pt(),fabs(phys.leptons[ilep].eta()),2012);
+                    }
                 }
             }
 
@@ -583,7 +595,52 @@ int main(int argc, char* argv[])
         } // loop all leptons end
 
 
-	llvv_tree->Fill();
+        llvv_tree->Fill();
+
+        // swap the tag and probe leg, increase statistics
+        bool doswap(true);
+        if(doswap) {
+            //electron
+            bool temp_tag_elepassLoose = tag_elepassLoose;
+            float temp_tag_ele_pt = tag_ele_pt;
+            float temp_tag_ele_eta = tag_ele_eta;
+            float temp_tag_ele_abseta = tag_ele_abseta;
+            bool temp_tag_elepassTight = tag_elepassTight;
+
+            tag_elepassLoose = probe_elepassLoose;
+            tag_ele_pt = probe_ele_pt;
+            tag_ele_eta = probe_ele_eta;
+            tag_ele_abseta = probe_ele_abseta;
+            tag_elepassTight = probe_elepassTight;
+
+            probe_elepassLoose = temp_tag_elepassLoose;
+            probe_ele_pt = temp_tag_ele_pt;
+            probe_ele_eta = temp_tag_ele_eta;
+            probe_ele_abseta = temp_tag_ele_abseta;
+            probe_elepassTight = temp_tag_elepassTight;
+
+            //muon
+            bool temp_tag_mupassLoose = tag_mupassLoose;
+            float temp_tag_mu_pt = tag_mu_pt;
+            float temp_tag_mu_eta = tag_mu_eta;
+            float temp_tag_mu_abseta = tag_mu_abseta;
+            bool temp_tag_mupassTight = tag_mupassTight;
+
+            tag_mupassLoose = probe_mupassLoose;
+            tag_mu_pt = probe_mu_pt;
+            tag_mu_eta = probe_mu_eta;
+            tag_mu_abseta = probe_mu_abseta;
+            tag_mupassTight = probe_mupassTight;
+
+            probe_mupassLoose = temp_tag_mupassLoose;
+            probe_mu_pt = temp_tag_mu_pt;
+            probe_mu_eta = temp_tag_mu_eta;
+            probe_mu_abseta = temp_tag_mu_abseta;
+            probe_mupassTight = temp_tag_mupassTight;
+
+
+            llvv_tree->Fill();
+        }
 
 
 
@@ -629,20 +686,19 @@ int main(int argc, char* argv[])
 
         if(hasTrigger)                 {
             mon.fillHisto("eventflow",tags,0,weight);
-        }
-	else continue;
+        } else continue;
 
 
 
-	//mon.fillHisto("zmass_raw"			,tags, zll.mass(), weight);
+        //mon.fillHisto("zmass_raw"			,tags, zll.mass(), weight);
         //mon.fillHisto("zpt_raw"				,tags, zll.pt(),   weight);
-	//mon.fillHisto("pfmet_raw"			,tags, zvvs[0].pt(), weight);
-	//mon.fillHisto("redmet_raw"			,tags, aRedMet.pt(), weight);
-	//mon.fillHisto("met_sig_raw"			,tags, phys.met_sig[1], weight);
-	//mon.fillHisto("mtless_ZMet_raw"                 ,tags, aMTmassless, weight);
-	//mon.fillHisto("nleptons_raw"			,tags, nextraleptons, weight);
-	////mon.fillHisto("npfjets_raw"			,tags, nAJetsGood30, weight);
-	////mon.fillHisto("npfbjets_raw"			,tags, nABtags, weight);
+        //mon.fillHisto("pfmet_raw"			,tags, zvvs[0].pt(), weight);
+        //mon.fillHisto("redmet_raw"			,tags, aRedMet.pt(), weight);
+        //mon.fillHisto("met_sig_raw"			,tags, phys.met_sig[1], weight);
+        //mon.fillHisto("mtless_ZMet_raw"                 ,tags, aMTmassless, weight);
+        //mon.fillHisto("nleptons_raw"			,tags, nextraleptons, weight);
+        ////mon.fillHisto("npfjets_raw"			,tags, nAJetsGood30, weight);
+        ////mon.fillHisto("npfbjets_raw"			,tags, nABtags, weight);
 
         //##############################################
         //########  Main Event Selection        ########
@@ -650,86 +706,86 @@ int main(int argc, char* argv[])
 
 
 
-	//electron
-	if( ((isMC && ev.cat==EE) || (!isMC && fType==EE)) && tightElectrons_raw.size()>0 ){
-		for(size_t j=0; j<tightElectrons_raw.size(); j++){
+        //electron
+        if( ((isMC && ev.cat==EE) || (!isMC && fType==EE)) && tightElectrons_raw.size()>0 ) {
+            for(size_t j=0; j<tightElectrons_raw.size(); j++) {
 
-			LorentzVector Tag = tightElectrons_raw[j];	
-			for(size_t l=0; l<looseElectrons_raw.size(); l++){
+                LorentzVector Tag = tightElectrons_raw[j];
+                for(size_t l=0; l<looseElectrons_raw.size(); l++) {
 
-				// check if exist a ``Loose'' lepton build tag-and-probe Z candidates
-				LorentzVector Probe = looseElectrons_raw[l];
-				if(Tag.eta()==Probe.eta()) continue; // remove the overlap
-				LorentzVector dilep(Tag+Probe);
-				if(fabs(dilep.mass()-91)>5) continue; // remove the non-Z candidates
-				mon.fillHisto("eleLooseLepEffPt",tags, Probe.pt(), weight);
-				mon.fillHisto("eleLooseLepEffEta",tags, Probe.eta(), weight);
-				double eta = Probe.eta();
-				if(fabs(eta)<1.0)        mon.fillHisto("eleLooseLepEff_etabin1",tags, Probe.pt(), weight);
-				else if(fabs(eta)<1.479) mon.fillHisto("eleLooseLepEff_etabin2",tags, Probe.pt(), weight);
-				else if(fabs(eta)<2.00)  mon.fillHisto("eleLooseLepEff_etabin3",tags, Probe.pt(), weight);
-				else			 mon.fillHisto("eleLooseLepEff_etabin4",tags, Probe.pt(), weight);
-				
-				// check this probe lepton is also ``Tight''
-				for(size_t k=0; k<tightElectrons_raw.size(); k++){
-					LorentzVector TightProbe = tightElectrons_raw[k];
-					if(Probe.eta()!=TightProbe.eta()) continue; // check if the lepton is same or not
-					mon.fillHisto("eleTightLepEffPt",tags, TightProbe.pt(), weight);
-					mon.fillHisto("eleTightLepEffEta",tags, TightProbe.eta(), weight);
-					double eta = TightProbe.eta();
-					if(fabs(eta)<1.0)        mon.fillHisto("eleTightLepEff_etabin1",tags, TightProbe.pt(), weight);
-					else if(fabs(eta)<1.479) mon.fillHisto("eleTightLepEff_etabin2",tags, TightProbe.pt(), weight);
-					else if(fabs(eta)<2.00)  mon.fillHisto("eleTightLepEff_etabin3",tags, TightProbe.pt(), weight);
-					else                     mon.fillHisto("eleTightLepEff_etabin4",tags, TightProbe.pt(), weight);
-				
-				}
+                    // check if exist a ``Loose'' lepton build tag-and-probe Z candidates
+                    LorentzVector Probe = looseElectrons_raw[l];
+                    if(Tag.eta()==Probe.eta()) continue; // remove the overlap
+                    LorentzVector dilep(Tag+Probe);
+                    if(fabs(dilep.mass()-91)>5) continue; // remove the non-Z candidates
+                    mon.fillHisto("eleLooseLepEffPt",tags, Probe.pt(), weight);
+                    mon.fillHisto("eleLooseLepEffEta",tags, Probe.eta(), weight);
+                    double eta = Probe.eta();
+                    if(fabs(eta)<1.0)        mon.fillHisto("eleLooseLepEff_etabin1",tags, Probe.pt(), weight);
+                    else if(fabs(eta)<1.479) mon.fillHisto("eleLooseLepEff_etabin2",tags, Probe.pt(), weight);
+                    else if(fabs(eta)<2.00)  mon.fillHisto("eleLooseLepEff_etabin3",tags, Probe.pt(), weight);
+                    else			 mon.fillHisto("eleLooseLepEff_etabin4",tags, Probe.pt(), weight);
 
-			}
+                    // check this probe lepton is also ``Tight''
+                    for(size_t k=0; k<tightElectrons_raw.size(); k++) {
+                        LorentzVector TightProbe = tightElectrons_raw[k];
+                        if(Probe.eta()!=TightProbe.eta()) continue; // check if the lepton is same or not
+                        mon.fillHisto("eleTightLepEffPt",tags, TightProbe.pt(), weight);
+                        mon.fillHisto("eleTightLepEffEta",tags, TightProbe.eta(), weight);
+                        double eta = TightProbe.eta();
+                        if(fabs(eta)<1.0)        mon.fillHisto("eleTightLepEff_etabin1",tags, TightProbe.pt(), weight);
+                        else if(fabs(eta)<1.479) mon.fillHisto("eleTightLepEff_etabin2",tags, TightProbe.pt(), weight);
+                        else if(fabs(eta)<2.00)  mon.fillHisto("eleTightLepEff_etabin3",tags, TightProbe.pt(), weight);
+                        else                     mon.fillHisto("eleTightLepEff_etabin4",tags, TightProbe.pt(), weight);
 
-		}
-	}
+                    }
 
+                }
 
+            }
+        }
 
 
-	//muon
-	if( ((isMC && ev.cat==MUMU) || (!isMC && fType==MUMU)) && tightMuons_raw.size()>0 ){
-		for(size_t j=0; j<tightMuons_raw.size(); j++){
 
-			LorentzVector Tag = tightMuons_raw[j];	
-			for(size_t l=0; l<looseMuons_raw.size(); l++){
 
-				// check if exist a ``Loose'' lepton build tag-and-probe Z candidates
-				LorentzVector Probe =looseMuons_raw[l];
-				if(Tag.eta()==Probe.eta()) continue; // remove the overlap
-				LorentzVector dilep(Tag+Probe);
-				if(fabs(dilep.mass()-91)>5) continue; // remove the non-Z candidates
-				mon.fillHisto("muLooseLepEffPt",tags, Probe.pt(), weight);
-				mon.fillHisto("muLooseLepEffEta",tags, Probe.eta(), weight);
-				double eta = Probe.eta();
-				if(fabs(eta)<1.0)        mon.fillHisto("muLooseLepEff_etabin1",tags, Probe.pt(), weight);
-				else if(fabs(eta)<1.479) mon.fillHisto("muLooseLepEff_etabin2",tags, Probe.pt(), weight);
-				else if(fabs(eta)<2.00)  mon.fillHisto("muLooseLepEff_etabin3",tags, Probe.pt(), weight);
-				else			 mon.fillHisto("muLooseLepEff_etabin4",tags, Probe.pt(), weight);
-				
-				// check this probe lepton is also ``Tight''
-				for(size_t k=0; k<tightMuons_raw.size(); k++){
-					LorentzVector TightProbe = tightMuons_raw[k];
-					if(Probe.eta()!=TightProbe.eta()) continue; // check if the lepton is same or not
-					mon.fillHisto("muTightLepEffPt",tags, TightProbe.pt(), weight);
-					mon.fillHisto("muTightLepEffEta",tags, TightProbe.eta(), weight);
-					double eta = TightProbe.eta();
-					if(fabs(eta)<1.0)        mon.fillHisto("muTightLepEff_etabin1",tags, TightProbe.pt(), weight);
-					else if(fabs(eta)<1.479) mon.fillHisto("muTightLepEff_etabin2",tags, TightProbe.pt(), weight);
-					else if(fabs(eta)<2.00)  mon.fillHisto("muTightLepEff_etabin3",tags, TightProbe.pt(), weight);
-					else                     mon.fillHisto("muTightLepEff_etabin4",tags, TightProbe.pt(), weight);
-				
-				}
+        //muon
+        if( ((isMC && ev.cat==MUMU) || (!isMC && fType==MUMU)) && tightMuons_raw.size()>0 ) {
+            for(size_t j=0; j<tightMuons_raw.size(); j++) {
 
-			}
+                LorentzVector Tag = tightMuons_raw[j];
+                for(size_t l=0; l<looseMuons_raw.size(); l++) {
 
-		}
-	}
+                    // check if exist a ``Loose'' lepton build tag-and-probe Z candidates
+                    LorentzVector Probe =looseMuons_raw[l];
+                    if(Tag.eta()==Probe.eta()) continue; // remove the overlap
+                    LorentzVector dilep(Tag+Probe);
+                    if(fabs(dilep.mass()-91)>5) continue; // remove the non-Z candidates
+                    mon.fillHisto("muLooseLepEffPt",tags, Probe.pt(), weight);
+                    mon.fillHisto("muLooseLepEffEta",tags, Probe.eta(), weight);
+                    double eta = Probe.eta();
+                    if(fabs(eta)<1.0)        mon.fillHisto("muLooseLepEff_etabin1",tags, Probe.pt(), weight);
+                    else if(fabs(eta)<1.479) mon.fillHisto("muLooseLepEff_etabin2",tags, Probe.pt(), weight);
+                    else if(fabs(eta)<2.00)  mon.fillHisto("muLooseLepEff_etabin3",tags, Probe.pt(), weight);
+                    else			 mon.fillHisto("muLooseLepEff_etabin4",tags, Probe.pt(), weight);
+
+                    // check this probe lepton is also ``Tight''
+                    for(size_t k=0; k<tightMuons_raw.size(); k++) {
+                        LorentzVector TightProbe = tightMuons_raw[k];
+                        if(Probe.eta()!=TightProbe.eta()) continue; // check if the lepton is same or not
+                        mon.fillHisto("muTightLepEffPt",tags, TightProbe.pt(), weight);
+                        mon.fillHisto("muTightLepEffEta",tags, TightProbe.eta(), weight);
+                        double eta = TightProbe.eta();
+                        if(fabs(eta)<1.0)        mon.fillHisto("muTightLepEff_etabin1",tags, TightProbe.pt(), weight);
+                        else if(fabs(eta)<1.479) mon.fillHisto("muTightLepEff_etabin2",tags, TightProbe.pt(), weight);
+                        else if(fabs(eta)<2.00)  mon.fillHisto("muTightLepEff_etabin3",tags, TightProbe.pt(), weight);
+                        else                     mon.fillHisto("muTightLepEff_etabin4",tags, TightProbe.pt(), weight);
+
+                    }
+
+                }
+
+            }
+        }
 
 
 
@@ -758,10 +814,10 @@ int main(int argc, char* argv[])
     ofile->cd("tpTree");
     llvv_tree->Write();
     ofile->Close();
-/*
-    if(outTxtFile_full)fclose(outTxtFile_full);
-    if(outTxtFile_final)fclose(outTxtFile_final);
-*/
+    /*
+        if(outTxtFile_full)fclose(outTxtFile_full);
+        if(outTxtFile_final)fclose(outTxtFile_final);
+    */
 }
 
 
