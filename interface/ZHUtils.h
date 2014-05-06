@@ -56,6 +56,9 @@ class ZHUtils
   std::map<TString,float> getWeights(double ValtoWeight, TString wgtName);
   double get2DWeights(double Val_x, double Val_y, TString wgtName, TString cat);
 
+  //prompt rate and fake rate
+  double promptRate(int pdgid, double pt, double abseta);
+
   ~ZHUtils();
 
  private:

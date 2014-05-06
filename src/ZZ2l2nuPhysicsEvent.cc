@@ -196,6 +196,34 @@ std::pair<int,int> getWZdecayMode(ZZ2l2nuSummary_t &ev)
 }
 
 //
+int getQCDInfo(ZZ2l2nuSummary_t &ev)
+{
+  int qcdType=0;
+  bool isLightquark(false);
+  bool isCquark(false);
+  bool isBquark(false);
+  bool isTquark(false);
+  bool isGamma(false);
+  for(Int_t ipart=0; ipart<ev.nmcparticles; ipart++)
+  {
+    if(abs(ev.mc_id[ipart])<=3) {isLightquark = true; break;} 
+    if(abs(ev.mc_id[ipart])==4) {isCquark = true; break;} 
+    if(abs(ev.mc_id[ipart])==5) {isBquark = true; break;}
+    if(abs(ev.mc_id[ipart])==6) {isTquark = true; break;}
+    if(abs(ev.mc_id[ipart])==22) {isGamma = true; break;}
+  }
+
+  qcdType = (isLightquark << 0) |
+	    (isCquark << 1) |
+	    (isBquark << 2) |
+	    (isTquark << 3) |
+	    (isGamma << 4);
+
+  return qcdType;
+}
+
+
+//
 int getNgenLeptons(int mcChannelCode, int pdgId)
 {
   int shift(0);

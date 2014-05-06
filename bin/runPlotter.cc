@@ -848,6 +848,12 @@ void Draw1DHistogram(JSONWrapper::Object& Root, std::string RootDir, NameAndType
          if(tSaveName.Contains("npfjets")) maximumFound*= 50;
          if(tSaveName.Contains("npfbjets")) maximumFound*= 50;
 	 if(tSaveName.Contains("_WWCtrl")) maximumFound*= 50;
+	 if(tSaveName.Contains("Eta_raw")) maximumFound*= 40;
+	 if(tSaveName.Contains("wmt_raw")) maximumFound*= 20;
+	 if(tSaveName.Contains("pfmet_raw")) maximumFound*= 20;
+	 if(tSaveName.Contains("eleLooseFakePt")) maximumFound*= 20;
+	 if(tSaveName.Contains("eleTightFakePt")) maximumFound*= 20;
+	 if(tSaveName.Contains("FakeEta")) maximumFound*= 40;
 	 maximumFound *= scaleYMax;
 
 	 stack->SetMaximum(maximumFound);
@@ -921,7 +927,7 @@ void Draw1DHistogram(JSONWrapper::Object& Root, std::string RootDir, NameAndType
      }
    
    TPaveText* T = new TPaveText(0.1,0.994,0.90,0.94, "NDC");
-   if(isDataBlind || noratio) T = new TPaveText(0.2,0.994,0.87,0.94, "NDC"); 
+   if(isDataBlind || noratio) T = new TPaveText(0.2,0.994,0.87,0.95, "NDC"); 
    T->SetFillColor(0);
    T->SetFillStyle(0);  T->SetLineColor(0);
    T->SetTextAlign(22);
