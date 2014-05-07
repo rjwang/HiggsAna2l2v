@@ -58,6 +58,7 @@ class ZHUtils
 
   //prompt rate and fake rate
   double promptRate(int pdgid, double pt, double abseta);
+  double fakeRate(int pdgid, double pt, double abseta);
 
   ~ZHUtils();
 

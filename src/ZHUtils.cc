@@ -284,7 +284,7 @@ double ZHUtils::promptRate(int pdgid, double pt, double abseta)
             else if(pt<40) prompt_rate = 0.9173;
             else if(pt<45) prompt_rate = 0.9322;
             else if(pt<60) prompt_rate = 0.9418;
-            else if(pt<100) prompt_rate = 0.9498;
+            else 	   prompt_rate = 0.9498;
 
         } else if(abseta<1.48) {
             if(pt<25)      prompt_rate = 0.7642;
@@ -293,7 +293,7 @@ double ZHUtils::promptRate(int pdgid, double pt, double abseta)
             else if(pt<40) prompt_rate = 0.8791;
             else if(pt<45) prompt_rate = 0.8932;
             else if(pt<60) prompt_rate = 0.9109;
-            else if(pt<100) prompt_rate = 0.9283;
+            else 	   prompt_rate = 0.9283;
 
         } else if(abseta<2.0) {
             if(pt<25)      prompt_rate = 0.7406;
@@ -302,7 +302,7 @@ double ZHUtils::promptRate(int pdgid, double pt, double abseta)
             else if(pt<40) prompt_rate = 0.8554;
             else if(pt<45) prompt_rate = 0.8774;
             else if(pt<60) prompt_rate = 0.8975;
-            else if(pt<100) prompt_rate = 0.9273;
+            else 	   prompt_rate = 0.9273;
 
         } else {
             if(pt<25)      prompt_rate = 0.7255;
@@ -311,7 +311,7 @@ double ZHUtils::promptRate(int pdgid, double pt, double abseta)
             else if(pt<40) prompt_rate = 0.8528;
             else if(pt<45) prompt_rate = 0.8790;
             else if(pt<60) prompt_rate = 0.8989;
-            else if(pt<100) prompt_rate = 0.9252;
+            else 	   prompt_rate = 0.9252;
         }
 
     } else if(pdgid==13) { //muon
@@ -323,7 +323,7 @@ double ZHUtils::promptRate(int pdgid, double pt, double abseta)
             else if(pt<40) prompt_rate = 0.9732;
             else if(pt<45) prompt_rate = 0.9842;
             else if(pt<60) prompt_rate = 0.9884;
-            else if(pt<100) prompt_rate = 0.9904;
+            else 	   prompt_rate = 0.9904;
 
         } else if(abseta<1.48) {
             if(pt<25)      prompt_rate = 0.9259;
@@ -332,7 +332,7 @@ double ZHUtils::promptRate(int pdgid, double pt, double abseta)
             else if(pt<40) prompt_rate = 0.9788;
             else if(pt<45) prompt_rate = 0.9886;
             else if(pt<60) prompt_rate = 0.9915;
-            else if(pt<100) prompt_rate = 0.9904;
+            else 	   prompt_rate = 0.9904;
 
         } else if(abseta<2.0) {
             if(pt<25)      prompt_rate = 0.9412;
@@ -341,7 +341,7 @@ double ZHUtils::promptRate(int pdgid, double pt, double abseta)
             else if(pt<40) prompt_rate = 0.9805;
             else if(pt<45) prompt_rate = 0.9870;
             else if(pt<60) prompt_rate = 0.9883;
-            else if(pt<100) prompt_rate = 0.9858;
+            else 	   prompt_rate = 0.9858;
 
         } else {
             if(pt<25)      prompt_rate = 0.9260;
@@ -350,13 +350,47 @@ double ZHUtils::promptRate(int pdgid, double pt, double abseta)
             else if(pt<40) prompt_rate = 0.9750;
             else if(pt<45) prompt_rate = 0.9818;
             else if(pt<60) prompt_rate = 0.9838;
-            else if(pt<100) prompt_rate = 0.9824;
+            else 	   prompt_rate = 0.9824;
         }
 
     }
 
     return prompt_rate;
 }
+
+
+
+
+double ZHUtils::fakeRate(int pdgid, double pt, double abseta)
+{
+    double fake_rate = 0.;
+
+    if(pdgid==11) { //electron
+        if(pt<25)      fake_rate = 0.106236;
+        else if(pt<30) fake_rate = 0.104462;
+        else if(pt<35) fake_rate = 0.101852;
+        else if(pt<40) fake_rate = 0.103804;
+        else if(pt<45) fake_rate = 0.106015;
+	else if(pt<50) fake_rate = 0.111559;
+        else if(pt<60) fake_rate = 0.111799;
+        else 	       fake_rate = 0.110794;
+
+    } else if(pdgid==13) { //muon
+
+        if(pt<25)      fake_rate = 0.0803843;
+        else if(pt<30) fake_rate = 0.0864601;
+        else if(pt<35) fake_rate = 0.085329;
+        else if(pt<40) fake_rate = 0.101627;
+        else if(pt<45) fake_rate = 0.0939324;
+        else if(pt<50) fake_rate = 0.0651487;
+        else if(pt<60) fake_rate = 0.0523345;
+        else           fake_rate = 0.101818;
+    }
+
+    return fake_rate;
+
+}
+
 
 
 /*
