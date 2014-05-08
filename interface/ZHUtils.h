@@ -56,9 +56,14 @@ class ZHUtils
   std::map<TString,float> getWeights(double ValtoWeight, TString wgtName);
   double get2DWeights(double Val_x, double Val_y, TString wgtName, TString cat);
 
-  //prompt rate and fake rate
+
+  // prompt rate and fake rate
   double promptRate(int pdgid, double pt, double abseta);
   double fakeRate(int pdgid, double pt, double abseta);
+
+  double getN_PFweight(int TL_type, LorentzVector lep1, int id1, LorentzVector lep2, int id2);
+  double getN_FPweight(int TL_type, LorentzVector lep1, int id1, LorentzVector lep2, int id2);
+  double getN_FFweight(int TL_type, LorentzVector lep1, int id1, LorentzVector lep2, int id2);
 
   ~ZHUtils();
 

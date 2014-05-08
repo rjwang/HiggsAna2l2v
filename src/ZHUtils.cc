@@ -371,7 +371,7 @@ double ZHUtils::fakeRate(int pdgid, double pt, double abseta)
         else if(pt<35) fake_rate = 0.101852;
         else if(pt<40) fake_rate = 0.103804;
         else if(pt<45) fake_rate = 0.106015;
-	else if(pt<50) fake_rate = 0.111559;
+        else if(pt<50) fake_rate = 0.111559;
         else if(pt<60) fake_rate = 0.111799;
         else 	       fake_rate = 0.110794;
 
@@ -392,6 +392,61 @@ double ZHUtils::fakeRate(int pdgid, double pt, double abseta)
 }
 
 
+double ZHUtils::getN_PFweight(int TL_type, LorentzVector lep1, int id1, LorentzVector lep2, int id2)
+{
+    double p_1 = promptRate( id1, lep1.pt(), fabs(lep1.eta()) );
+    double p_2 = promptRate( id2, lep2.pt(), fabs(lep2.eta()) );
+    double f_1 = fakeRate( id1, lep1.pt(), fabs(lep1.eta()) );
+    double f_2 = fakeRate( id2, lep2.pt(), fabs(lep2.eta()) );
+
+    double weight = 1./(p_1 - f_1);
+    weight /= (p_2 - f_2);
+    //TL_type: 00(LL) 01(TL) 10(LT) 11(TT)
+    if(TL_type == 0) weight *= -f_1*p_2;
+    if(TL_type == 1) weight *= (1.-f_1)*p_2;
+    if(TL_type == 2) weight *= f_1*(1.-p_2);
+    if(TL_type == 3) weight *= -(1.-f_1)*(1.-p_2);
+
+    return weight;
+}
+
+
+double ZHUtils::getN_FPweight(int TL_type, LorentzVector lep1, int id1, LorentzVector lep2, int id2)
+{
+    double p_1 = promptRate( id1, lep1.pt(), fabs(lep1.eta()) );
+    double p_2 = promptRate( id2, lep2.pt(), fabs(lep2.eta()) );
+    double f_1 = fakeRate( id1, lep1.pt(), fabs(lep1.eta()) );
+    double f_2 = fakeRate( id2, lep2.pt(), fabs(lep2.eta()) );
+
+    double weight = 1./(p_1 - f_1);
+    weight /= (p_2 - f_2);
+    //TL_type: 00(LL) 01(TL) 10(LT) 11(TT)
+    if(TL_type == 0) weight *= -p_1*f_2;
+    if(TL_type == 1) weight *= (1.-p_1)*f_2;
+    if(TL_type == 2) weight *= p_1*(1.-f_2);
+    if(TL_type == 3) weight *= -(1.-p_1)*(1.-f_2);
+
+    return weight;
+}
+
+
+double ZHUtils::getN_FFweight(int TL_type, LorentzVector lep1, int id1, LorentzVector lep2, int id2)
+{
+    double p_1 = promptRate( id1, lep1.pt(), fabs(lep1.eta()) );
+    double p_2 = promptRate( id2, lep2.pt(), fabs(lep2.eta()) );
+    double f_1 = fakeRate( id1, lep1.pt(), fabs(lep1.eta()) );
+    double f_2 = fakeRate( id2, lep2.pt(), fabs(lep2.eta()) );
+
+    double weight = 1./(p_1 - f_1);
+    weight /= (p_2 - f_2);
+    //TL_type: 00(LL) 01(TL) 10(LT) 11(TT)
+    if(TL_type == 0) weight *= p_1*p_2;
+    if(TL_type == 1) weight *= -(1.-p_1)*p_2;
+    if(TL_type == 2) weight *= -p_1*(1.-p_2);
+    if(TL_type == 3) weight *= (1.-p_1)*(1.-p_2);
+
+    return weight;
+}
 
 /*
    float weightNLOEWKzz(float pt)

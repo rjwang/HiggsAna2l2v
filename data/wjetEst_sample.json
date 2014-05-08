@@ -1,0 +1,77 @@
+{
+  "proc": [
+    {
+      "isdata": true, 
+      "color": 1, 
+      "tag": "Data", 
+      "marker": 20, 
+      "data": [
+        {
+          "dtag": "Data8TeV_DoubleElectron2012A", 
+          "split": 5
+        }, 
+        {
+          "dtag": "Data8TeV_DoubleElectron2012B", 
+          "split": 5
+        }, 
+        {
+          "dtag": "Data8TeV_DoubleElectron2012C", 
+          "split": 10
+        }, 
+        {
+          "dtag": "Data8TeV_DoubleElectron2012D", 
+          "split": 5
+        }, 
+        {
+          "dtag": "Data8TeV_DoubleMu2012A", 
+          "split": 2
+        }, 
+        {
+          "dtag": "Data8TeV_DoubleMu2012B", 
+          "split": 10
+        }, 
+        {
+          "dtag": "Data8TeV_DoubleMu2012C", 
+          "split": 10
+        }, 
+        {
+          "dtag": "Data8TeV_DoubleMu2012D", 
+          "split": 10
+        }, 
+        {
+          "dtag": "Data8TeV_SingleElectron2012A", 
+          "split": 2
+        }, 
+        {
+          "dtag": "Data8TeV_SingleElectron2012B", 
+          "split": 10
+        }, 
+        {
+          "dtag": "Data8TeV_SingleElectron2012C", 
+          "split": 10
+        }, 
+        {
+          "dtag": "Data8TeV_SingleElectron2012D", 
+          "split": 10
+        }, 
+        {
+          "dtag": "Data8TeV_SingleMu2012A", 
+          "split": 2
+        }, 
+        {
+          "dtag": "Data8TeV_SingleMu2012B", 
+          "split": 10
+        }, 
+        {
+          "dtag": "Data8TeV_SingleMu2012C", 
+          "split": 10
+        }, 
+        {
+          "dtag": "Data8TeV_SingleMu2012D", 
+          "split": 10
+        }
+      ], 
+      "fill": 0
+    }
+  ]
+}
