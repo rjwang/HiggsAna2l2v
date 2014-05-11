@@ -127,14 +127,27 @@ int main(int argc, char* argv[])
     //ZHUtils myZHUtils(runProcess);
 
     //systematics
-    //bool runSystematics                        = runProcess.getParameter<bool>("runSystematics");
+    bool runSystematics                        = runProcess.getParameter<bool>("runSystematics");
+    std::vector<TString> varNames(1,"");
+    if(runSystematics) {
+        cout << "Systematics will be computed for this analysis" << endl;
+        varNames.push_back("_mtup");
+        varNames.push_back("_mtdown");
+        varNames.push_back("_metup");
+        varNames.push_back("_metdown");
+	varNames.push_back("_jptup");
+	varNames.push_back("_jptdown");
+	varNames.push_back("_dphiup");
+	varNames.push_back("_dphidown");
+    }
+    size_t nvarsToInclude=varNames.size();
+
 
     //##################################################################################
     //##########################    INITIATING HISTOGRAMS     ##########################
     //##################################################################################
 
     SmartSelectionMonitor mon;
-
 
     TH1F *h=(TH1F*) mon.addHistogram( new TH1F ("eventflow", ";;Events", 12,0,12) );
     h->GetXaxis()->SetBinLabel(1,"Trigger");
@@ -227,7 +240,7 @@ int main(int argc, char* argv[])
     //double fakePt[11]= {20,25,30,35,40,45,50,60,70,80,100};
     double mufakePt[9] = {20,25,30,35,40,45,50,60,100};
     double fakeEta[9]= {-2.5,-2.,-1.479,-1.,0.,1.,1.479,2.,2.5};
-    double fakevtx[7]={0,10,15,20,25,30,50};
+    double fakevtx[7]= {0,10,15,20,25,30,50};
 
     mon.addHistogram( new TH1F( "eleLooseFakePt",       ";Loose #it{p}_{T}^{e} [GeV];Events", 8,mufakePt) );
     mon.addHistogram( new TH1F( "eleTightFakePt",       ";Tight #it{p}_{T}^{e} [GeV];Events", 8,mufakePt) );
@@ -271,6 +284,19 @@ int main(int argc, char* argv[])
     mon.addHistogram( new TH1F( "muLooseFake_etabin4",       ";Loose #it{p}_{T}^{#mu} [GeV];Events", 8,mufakePt) );
     mon.addHistogram( new TH1F( "muTightFake_etabin4",       ";Tight #it{p}_{T}^{#mu} [GeV];Events", 8,mufakePt) );
 
+
+
+    TH1F* Hoptim_systs  =  (TH1F*) mon.addHistogram( new TH1F ("optim_systs"    , ";syst;", nvarsToInclude,0,nvarsToInclude) ) ;
+
+    for(size_t ivar=0; ivar<nvarsToInclude; ivar++) {
+        Hoptim_systs->GetXaxis()->SetBinLabel(ivar+1, varNames[ivar]);
+
+        mon.addHistogram( new TH1F (TString("muLooseFakePt_syst")+varNames[ivar], ";Loose #it{p}_{T}^{#mu} [GeV];Events", 8,mufakePt) );
+        mon.addHistogram( new TH1F (TString("muTightFakePt_syst")+varNames[ivar], ";Tight #it{p}_{T}^{#mu} [GeV];Events", 8,mufakePt) );
+	mon.addHistogram( new TH1F (TString("eleLooseFakePt_syst")+varNames[ivar],";Loose #it{p}_{T}^{e} [GeV];Events", 8,mufakePt) );
+	mon.addHistogram( new TH1F (TString("eleTightFakePt_syst")+varNames[ivar],";Tight #it{p}_{T}^{e} [GeV];Events", 8,mufakePt) );
+
+    }
 
 
 
@@ -747,16 +773,18 @@ int main(int argc, char* argv[])
         //########  Main Fake Rate Calculation  ########
         //##############################################
 
-
-
+        std::vector<LorentzVector> looseMuons = checkDiMuonMass(looseMuons_raw);
+        std::vector<LorentzVector> tightMuons = checkDiMuonMass(tightMuons_raw);
+        std::vector<LorentzVector> looseElectrons = checkDiElectronMass(looseElectrons_raw);
+        std::vector<LorentzVector> tightElectrons = checkDiElectronMass(tightElectrons_raw);
 
         // drive fake rate
         // fixed dijet control sample
         if(zvvs[0].pt()<20) {
-            std::vector<LorentzVector> looseMuons = checkDiMuonMass(looseMuons_raw);
-            std::vector<LorentzVector> tightMuons = checkDiMuonMass(tightMuons_raw);
-            std::vector<LorentzVector> looseElectrons = checkDiElectronMass(looseElectrons_raw);
-            std::vector<LorentzVector> tightElectrons = checkDiElectronMass(tightElectrons_raw);
+            //std::vector<LorentzVector> looseMuons = checkDiMuonMass(looseMuons_raw);
+            //std::vector<LorentzVector> tightMuons = checkDiMuonMass(tightMuons_raw);
+            //std::vector<LorentzVector> looseElectrons = checkDiElectronMass(looseElectrons_raw);
+            //std::vector<LorentzVector> tightElectrons = checkDiElectronMass(tightElectrons_raw);
 
             if(hasEtrigger) {
                 if(passLooseEle) {
@@ -767,9 +795,9 @@ int main(int argc, char* argv[])
                         double Wmt = METUtils::transverseMass(looseElectrons[j],zvvs[0],false);
                         if (Wmt > 60) continue;
 
-			mon.fillHisto("eleLooseFakeMET",tags, zvvs[0].pt(), weight);
-			mon.fillHisto("eleLooseFakeNvtx",tags, ev.nvtx, weight);
-			mon.fillHisto("eleLooseFakeMT",tags, Wmt, weight);
+                        mon.fillHisto("eleLooseFakeMET",tags, zvvs[0].pt(), weight);
+                        mon.fillHisto("eleLooseFakeNvtx",tags, ev.nvtx, weight);
+                        mon.fillHisto("eleLooseFakeMT",tags, Wmt, weight);
                         double eta = looseElectrons[j].eta();
                         mon.fillHisto("eleLooseFakePt",tags, looseElectrons[j].pt(), weight);
                         mon.fillHisto("eleLooseFakeEta",tags, eta, weight);
@@ -787,9 +815,9 @@ int main(int argc, char* argv[])
                         double Wmt = METUtils::transverseMass(tightElectrons[j],zvvs[0],false);
                         if (Wmt > 60) continue;
 
-			mon.fillHisto("eleTightFakeMET",tags, zvvs[0].pt(), weight);
-			mon.fillHisto("eleTightFakeNvtx",tags, ev.nvtx, weight);
-			mon.fillHisto("eleTightFakeMT",tags, Wmt, weight);
+                        mon.fillHisto("eleTightFakeMET",tags, zvvs[0].pt(), weight);
+                        mon.fillHisto("eleTightFakeNvtx",tags, ev.nvtx, weight);
+                        mon.fillHisto("eleTightFakeMT",tags, Wmt, weight);
                         double eta = tightElectrons[j].eta();
                         mon.fillHisto("eleTightFakePt",tags, tightElectrons[j].pt(), weight);
                         mon.fillHisto("eleTightFakeEta",tags, eta, weight);
@@ -811,9 +839,9 @@ int main(int argc, char* argv[])
                         double Wmt = METUtils::transverseMass(looseMuons[j],zvvs[0],false);
                         if (Wmt > 20) continue;
 
-			mon.fillHisto("muLooseFakeMET",tags, zvvs[0].pt(), weight);
-			mon.fillHisto("muLooseFakeNvtx",tags, ev.nvtx, weight);
-			mon.fillHisto("muLooseFakeMT",tags, Wmt, weight);
+                        mon.fillHisto("muLooseFakeMET",tags, zvvs[0].pt(), weight);
+                        mon.fillHisto("muLooseFakeNvtx",tags, ev.nvtx, weight);
+                        mon.fillHisto("muLooseFakeMT",tags, Wmt, weight);
                         double eta = looseMuons[j].eta();
                         mon.fillHisto("muLooseFakePt",tags, looseMuons[j].pt(), weight);
                         mon.fillHisto("muLooseFakeEta",tags, eta, weight);
@@ -831,9 +859,9 @@ int main(int argc, char* argv[])
                         double Wmt = METUtils::transverseMass(tightMuons[j],zvvs[0],false);
                         if (Wmt > 20) continue;
 
-			mon.fillHisto("muTightFakeMET",tags, zvvs[0].pt(), weight);
-			mon.fillHisto("muTightFakeNvtx",tags, ev.nvtx, weight);
-			mon.fillHisto("muTightFakeMT",tags, Wmt, weight);
+                        mon.fillHisto("muTightFakeMET",tags, zvvs[0].pt(), weight);
+                        mon.fillHisto("muTightFakeNvtx",tags, ev.nvtx, weight);
+                        mon.fillHisto("muTightFakeMT",tags, Wmt, weight);
                         double eta = tightMuons[j].eta();
                         mon.fillHisto("muTightFakePt",tags, tightMuons[j].pt(), weight);
                         mon.fillHisto("muTightFakeEta",tags, eta, weight);
@@ -849,6 +877,94 @@ int main(int argc, char* argv[])
 
 
 
+
+        //##############################################################################
+        //### HISTOS FOR STATISTICAL ANALYSIS (include systematic variations)
+        //##############################################################################
+
+
+        for(size_t ivar=0; ivar<nvarsToInclude; ivar++) {
+
+            double metCuts = 20;
+            double mumtCuts = 20;
+	    double elemtCuts = 60;
+	    double jptCuts = 30;
+	    double dphiCuts = 1;
+
+            if(varNames[ivar]=="_mtup") {	mumtCuts += 5; elemtCuts += 5; }
+            if(varNames[ivar]=="_mtdown") {	mumtCuts -= 5; elemtCuts -= 5; }
+            if(varNames[ivar]=="_metup") 	metCuts += 5;
+            if(varNames[ivar]=="_metdown") 	metCuts -= 5;
+	    if(varNames[ivar]=="_jptup") 	jptCuts += 5;
+	    if(varNames[ivar]=="_jptdown") 	jptCuts -= 5;
+	    if(varNames[ivar]=="_dphiup")	dphiCuts += 0.3; 
+	    if(varNames[ivar]=="_dphidown")	dphiCuts -= 0.3;
+
+            bool passMET_syst = (zvvs[0].pt() < metCuts);
+
+	    bool passLocalLooseMu(looseMuons_raw.size()>0 && aGoodIdJets.size()>0 && LeadingJet.pt()>jptCuts);
+	    bool passLocalTightMu(tightMuons_raw.size()>0 && aGoodIdJets.size()>0 && LeadingJet.pt()>jptCuts);
+	    bool passLocalLooseEle(looseElectrons_raw.size()>0 && aGoodIdJets.size()>0 && LeadingJet.pt()>jptCuts);
+	    bool passLocalTightEle(tightElectrons_raw.size()>0 && aGoodIdJets.size()>0 && LeadingJet.pt()>jptCuts);
+
+	    if(!passMET_syst) continue;
+
+            if(hasMtrigger) {
+                if(passLocalLooseMu) {
+                    for(size_t j=0; j<looseMuons.size(); j++) {
+                        double dphi=fabs(deltaPhi(looseMuons[j].phi(),LeadingJet.phi()));
+                        if(dphi<dphiCuts) continue;
+                        double Wmt = METUtils::transverseMass(looseMuons[j],zvvs[0],false);
+                        if (Wmt > mumtCuts) continue;
+
+                        mon.fillHisto(TString("muLooseFakePt_syst")+varNames[ivar],tags, looseMuons[j].pt(), weight);
+                    }
+                }//passLocalLooseMu
+                if(passLocalTightMu) {
+                    for(size_t j=0; j<tightMuons.size(); j++) {
+                        double dphi=fabs(deltaPhi(tightMuons[j].phi(),LeadingJet.phi()));
+                        if(dphi<dphiCuts) continue;
+                        double Wmt = METUtils::transverseMass(tightMuons[j],zvvs[0],false);
+                        if (Wmt > mumtCuts) continue;
+
+                        mon.fillHisto(TString("muTightFakePt_syst")+varNames[ivar],tags, tightMuons[j].pt(), weight);
+                    }
+                } //passLocalTightMu
+            }//hasMtrigger
+
+
+            if(hasEtrigger) {
+                if(passLocalLooseEle) {
+                    for(size_t j=0; j<looseElectrons.size(); j++) {
+
+                        double dphi=fabs(deltaPhi(looseElectrons[j].phi(),LeadingJet.phi()));
+                        if(dphi<dphiCuts) continue;
+                        double Wmt = METUtils::transverseMass(looseElectrons[j],zvvs[0],false);
+                        if (Wmt > elemtCuts) continue;
+
+                        mon.fillHisto(TString("eleLooseFakePt_syst")+varNames[ivar],tags, looseElectrons[j].pt(), weight);
+
+                    } 
+                } //passLocalLooseEle
+
+                if(passLocalTightEle) {
+                    for(size_t j=0; j<tightElectrons.size(); j++) {
+                        double dphi=fabs(deltaPhi(tightElectrons[j].phi(),LeadingJet.phi()));
+                        if(dphi<dphiCuts) continue;
+                        double Wmt = METUtils::transverseMass(tightElectrons[j],zvvs[0],false);
+                        if (Wmt > elemtCuts) continue;
+
+                        mon.fillHisto(TString("eleTightFakePt_syst")+varNames[ivar],tags, tightElectrons[j].pt(), weight);
+
+                    }
+                } // passLocalTightEle
+
+            } //hasEtrigger
+
+
+
+
+        }
 
 
 
