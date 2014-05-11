@@ -65,6 +65,52 @@ ZHUtils::ZHUtils(const edm::ParameterSet &runProcess)
 }
 
 
+void ZHUtils::get_frFile(const edm::ParameterSet &runProcess)
+{
+    std::vector<std::string> FakeRateFiles = runProcess.getParameter<std::vector<std::string> >("fakeRateFile");
+    for(size_t ifile=0; ifile<FakeRateFiles.size(); ifile++) {
+
+        TString frFile(FakeRateFiles[ifile].c_str());
+        gSystem->ExpandPathName(frFile);
+        TFile *fr_File=TFile::Open(frFile);
+
+        if(fr_File) {
+            cout << "[ZHUtils] retrieving fake rates from: " << frFile << endl;
+            std::vector<TString> varNames(1,"");
+            varNames.push_back("_mtup");
+            varNames.push_back("_mtdown");
+            varNames.push_back("_metup");
+            varNames.push_back("_metdown");
+            varNames.push_back("_jptup");
+            varNames.push_back("_jptdown");
+            varNames.push_back("_dphiup");
+            varNames.push_back("_dphidown");
+            varNames.push_back("_ewkup");
+            varNames.push_back("_ewkdown");
+            size_t nvarsToInclude=varNames.size();
+
+            std::vector<TString> tagNames;
+            tagNames.push_back("ele");
+            tagNames.push_back("mu");
+
+            for(size_t itag=0; itag<tagNames.size(); itag++) {
+                for(size_t ivar=0; ivar<nvarsToInclude; ivar++) {
+                    TString key = tagNames[itag]+"FakePt_syst"+varNames[ivar];
+		    cout << "key: " << key << endl;
+                    TH1F *h = (TH1F *) fr_File->Get(key);
+                    h->SetDirectory(0); //THIS IS IMPORTANT FOR TH1 Weight File!!!
+                    fakerate1DH_[key] = h;
+                } // ivar
+            } // itag
+
+        } //fr_File
+        fr_File->Close();
+        cout << "[ZHUtils] close file: " << frFile << endl;
+    }
+}
+
+
+
 double ZHUtils::Collins_Soper(const LorentzVector& lepton1, const LorentzVector& lepton2)
 {
 
@@ -361,11 +407,21 @@ double ZHUtils::promptRate(int pdgid, double pt, double abseta)
 
 
 
-double ZHUtils::fakeRate(int pdgid, double pt, double abseta)
+double ZHUtils::fakeRate(int pdgid, double pt, double abseta, TString key)
 {
     double fake_rate = 0.;
+    TString tag;
+    if(pdgid==11) tag="ele"+key;
+    else if(pdgid==13) tag="mu"+key; 
 
+    TH1F* fr_h = fakerate1DH_[tag];
+    if(fr_h==0) cout << "cannot find hist: " << tag << endl;
+    int binx = fr_h->GetXaxis()->FindBin(pt);
+    fake_rate = fr_h->GetBinContent(binx);
+
+    /*
     if(pdgid==11) { //electron
+
         if(pt<25)      fake_rate = 0.106236;
         else if(pt<30) fake_rate = 0.104462;
         else if(pt<35) fake_rate = 0.101852;
@@ -386,18 +442,19 @@ double ZHUtils::fakeRate(int pdgid, double pt, double abseta)
         else if(pt<60) fake_rate = 0.0523345;
         else           fake_rate = 0.101818;
     }
-
+    */
+    
     return fake_rate;
 
 }
 
 
-double ZHUtils::getN_PFweight(int TL_type, LorentzVector lep1, int id1, LorentzVector lep2, int id2)
+double ZHUtils::getN_PFweight(int TL_type, LorentzVector lep1, int id1, LorentzVector lep2, int id2, TString key)
 {
     double p_1 = promptRate( id1, lep1.pt(), fabs(lep1.eta()) );
     double p_2 = promptRate( id2, lep2.pt(), fabs(lep2.eta()) );
-    double f_1 = fakeRate( id1, lep1.pt(), fabs(lep1.eta()) );
-    double f_2 = fakeRate( id2, lep2.pt(), fabs(lep2.eta()) );
+    double f_1 = fakeRate( id1, lep1.pt(), fabs(lep1.eta()), key);
+    double f_2 = fakeRate( id2, lep2.pt(), fabs(lep2.eta()), key);
 
     double weight = 1./(p_1 - f_1);
     weight /= (p_2 - f_2);
@@ -411,12 +468,12 @@ double ZHUtils::getN_PFweight(int TL_type, LorentzVector lep1, int id1, LorentzV
 }
 
 
-double ZHUtils::getN_FPweight(int TL_type, LorentzVector lep1, int id1, LorentzVector lep2, int id2)
+double ZHUtils::getN_FPweight(int TL_type, LorentzVector lep1, int id1, LorentzVector lep2, int id2, TString key)
 {
     double p_1 = promptRate( id1, lep1.pt(), fabs(lep1.eta()) );
     double p_2 = promptRate( id2, lep2.pt(), fabs(lep2.eta()) );
-    double f_1 = fakeRate( id1, lep1.pt(), fabs(lep1.eta()) );
-    double f_2 = fakeRate( id2, lep2.pt(), fabs(lep2.eta()) );
+    double f_1 = fakeRate( id1, lep1.pt(), fabs(lep1.eta()), key);
+    double f_2 = fakeRate( id2, lep2.pt(), fabs(lep2.eta()), key);
 
     double weight = 1./(p_1 - f_1);
     weight /= (p_2 - f_2);
@@ -430,12 +487,12 @@ double ZHUtils::getN_FPweight(int TL_type, LorentzVector lep1, int id1, LorentzV
 }
 
 
-double ZHUtils::getN_FFweight(int TL_type, LorentzVector lep1, int id1, LorentzVector lep2, int id2)
+double ZHUtils::getN_FFweight(int TL_type, LorentzVector lep1, int id1, LorentzVector lep2, int id2, TString key)
 {
     double p_1 = promptRate( id1, lep1.pt(), fabs(lep1.eta()) );
     double p_2 = promptRate( id2, lep2.pt(), fabs(lep2.eta()) );
-    double f_1 = fakeRate( id1, lep1.pt(), fabs(lep1.eta()) );
-    double f_2 = fakeRate( id2, lep2.pt(), fabs(lep2.eta()) );
+    double f_1 = fakeRate( id1, lep1.pt(), fabs(lep1.eta()), key);
+    double f_2 = fakeRate( id2, lep2.pt(), fabs(lep2.eta()), key);
 
     double weight = 1./(p_1 - f_1);
     weight /= (p_2 - f_2);

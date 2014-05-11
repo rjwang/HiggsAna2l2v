@@ -58,18 +58,21 @@ class ZHUtils
 
 
   // prompt rate and fake rate
+  void get_frFile(const edm::ParameterSet &runProcess);
   double promptRate(int pdgid, double pt, double abseta);
-  double fakeRate(int pdgid, double pt, double abseta);
+  double fakeRate(int pdgid, double pt, double abseta, TString key);
 
-  double getN_PFweight(int TL_type, LorentzVector lep1, int id1, LorentzVector lep2, int id2);
-  double getN_FPweight(int TL_type, LorentzVector lep1, int id1, LorentzVector lep2, int id2);
-  double getN_FFweight(int TL_type, LorentzVector lep1, int id1, LorentzVector lep2, int id2);
+  double getN_PFweight(int TL_type, LorentzVector lep1, int id1, LorentzVector lep2, int id2, TString key);
+  double getN_FPweight(int TL_type, LorentzVector lep1, int id1, LorentzVector lep2, int id2, TString key);
+  double getN_FFweight(int TL_type, LorentzVector lep1, int id1, LorentzVector lep2, int id2, TString key);
 
   ~ZHUtils();
 
  private:
   std::map<TString, std::map<TString,TGraph *> > wgtsH_;
   std::map<TString, std::map<TString,TH2F *> > wgts2DH_;
+
+  std::map<TString, TH1F *> fakerate1DH_;
 
 };
 #endif

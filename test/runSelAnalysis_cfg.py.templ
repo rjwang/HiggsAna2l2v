@@ -47,6 +47,7 @@ runProcess = cms.PSet(
     saveSummaryTree = cms.bool(@saveSummaryTree),
     runSystematics = cms.bool(@runSystematics),	
     weightsFile = cms.vstring(@weightsFile),	 
+    fakeRateFile = cms.vstring("${CMSSW_BASE}/src/CMGTools/HiggsAna2l2v/data/fr_pt.root"),
 #    hqtWeightsFile = cms.vstring(
 #	"${CMSSW_BASE}/src/CMGTools/HtoZZ2l2nu/data/HiggsQtWeights.root",
 #	"${CMSSW_BASE}/src/CMGTools/HtoZZ2l2nu/data/LineShapes.root",

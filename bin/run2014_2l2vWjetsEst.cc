@@ -130,7 +130,22 @@ int main(int argc, char* argv[])
 
     //ZHinvisible reweighting file input
     ZHUtils myZHUtils(runProcess);
+    myZHUtils.get_frFile(runProcess);
 
+
+    // run systematics
+    std::vector<TString> varNames(1,"");
+    varNames.push_back("_mtup");
+    varNames.push_back("_mtdown");
+    varNames.push_back("_metup");
+    varNames.push_back("_metdown");
+    varNames.push_back("_jptup");
+    varNames.push_back("_jptdown");
+    varNames.push_back("_dphiup");
+    varNames.push_back("_dphidown");
+    varNames.push_back("_ewkup");
+    varNames.push_back("_ewkdown");
+    size_t nvarsToInclude=varNames.size();
 
     //##################################################################################
     //##########################    INITIATING     TREES      ##########################
@@ -166,9 +181,10 @@ int main(int argc, char* argv[])
 
 
     // data-driven Wjets, QCD background
-    mon.addHistogram( new TH1F( "zmass_Wjet_Ctrl", ";M^{ll} [GeV];Events", 1,40,250) );
-    mon.addHistogram( new TH1F( "zmass_QCD_Ctrl", ";M^{ll} [GeV];Events", 1,40,250) );
-
+    for(size_t ivar=0; ivar<nvarsToInclude; ivar++) {
+        mon.addHistogram( new TH1F( TString("zmass_Wjet_Ctrl")+varNames[ivar], ";M^{ll} [GeV];Events", 1,40,250) );
+        mon.addHistogram( new TH1F( TString("zmass_QCD_Ctrl")+varNames[ivar],  ";M^{ll} [GeV];Events", 1,40,250) );
+    }
 
 
 
@@ -390,11 +406,11 @@ int main(int argc, char* argv[])
 
         LorentzVector lep1=phys.leptons[0];
         LorentzVector lep2=phys.leptons[1];
-	int id1 = fabs(phys.leptons[0].id);
-	int id2 = fabs(phys.leptons[1].id);
+        int id1 = fabs(phys.leptons[0].id);
+        int id2 = fabs(phys.leptons[1].id);
         LorentzVector zll(lep1+lep2);
-	bool passZmass(fabs(zll.mass()-91)<15);
-	bool passZpt(zll.pt()>50);
+        bool passZmass(fabs(zll.mass()-91)<15);
+        bool passZpt(zll.pt()>50);
         //bool passtightZmass(fabs(zll.mass()-91)<5);
 
         //check alternative selections for the dilepton
@@ -402,10 +418,10 @@ int main(int argc, char* argv[])
 
 
 
-	bool passLooseIdAndIso(true);
-	bool isLep1_Tight(false);
-	bool isLep2_Tight(false);
-	int TL_bits = 0;
+        bool passLooseIdAndIso(true);
+        bool isLep1_Tight(false);
+        bool isLep2_Tight(false);
+        int TL_bits = 0;
 
         // looping leptons (what I want)  begin
         for(size_t ilep=0; ilep<2; ilep++) {
@@ -423,7 +439,7 @@ int main(int argc, char* argv[])
             std::map<int,bool> passIsos;
 
             //bool hasGoodId(false), isIso(false);
-	    bool hasLooseGoodId(false);
+            bool hasLooseGoodId(false);
 
             if(fabs(phys.leptons[ilep].id)==13) {
                 if( hasObjectId(ev.mn_idbits[lpid], MID_PF)
@@ -437,11 +453,11 @@ int main(int argc, char* argv[])
                         && ev.mn_trkLayersWithMeasurement[lpid]>5
                         //&& relIso< 1.0 /*0.2*/
                   ) {
-		    hasLooseGoodId = true;
+                    hasLooseGoodId = true;
                 }
                 if( hasObjectId(ev.mn_idbits[lpid], MID_TIGHT) && relIso<0.2)    {
-		    if(ilep==0) isLep1_Tight = true;
-		    if(ilep==1) isLep2_Tight = true; 
+                    if(ilep==0) isLep1_Tight = true;
+                    if(ilep==1) isLep2_Tight = true;
                 }
 
                 llScaleFactor *= lsf.getLeptonEfficiency(phys.leptons[ilep].pt(),fabs(phys.leptons[ilep].eta()),13).first;
@@ -463,11 +479,11 @@ int main(int argc, char* argv[])
                                   0., 0., 0.,
                                   !hasObjectId(ev.en_idbits[lpid], EID_CONVERSIONVETO),0,ev.rho);
                     if(passWp && iwp==3) { //LOOSE
-			hasLooseGoodId = true;
+                        hasLooseGoodId = true;
                     }
                     if(passWp && iwp==1 && relIso<0.15) {
-			if(ilep==0) isLep1_Tight = true;
-			if(ilep==1) isLep2_Tight = true;
+                        if(ilep==0) isLep1_Tight = true;
+                        if(ilep==1) isLep2_Tight = true;
                     }
                     if(!use2011Id) {
                         //llScaleFactor *= 1;
@@ -476,15 +492,15 @@ int main(int argc, char* argv[])
                 }
             }
 
-	    if(!hasLooseGoodId) {
+            if(!hasLooseGoodId) {
                 passLooseIdAndIso &=false;
             }
 
         } // loop all leptons end
 
 
-	TL_bits = (isLep1_Tight << 0) |
-		  (isLep2_Tight << 1); 
+        TL_bits = (isLep1_Tight << 0) |
+                  (isLep2_Tight << 1);
 
 
 
@@ -492,23 +508,23 @@ int main(int argc, char* argv[])
 
         //
         // 3rd LEPTON ANALYSIS
-	//
-	bool pass3dLeptonVeto(true);
-	int nextraleptons(0);
-	std::vector<LorentzVector> extraLeptonsP4;
+        //
+        bool pass3dLeptonVeto(true);
+        int nextraleptons(0);
+        std::vector<LorentzVector> extraLeptonsP4;
         for(size_t ilep=2; ilep<phys.leptons.size(); ilep++) {
             //lepton type
-            bool isGood(false); 
+            bool isGood(false);
             int lpid=phys.leptons[ilep].pid;
             if(fabs(phys.leptons[ilep].id)==13) {
                 if(!use2011Id) {
                     isGood = (hasObjectId(ev.mn_idbits[lpid], MID_LOOSE) && phys.leptons[ilep].pfRelIsoDbeta()<0.2 && phys.leptons[ilep].pt()>10);
                     isGood |= (hasObjectId(ev.mn_idbits[lpid], MID_SOFT) && phys.leptons[ilep].pt()>3);
-                } 
+                }
             } else {
                 if(!use2011Id) {
                     isGood = ( hasObjectId(ev.en_idbits[lpid],EID_VETO) && phys.leptons[ilep].ePFRelIsoCorrected2012(ev.rho,ev.en_sceta[lpid])<0.15 && phys.leptons[ilep].pt()>10);
-                } 
+                }
             }
             nextraleptons += isGood;
             LorentzVector tmpLep = phys.leptons[ilep];
@@ -525,7 +541,7 @@ int main(int argc, char* argv[])
         PhysicsObjectJetCollection &aJets = ( useJERsmearing ? variedAJets[0] : recoJets );
         PhysicsObjectJetCollection aGoodIdJets;
 
-	bool passBveto(true);
+        bool passBveto(true);
 
         int nABtags(0),nAJetsGood30(0),nAJetsGood15(0), nCSVMtags(0), nCSVTtags(0);
         float mindphijmet(999999.),mindphijmet15(999999.);
@@ -551,23 +567,23 @@ int main(int argc, char* argv[])
             if(aJets[ijet].pt()>20 /*&& fabs(aJets[ijet].eta())<2.5*/)  nCSVTtags += (aJets[ijet].btag6>0.898);
         }
 
-	passBveto=(nABtags==0);
+        passBveto=(nABtags==0);
 
 
-	double dphiZllmet=fabs(deltaPhi(zll.phi(),zvvs[0].phi()));
-	bool passdphiZllmetCut20(dphiZllmet>2.0);
-	bool passdphiZllmetCut24(dphiZllmet>2.4);	
-	bool passdphiZllmetCut27(dphiZllmet>2.7);
+        double dphiZllmet=fabs(deltaPhi(zll.phi(),zvvs[0].phi()));
+        bool passdphiZllmetCut20(dphiZllmet>2.0);
+        bool passdphiZllmetCut24(dphiZllmet>2.4);
+        bool passdphiZllmetCut27(dphiZllmet>2.7);
 
-	bool passMetCut60=(zvvs[0].pt()>60);
-	bool passMetCut80=(zvvs[0].pt()>80);
-	bool passMetCut100=(zvvs[0].pt()>100);
-	bool passMetCut120=(zvvs[0].pt()>120);
+        bool passMetCut60=(zvvs[0].pt()>60);
+        bool passMetCut80=(zvvs[0].pt()>80);
+        bool passMetCut100=(zvvs[0].pt()>100);
+        bool passMetCut120=(zvvs[0].pt()>120);
 
-	bool passBalanceCut025=(zvvs[0].pt()/zll.pt()>0.75 && zvvs[0].pt()/zll.pt()<1.25);
-	bool passBalanceCut05=(zvvs[0].pt()/zll.pt()>0.5 && zvvs[0].pt()/zll.pt()<1.5);
-	bool passBalanceCut075=(zvvs[0].pt()/zll.pt()>0.25 && zvvs[0].pt()/zll.pt()<1.75);
-	
+        bool passBalanceCut025=(zvvs[0].pt()/zll.pt()>0.75 && zvvs[0].pt()/zll.pt()<1.25);
+        bool passBalanceCut05=(zvvs[0].pt()/zll.pt()>0.5 && zvvs[0].pt()/zll.pt()<1.5);
+        bool passBalanceCut075=(zvvs[0].pt()/zll.pt()>0.25 && zvvs[0].pt()/zll.pt()<1.75);
+
 
         //#########################################################
         //####  RUN PRESELECTION AND CONTROL REGION PLOTS  ########
@@ -575,9 +591,9 @@ int main(int argc, char* argv[])
 
         if(isMC && use2011Id) weight *= llScaleFactor*llTriggerEfficiency;
 
-	if(hasTrigger) mon.fillHisto("eventflow",tags,0,weight);
+        if(hasTrigger) mon.fillHisto("eventflow",tags,0,weight);
 
-	// fire Trigger and LOOSE lepton selection
+        // fire Trigger and LOOSE lepton selection
         if(hasTrigger && passLooseIdAndIso) {
             mon.fillHisto("eventflow",tags,1,weight);
         } else continue;
@@ -589,15 +605,15 @@ int main(int argc, char* argv[])
         TString tag_subcat = eventCategoryInst.GetLabel(eventSubCat);
 
 
-	tags.push_back(tag_cat); //add ee, mumu, emu category
-	/*
-        tags.push_back(tag_cat+tag_subcat); // add jet binning category
-        if(tag_subcat=="eq0jets" || tag_subcat=="eq1jets") tags.push_back(tag_cat+"lesq1jets");
-        if(tag_cat=="mumu" || tag_cat=="ee") {
-            tags.push_back("ll"+tag_subcat);
-            if(tag_subcat=="eq0jets" || tag_subcat=="eq1jets") tags.push_back("lllesq1jets");
-        }
-	*/
+        tags.push_back(tag_cat); //add ee, mumu, emu category
+        /*
+            tags.push_back(tag_cat+tag_subcat); // add jet binning category
+            if(tag_subcat=="eq0jets" || tag_subcat=="eq1jets") tags.push_back(tag_cat+"lesq1jets");
+            if(tag_cat=="mumu" || tag_cat=="ee") {
+                tags.push_back("ll"+tag_subcat);
+                if(tag_subcat=="eq0jets" || tag_subcat=="eq1jets") tags.push_back("lllesq1jets");
+            }
+        */
 
 
 
@@ -609,29 +625,33 @@ int main(int argc, char* argv[])
 
 
         //TL_bits: 00(LL) 01(TL) 10(LT) 11(TT)
-	//cout << "TL_bits: " << TL_bits << endl;
-
-	double N_PFweights = myZHUtils.getN_PFweight(TL_bits,lep1,id1,lep2,id2);
-	double N_FPweights = myZHUtils.getN_FPweight(TL_bits,lep1,id1,lep2,id2);
-	double N_FFweights = myZHUtils.getN_FFweight(TL_bits,lep1,id1,lep2,id2);
-
-    	double p_1 = myZHUtils.promptRate( id1, lep1.pt(), fabs(lep1.eta()) );
-    	double p_2 = myZHUtils.promptRate( id2, lep2.pt(), fabs(lep2.eta()) );
-    	double f_1 = myZHUtils.fakeRate( id1, lep1.pt(), fabs(lep1.eta()) );
-    	double f_2 = myZHUtils.fakeRate( id2, lep2.pt(), fabs(lep2.eta()) );
-
-	double Wjet_weight = N_PFweights * p_1*f_2 + N_FPweights * f_1*p_2;
-	double QCD_weight = N_FFweights * f_1*f_2; 
+        //cout << "TL_bits: " << TL_bits << endl;
 
 
-	if(passZmass && passZpt && pass3dLeptonVeto && passBveto && passdphiZllmetCut20 && passBalanceCut025 && passMetCut80) {
-		mon.fillHisto("zmass_Wjet_Ctrl",tags,zll.mass(),weight*Wjet_weight);
-		mon.fillHisto("zmass_QCD_Ctrl",tags,zll.mass(),weight*QCD_weight);
-	}
+        for(size_t ivar=0; ivar<nvarsToInclude; ivar++) {
+            TString key = "FakePt_syst"+varNames[ivar];
+
+            double N_PFweights = myZHUtils.getN_PFweight(TL_bits,lep1,id1,lep2,id2,key);
+            double N_FPweights = myZHUtils.getN_FPweight(TL_bits,lep1,id1,lep2,id2,key);
+            double N_FFweights = myZHUtils.getN_FFweight(TL_bits,lep1,id1,lep2,id2,key);
+
+            double p_1 = myZHUtils.promptRate( id1, lep1.pt(), fabs(lep1.eta()) );
+            double p_2 = myZHUtils.promptRate( id2, lep2.pt(), fabs(lep2.eta()) );
+            double f_1 = myZHUtils.fakeRate( id1, lep1.pt(), fabs(lep1.eta()), key);
+            double f_2 = myZHUtils.fakeRate( id2, lep2.pt(), fabs(lep2.eta()), key);
+
+            double Wjet_weight = N_PFweights * p_1*f_2 + N_FPweights * f_1*p_2;
+            double QCD_weight = N_FFweights * f_1*f_2;
+
+
+            if(passZmass && passZpt && pass3dLeptonVeto && passBveto && passdphiZllmetCut20 && passBalanceCut025 && passMetCut80) {
+                mon.fillHisto(TString("zmass_Wjet_Ctrl")+varNames[ivar],tags,zll.mass(),weight*Wjet_weight);
+                mon.fillHisto(TString("zmass_QCD_Ctrl")+varNames[ivar],tags,zll.mass(),weight*QCD_weight);
+            }
 
 
 
-
+        }
 
 
 
