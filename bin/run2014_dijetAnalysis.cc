@@ -891,21 +891,21 @@ int main(int argc, char* argv[])
 	    double jptCuts = 30;
 	    double dphiCuts = 1;
 
-            if(varNames[ivar]=="_mtup") {	mumtCuts += 5; elemtCuts += 5; }
-            if(varNames[ivar]=="_mtdown") {	mumtCuts -= 5; elemtCuts -= 5; }
-            if(varNames[ivar]=="_metup") 	metCuts += 5;
-            if(varNames[ivar]=="_metdown") 	metCuts -= 5;
-	    if(varNames[ivar]=="_jptup") 	jptCuts += 5;
-	    if(varNames[ivar]=="_jptdown") 	jptCuts -= 5;
-	    if(varNames[ivar]=="_dphiup")	dphiCuts += 0.3; 
-	    if(varNames[ivar]=="_dphidown")	dphiCuts -= 0.3;
+            if(varNames[ivar]=="_mtup") {	mumtCuts *= 1.1; elemtCuts *= 1.1; }
+            if(varNames[ivar]=="_mtdown") {	mumtCuts *= 0.9; elemtCuts *= 0.9; }
+            if(varNames[ivar]=="_metup") 	metCuts *= 1.1;
+            if(varNames[ivar]=="_metdown") 	metCuts *= 0.9;
+	    if(varNames[ivar]=="_jptup") 	jptCuts *= 1.1;
+	    if(varNames[ivar]=="_jptdown") 	jptCuts *= 0.9;
+	    if(varNames[ivar]=="_dphiup")	dphiCuts *= 1.1; 
+	    if(varNames[ivar]=="_dphidown")	dphiCuts *= 0.9;
 
             bool passMET_syst = (zvvs[0].pt() < metCuts);
 
-	    bool passLocalLooseMu(looseMuons_raw.size()>0 && aGoodIdJets.size()>0 && LeadingJet.pt()>jptCuts);
-	    bool passLocalTightMu(tightMuons_raw.size()>0 && aGoodIdJets.size()>0 && LeadingJet.pt()>jptCuts);
-	    bool passLocalLooseEle(looseElectrons_raw.size()>0 && aGoodIdJets.size()>0 && LeadingJet.pt()>jptCuts);
-	    bool passLocalTightEle(tightElectrons_raw.size()>0 && aGoodIdJets.size()>0 && LeadingJet.pt()>jptCuts);
+	    bool passLocalLooseMu(aGoodIdJets.size()>0 && LeadingJet.pt()>jptCuts);
+	    bool passLocalTightMu(aGoodIdJets.size()>0 && LeadingJet.pt()>jptCuts);
+	    bool passLocalLooseEle(aGoodIdJets.size()>0 && LeadingJet.pt()>jptCuts);
+	    bool passLocalTightEle(aGoodIdJets.size()>0 && LeadingJet.pt()>jptCuts);
 
 	    if(!passMET_syst) continue;
 
