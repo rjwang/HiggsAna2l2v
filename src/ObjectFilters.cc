@@ -1167,6 +1167,7 @@ std::pair<int,vector<const reco::Candidate *> > assignPhysicsChannel(edm::Handle
     {
       const reco::GenParticle & p = dynamic_cast<const reco::GenParticle &>( (*genParticles)[i] );
 
+      //cout << p.pdgId() << endl;
       //PROMPT PHOTON COUNTING from Hgg
       if(p.status()==1 && abs(p.pdgId()==22) && p.pt()>20)
 	{

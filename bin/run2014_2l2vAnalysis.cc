@@ -89,11 +89,16 @@ int main(int argc, char* argv[])
     if(url.Contains("SingleMu"))  fType=MUMU;
     if(url.Contains("SingleEle")) fType=EE;
     bool isSingleMuPD(!isMC && url.Contains("SingleMu"));
+    bool isDoubleMuPD(!isMC && url.Contains("DoubleMu"));
     bool isSingleElePD(!isMC && url.Contains("SingleEle"));
+    bool isDoubleElePD(!isMC && url.Contains("DoubleEle"));
+
     bool isMC_ZZ  = isMC && ( string(url.Data()).find("TeV_ZZ")  != string::npos);
     bool isMC_WZ  = isMC && ( string(url.Data()).find("TeV_WZ")  != string::npos);
     bool isMC_ZH  = isMC && ( string(url.Data()).find("TeV_ZH")  != string::npos);
     bool isMC_HZZd= isMC && ( string(url.Data()).find("TeV_HZZd")  != string::npos);
+    bool isMC_FermionWIMP = isMC && ( string(url.Data()).find("TeV_FermionWIMP") != string::npos);
+
     bool isV0JetsMC(isMC && (url.Contains("DYJetsToLL_50toInf") || url.Contains("WJets")));
     bool isMC_DY  = isMC && ( (string(url.Data()).find("TeV_DYJetsToLL")!= string::npos)
 			|| (string(url.Data()).find("TeV_ZG")!= string::npos) );
@@ -672,12 +677,19 @@ int main(int argc, char* argv[])
                 if(!hasMtrigger) continue;
                 if(hasMtrigger && hasMMtrigger) continue;
             }
+            if(isDoubleMuPD) {
+                if(!hasMMtrigger) continue;
+            }
 
             //this is a safety veto for the single Ele PD
             if(isSingleElePD) {
                 if(!hasEtrigger) continue;
                 if(hasEtrigger && hasEEtrigger) continue;
             }
+            if(isDoubleElePD){
+                if(!hasEEtrigger) continue;
+            }
+
 
             hasTrigger=true;
         } else {

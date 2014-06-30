@@ -646,7 +646,7 @@ void Draw1DHistogram(JSONWrapper::Object& Root, std::string RootDir, NameAndType
    t1->Draw();
    t1->cd();
    if(!isDataBlind || noratio) t1->SetBottomMargin(0);
-   TString name_denRelUncH;
+   TString name_denRelUncH="";
    if(!noLog) t1->SetLogy(true);
    float maximumFound(noLog);
 

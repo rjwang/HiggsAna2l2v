@@ -239,6 +239,7 @@ int main(int argc, char* argv[])
     //plots for driving fake rates
     //double fakePt[11]= {20,25,30,35,40,45,50,60,70,80,100};
     double mufakePt[9] = {20,25,30,35,40,45,50,60,100};
+    double musysfakePt[7] = {20,25,30,35,40,45,100};
     double fakeEta[9]= {-2.5,-2.,-1.479,-1.,0.,1.,1.479,2.,2.5};
     double fakevtx[7]= {0,10,15,20,25,30,50};
 
@@ -291,10 +292,10 @@ int main(int argc, char* argv[])
     for(size_t ivar=0; ivar<nvarsToInclude; ivar++) {
         Hoptim_systs->GetXaxis()->SetBinLabel(ivar+1, varNames[ivar]);
 
-        mon.addHistogram( new TH1F (TString("muLooseFakePt_syst")+varNames[ivar], ";Loose #it{p}_{T}^{#mu} [GeV];Events", 8,mufakePt) );
-        mon.addHistogram( new TH1F (TString("muTightFakePt_syst")+varNames[ivar], ";Tight #it{p}_{T}^{#mu} [GeV];Events", 8,mufakePt) );
-	mon.addHistogram( new TH1F (TString("eleLooseFakePt_syst")+varNames[ivar],";Loose #it{p}_{T}^{e} [GeV];Events", 8,mufakePt) );
-	mon.addHistogram( new TH1F (TString("eleTightFakePt_syst")+varNames[ivar],";Tight #it{p}_{T}^{e} [GeV];Events", 8,mufakePt) );
+        mon.addHistogram( new TH1F (TString("muLooseFakePt_syst")+varNames[ivar], ";#it{p}_{T}^{#mu} [GeV];Events", 6,musysfakePt) );
+        mon.addHistogram( new TH1F (TString("muTightFakePt_syst")+varNames[ivar], ";#it{p}_{T}^{#mu} [GeV];Events", 6,musysfakePt) );
+	mon.addHistogram( new TH1F (TString("eleLooseFakePt_syst")+varNames[ivar],";#it{p}_{T}^{e} [GeV];Events", 8,mufakePt) );
+	mon.addHistogram( new TH1F (TString("eleTightFakePt_syst")+varNames[ivar],";#it{p}_{T}^{e} [GeV];Events", 8,mufakePt) );
 
     }
 
@@ -886,7 +887,7 @@ int main(int argc, char* argv[])
         for(size_t ivar=0; ivar<nvarsToInclude; ivar++) {
 
             double metCuts = 20;
-            double mumtCuts = 20;
+            double mumtCuts = 40;
 	    double elemtCuts = 60;
 	    double jptCuts = 30;
 	    double dphiCuts = 1;
@@ -897,8 +898,8 @@ int main(int argc, char* argv[])
             if(varNames[ivar]=="_metdown") 	metCuts *= 0.9;
 	    if(varNames[ivar]=="_jptup") 	jptCuts *= 1.1;
 	    if(varNames[ivar]=="_jptdown") 	jptCuts *= 0.9;
-	    if(varNames[ivar]=="_dphiup")	dphiCuts *= 1.1; 
-	    if(varNames[ivar]=="_dphidown")	dphiCuts *= 0.9;
+	    if(varNames[ivar]=="_dphiup")	dphiCuts *= 1.5; 
+	    if(varNames[ivar]=="_dphidown")	dphiCuts *= 0.5;
 
             bool passMET_syst = (zvvs[0].pt() < metCuts);
 

@@ -112,6 +112,9 @@ PhysicsEvent_t getPhysicsEventFrom(ZZ2l2nuSummary_t &ev)
 	case 22:
 	  phys.gengammas.push_back( PhysicsObject(p4,ev.mc_id[ipart]) );
 	  break;
+	case 1009: case -1009:
+	  phys.genWIMPs.push_back( PhysicsObject(p4,ev.mc_id[ipart]) );
+	  break;
 	case 11: case -11: case 13: case -13: case 15: case -15:
 	  //check overlap with other leptons
 	  bool overlap(false);
@@ -193,6 +196,12 @@ std::pair<int,int> getWZdecayMode(ZZ2l2nuSummary_t &ev)
 //       cout << endl;
 //     }
   return std::pair<int,int>(wdecay,zdecay);
+}
+
+void getdecayMode(ZZ2l2nuSummary_t &ev)
+{
+  for(Int_t ipart=0; ipart<ev.nmcparticles; ipart++) cout << fabs(ev.mc_id[ipart]) << " ";
+  cout << endl;
 }
 
 //

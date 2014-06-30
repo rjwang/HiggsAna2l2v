@@ -211,6 +211,7 @@ os.system('mkdir -p '+queuelog+'/all/')
 os.system('mv /tmp/'+who+'/SCRIPT_Submit2batch.sh '+queuelog+'/all/')
 os.system('mv /tmp/'+who+'/SCRIPT_Local.sh '+queuelog+'/all/')
 os.system('cp $CMSSW_BASE/src/CMGTools/HiggsAna2l2v/scripts/splitlocaljobs.py '+queuelog+'/all/')
+os.system('cp $CMSSW_BASE/src/CMGTools/HiggsAna2l2v/scripts/checkLocaljobs.py '+queuelog+'/all/')
 
 
 ##get good script for local run

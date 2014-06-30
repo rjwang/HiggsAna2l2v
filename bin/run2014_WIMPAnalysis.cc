@@ -89,7 +89,6 @@ int main(int argc, char* argv[])
     if(url.Contains("MuEG"))      fType=EMU;
     if(url.Contains("SingleMu"))  fType=MUMU;
     if(url.Contains("SingleEle")) fType=EE;
-
     bool isSingleMuPD(!isMC && url.Contains("SingleMu"));
     bool isDoubleMuPD(!isMC && url.Contains("DoubleMu"));
     bool isSingleElePD(!isMC && url.Contains("SingleEle"));
@@ -100,6 +99,7 @@ int main(int argc, char* argv[])
         bool isMC_ZH  = isMC && ( string(url.Data()).find("TeV_ZH")  != string::npos);
         bool isMC_HZZd= isMC && ( string(url.Data()).find("TeV_HZZd")  != string::npos);
     */
+    bool isMC_FermionWIMP = isMC && ( string(url.Data()).find("TeV_FermionWIMP") != string::npos);
     bool isV0JetsMC(isMC && (url.Contains("DYJetsToLL_50toInf") || url.Contains("WJets")));
     /*
         bool isMC_DY  = isMC && ( (string(url.Data()).find("TeV_DYJetsToLL")!= string::npos)
@@ -132,23 +132,10 @@ int main(int argc, char* argv[])
     JetCorrectionUncertainty jecUnc(uncFile.Data());
 
     //ZHinvisible reweighting file input
-    ZHUtils myZHUtils(runProcess);
-    myZHUtils.get_frFile(runProcess);
+    //ZHUtils myZHUtils(runProcess);
+    //myZHUtils.get_frFile(runProcess);
 
 
-    // run systematics
-    std::vector<TString> varNames(1,"");
-    varNames.push_back("_mtup");
-    varNames.push_back("_mtdown");
-    varNames.push_back("_metup");
-    varNames.push_back("_metdown");
-    varNames.push_back("_jptup");
-    varNames.push_back("_jptdown");
-    varNames.push_back("_dphiup");
-    varNames.push_back("_dphidown");
-    varNames.push_back("_ewkup");
-    varNames.push_back("_ewkdown");
-    size_t nvarsToInclude=varNames.size();
 
     //##################################################################################
     //##########################    INITIATING     TREES      ##########################
@@ -181,13 +168,11 @@ int main(int argc, char* argv[])
 
 
 
-
-
-    // data-driven Wjets, QCD background
-    for(size_t ivar=0; ivar<nvarsToInclude; ivar++) {
-        mon.addHistogram( new TH1F( TString("zmass_Wjet_Ctrl")+varNames[ivar], ";M^{ll} [GeV];Events", 1,40,250) );
-        mon.addHistogram( new TH1F( TString("zmass_QCD_Ctrl")+varNames[ivar],  ";M^{ll} [GeV];Events", 1,40,250) );
-    }
+    //MC Truth
+    mon.addHistogram( new TH1F( "mt_Gen", ";#it{m}_{T}(Z,#bar{#chi}#chi) [GeV];Events", 100,0,1500) );
+    mon.addHistogram( new TH1F( "met_Gen", ";#it{p}_{T}(#bar{#chi}#chi) [GeV];Events", 100,0,1500) );
+    mon.addHistogram( new TH1F( "zpt_Gen", ";#it{p}_{T}(Z) [GeV];Events", 100,0,1500) );
+    mon.addHistogram( new TH1F( "dphi_Gen", ";#Delta#phi(Z,#bar{#chi}#chi) [rad];Events", 100,0,TMath::Pi()) );
 
 
 
@@ -334,7 +319,6 @@ int main(int argc, char* argv[])
             //if(ev.cat==EMU  && !hasEMtrigger) continue;
             if(ev.cat==EMU  && !hasEMtrigger && !(hasEtrigger && hasMtrigger) ) continue;
 
-
             //this is a safety veto for the single mu PD
             if(isSingleMuPD) {
                 if(!hasMtrigger) continue;
@@ -349,10 +333,9 @@ int main(int argc, char* argv[])
                 if(!hasEtrigger) continue;
                 if(hasEtrigger && hasEEtrigger) continue;
             }
-            if(isDoubleElePD){
-                if(!hasEEtrigger) continue;
-            }
-
+	    if(isDoubleElePD){
+		if(!hasEEtrigger) continue;
+	    }
 
             hasTrigger=true;
         } else {
@@ -382,7 +365,20 @@ int main(int argc, char* argv[])
         Hcutflow->Fill(4,weight*TotalWeight_plus);
 
 
+	//Generator information
 
+        if(isMC_FermionWIMP){
+	    //getdecayMode(ev);
+	    if(phys.genWIMPs.size()!=2 || phys.genleptons.size()!=2) continue;
+            LorentzVector diwimp = phys.genWIMPs[0]+phys.genWIMPs[1];
+	    LorentzVector dilep = phys.genleptons[0]+phys.genleptons[1];
+	    double dphi = fabs(deltaPhi(dilep.phi(),diwimp.phi()));
+	    double MTmassless=METUtils::transverseMass(dilep,diwimp,false);
+            mon.fillHisto("mt_Gen", tags, MTmassless, weight);
+	    mon.fillHisto("met_Gen", tags, diwimp.pt(), weight);
+	    mon.fillHisto("zpt_Gen", tags, dilep.pt(), weight);
+	    mon.fillHisto("dphi_Gen", tags, dphi, weight);
+        }
 
 
 
@@ -417,11 +413,11 @@ int main(int argc, char* argv[])
 
         LorentzVector lep1=phys.leptons[0];
         LorentzVector lep2=phys.leptons[1];
-        int id1 = fabs(phys.leptons[0].id);
-        int id2 = fabs(phys.leptons[1].id);
+        //int id1 = fabs(phys.leptons[0].id);
+        //int id2 = fabs(phys.leptons[1].id);
         LorentzVector zll(lep1+lep2);
-        bool passZmass(fabs(zll.mass()-91)<15);
-        bool passZpt(zll.pt()>50);
+        //bool passZmass(fabs(zll.mass()-91)<15);
+        //bool passZpt(zll.pt()>50);
         //bool passtightZmass(fabs(zll.mass()-91)<5);
 
         //check alternative selections for the dilepton
@@ -430,6 +426,7 @@ int main(int argc, char* argv[])
 
 
         bool passLooseIdAndIso(true);
+	bool passTightIdAndIso(true);
         bool isLep1_Tight(false);
         bool isLep2_Tight(false);
         int TL_bits = 0;
@@ -451,6 +448,7 @@ int main(int argc, char* argv[])
 
             //bool hasGoodId(false), isIso(false);
             bool hasLooseGoodId(false);
+	    bool hasTightGoodId(false);
 
             if(fabs(phys.leptons[ilep].id)==13) {
                 if( hasObjectId(ev.mn_idbits[lpid], MID_PF)
@@ -467,6 +465,7 @@ int main(int argc, char* argv[])
                     hasLooseGoodId = true;
                 }
                 if( hasObjectId(ev.mn_idbits[lpid], MID_TIGHT) && relIso<0.2)    {
+		    hasTightGoodId = true;
                     if(ilep==0) isLep1_Tight = true;
                     if(ilep==1) isLep2_Tight = true;
                 }
@@ -493,6 +492,7 @@ int main(int argc, char* argv[])
                         hasLooseGoodId = true;
                     }
                     if(passWp && iwp==1 && relIso<0.15) {
+			hasTightGoodId = true;
                         if(ilep==0) isLep1_Tight = true;
                         if(ilep==1) isLep2_Tight = true;
                     }
@@ -506,6 +506,12 @@ int main(int argc, char* argv[])
             if(!hasLooseGoodId) {
                 passLooseIdAndIso &=false;
             }
+
+            if(!hasTightGoodId) {
+                passTightIdAndIso &=false;
+            }
+
+
 
         } // loop all leptons end
 
@@ -580,7 +586,7 @@ int main(int argc, char* argv[])
 
         passBveto=(nABtags==0);
 
-
+	/*
         double dphiZllmet=fabs(deltaPhi(zll.phi(),zvvs[0].phi()));
         bool passdphiZllmetCut20(dphiZllmet>2.0);
         bool passdphiZllmetCut24(dphiZllmet>2.4);
@@ -594,7 +600,7 @@ int main(int argc, char* argv[])
         bool passBalanceCut025=(zvvs[0].pt()/zll.pt()>0.75 && zvvs[0].pt()/zll.pt()<1.25);
         bool passBalanceCut05=(zvvs[0].pt()/zll.pt()>0.5 && zvvs[0].pt()/zll.pt()<1.5);
         bool passBalanceCut075=(zvvs[0].pt()/zll.pt()>0.25 && zvvs[0].pt()/zll.pt()<1.75);
-
+	*/
 
         //#########################################################
         //####  RUN PRESELECTION AND CONTROL REGION PLOTS  ########
@@ -605,7 +611,8 @@ int main(int argc, char* argv[])
         if(hasTrigger) mon.fillHisto("eventflow",tags,0,weight);
 
         // fire Trigger and LOOSE lepton selection
-        if(hasTrigger && passLooseIdAndIso) {
+        //if(hasTrigger && passLooseIdAndIso) {
+	if(hasTrigger && passTightIdAndIso) {
             mon.fillHisto("eventflow",tags,1,weight);
         } else continue;
 
@@ -637,32 +644,6 @@ int main(int argc, char* argv[])
 
         //TL_bits: 00(LL) 01(TL) 10(LT) 11(TT)
         //cout << "TL_bits: " << TL_bits << endl;
-
-
-        for(size_t ivar=0; ivar<nvarsToInclude; ivar++) {
-            TString key = "FakePt_syst"+varNames[ivar];
-
-            double N_PFweights = myZHUtils.getN_PFweight(TL_bits,lep1,id1,lep2,id2,key);
-            double N_FPweights = myZHUtils.getN_FPweight(TL_bits,lep1,id1,lep2,id2,key);
-            double N_FFweights = myZHUtils.getN_FFweight(TL_bits,lep1,id1,lep2,id2,key);
-
-            double p_1 = myZHUtils.promptRate( id1, lep1.pt(), fabs(lep1.eta()) );
-            double p_2 = myZHUtils.promptRate( id2, lep2.pt(), fabs(lep2.eta()) );
-            double f_1 = myZHUtils.fakeRate( id1, lep1.pt(), fabs(lep1.eta()), key);
-            double f_2 = myZHUtils.fakeRate( id2, lep2.pt(), fabs(lep2.eta()), key);
-
-            double Wjet_weight = N_PFweights * p_1*f_2 + N_FPweights * f_1*p_2;
-            double QCD_weight = N_FFweights * f_1*f_2;
-
-
-            if(passZmass && passZpt && pass3dLeptonVeto && passBveto && /*passdphiZllmetCut20 && passBalanceCut025 &&*/ passMetCut80) {
-                mon.fillHisto(TString("zmass_Wjet_Ctrl")+varNames[ivar],tags,zll.mass(),weight*Wjet_weight);
-                mon.fillHisto(TString("zmass_QCD_Ctrl")+varNames[ivar],tags,zll.mass(),weight*QCD_weight);
-            }
-
-
-
-        }
 
 
 
