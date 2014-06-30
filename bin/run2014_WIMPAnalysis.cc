@@ -99,7 +99,8 @@ int main(int argc, char* argv[])
         bool isMC_ZH  = isMC && ( string(url.Data()).find("TeV_ZH")  != string::npos);
         bool isMC_HZZd= isMC && ( string(url.Data()).find("TeV_HZZd")  != string::npos);
     */
-    bool isMC_FermionWIMP = isMC && ( string(url.Data()).find("TeV_FermionWIMP") != string::npos);
+    bool isMC_WIMP = isMC && ( string(url.Data()).find("TeV_FermionWIMP") != string::npos ||
+                               string(url.Data()).find("TeV_ScalarWIMP") != string::npos);
     bool isV0JetsMC(isMC && (url.Contains("DYJetsToLL_50toInf") || url.Contains("WJets")));
     /*
         bool isMC_DY  = isMC && ( (string(url.Data()).find("TeV_DYJetsToLL")!= string::npos)
@@ -158,13 +159,74 @@ int main(int argc, char* argv[])
     //for MC normalization (to 1/pb)
     TH1F* Hcutflow  = (TH1F*) mon.addHistogram(  new TH1F ("cutflow"    , "cutflow"    ,6,0,6) ) ;
 
-    //mon.addHistogram( new TH1F( "zpt_raw",       ";#it{p}_{T}^{ll} [GeV];Events", 50,0,500) );
-    //mon.addHistogram( new TH1F( "zmass_raw", ";#it{m}_{ll} [GeV];Events", 100,40,250) );
-    //mon.addHistogram( new TH1F( "pfmet_raw",        ";E_{T}^{miss} [GeV];Events", 50,0,100) );
-    //mon.addHistogram( new TH1F( "elewmt_raw",          ";#it{m}_{T} [GeV];Events", 50,0,20) );
-    //mon.addHistogram( new TH1F( "redmet_raw",        ";Red-E_{T}^{miss} [GeV];Events", 50,0,500) );
-    //mon.addHistogram( new TH1F( "met_sig_raw",        ";E_{T}^{miss} Significance;Events", 50,0,100) );
-    //mon.addHistogram( new TH1F( "mtless_ZMet_raw",      ";#it{m}_{T}(Z, E_{T}^{miss}) [GeV];Events", 50,0,500) );
+    // pileup control
+    mon.addHistogram( new TH1F( "nvtx_sel",";Vertices;Events",50,0,50) );
+    mon.addHistogram( new TH1F( "nvtx_raw",";Vertices;Events",50,0,50) );
+
+    mon.addHistogram( new TH1F( "zpt_raw",	";#it{p}_{T}^{ll} [GeV];Events", 50,0,500) );
+    mon.addHistogram( new TH1F( "zmass_raw",	";#it{m}_{ll} [GeV];Events", 100,40,250) );
+    mon.addHistogram( new TH1F( "pfmet_raw",    ";E_{T}^{miss} [GeV];Events", 50,0,500) );
+    mon.addHistogram( new TH1F( "mtless_zmet_raw",";#it{m}_{T}(Z, E_{T}^{miss}) [GeV];Events", 50,0,500) );
+
+    h = (TH1F*) mon.addHistogram( new TH1F( "nleptons_raw", ";Lepton multiplicity;Events", 3,0,3) );
+    for(int ibin=1; ibin<=h->GetXaxis()->GetNbins(); ibin++) {
+        TString label("");
+        if(ibin==h->GetXaxis()->GetNbins()) label +="#geq";
+        else                                label +="=";
+        label += (ibin+1);
+        h->GetXaxis()->SetBinLabel(ibin,label);
+    }
+
+    h=(TH1F *)mon.addHistogram( new TH1F("npfjets_raw",  ";Jet multiplicity (#it{p}_{T}>30 GeV);Events",5,0,5) );
+    for(int ibin=1; ibin<=h->GetXaxis()->GetNbins(); ibin++) {
+        TString label("");
+        if(ibin==h->GetXaxis()->GetNbins()) label +="#geq";
+        else                                label +="=";
+        label += (ibin-1);
+        h->GetXaxis()->SetBinLabel(ibin,label);
+    }
+
+    h=(TH1F *)mon.addHistogram( new TH1F("npfbjets_raw",    ";b-tag Jet multiplicity;Events",5,0,5) );
+    for(int ibin=1; ibin<=h->GetXaxis()->GetNbins(); ibin++) {
+        TString label("");
+        if(ibin==h->GetXaxis()->GetNbins()) label +="#geq";
+        else                                label +="=";
+        label += (ibin-1);
+        h->GetXaxis()->SetBinLabel(ibin,label);
+    }
+
+
+    // control plots
+    mon.addHistogram( new TH1F( "zpt_sel",       ";#it{p}_{T}^{ll} [GeV];Events", 50,0,500) );
+
+    h = (TH1F*) mon.addHistogram( new TH1F("nleptons_sel", ";Lepton multiplicity;Events", 3,0,3) );
+    for(int ibin=1; ibin<=h->GetXaxis()->GetNbins(); ibin++) {
+        TString label("");
+        if(ibin==h->GetXaxis()->GetNbins()) label +="#geq";
+        else                                label +="=";
+        label += (ibin+1);
+        h->GetXaxis()->SetBinLabel(ibin,label);
+    }
+
+
+    h=(TH1F *)mon.addHistogram( new TH1F("npfjets_sel",  ";Jet multiplicity (#it{p}_{T}>30 GeV);Events",5,0,5) );
+    for(int ibin=1; ibin<=h->GetXaxis()->GetNbins(); ibin++) {
+        TString label("");
+        if(ibin==h->GetXaxis()->GetNbins()) label +="#geq";
+        else                                label +="=";
+        label += (ibin-1);
+        h->GetXaxis()->SetBinLabel(ibin,label);
+    }
+
+
+    h=(TH1F *)mon.addHistogram( new TH1F("npfbjets_sel",    ";b-tag multiplicity;Events",5,0,5) );
+    for(int ibin=1; ibin<=h->GetXaxis()->GetNbins(); ibin++) {
+        TString label("");
+        if(ibin==h->GetXaxis()->GetNbins()) label +="#geq";
+        else                                label +="=";
+        label += (ibin-1);
+        h->GetXaxis()->SetBinLabel(ibin,label);
+    }
 
 
 
@@ -176,6 +238,8 @@ int main(int argc, char* argv[])
 
 
 
+    // final distributions
+    mon.addHistogram( new TH1F( "mt_final",             ";#it{m}_{T} [GeV];Events", 8,200,1000) );
 
 
     //##################################################################################
@@ -333,9 +397,9 @@ int main(int argc, char* argv[])
                 if(!hasEtrigger) continue;
                 if(hasEtrigger && hasEEtrigger) continue;
             }
-	    if(isDoubleElePD){
-		if(!hasEEtrigger) continue;
-	    }
+            if(isDoubleElePD) {
+                if(!hasEEtrigger) continue;
+            }
 
             hasTrigger=true;
         } else {
@@ -365,19 +429,19 @@ int main(int argc, char* argv[])
         Hcutflow->Fill(4,weight*TotalWeight_plus);
 
 
-	//Generator information
+        //Generator information
 
-        if(isMC_FermionWIMP){
-	    //getdecayMode(ev);
-	    if(phys.genWIMPs.size()!=2 || phys.genleptons.size()!=2) continue;
+        if(isMC_WIMP) {
+            //getdecayMode(ev);
+            if(phys.genWIMPs.size()!=2 || phys.genleptons.size()!=2) continue;
             LorentzVector diwimp = phys.genWIMPs[0]+phys.genWIMPs[1];
-	    LorentzVector dilep = phys.genleptons[0]+phys.genleptons[1];
-	    double dphi = fabs(deltaPhi(dilep.phi(),diwimp.phi()));
-	    double MTmassless=METUtils::transverseMass(dilep,diwimp,false);
+            LorentzVector dilep = phys.genleptons[0]+phys.genleptons[1];
+            double dphi = fabs(deltaPhi(dilep.phi(),diwimp.phi()));
+            double MTmassless=METUtils::transverseMass(dilep,diwimp,false);
             mon.fillHisto("mt_Gen", tags, MTmassless, weight);
-	    mon.fillHisto("met_Gen", tags, diwimp.pt(), weight);
-	    mon.fillHisto("zpt_Gen", tags, dilep.pt(), weight);
-	    mon.fillHisto("dphi_Gen", tags, dphi, weight);
+            mon.fillHisto("met_Gen", tags, diwimp.pt(), weight);
+            mon.fillHisto("zpt_Gen", tags, dilep.pt(), weight);
+            mon.fillHisto("dphi_Gen", tags, dphi, weight);
         }
 
 
@@ -416,8 +480,8 @@ int main(int argc, char* argv[])
         //int id1 = fabs(phys.leptons[0].id);
         //int id2 = fabs(phys.leptons[1].id);
         LorentzVector zll(lep1+lep2);
-        //bool passZmass(fabs(zll.mass()-91)<15);
-        //bool passZpt(zll.pt()>50);
+        bool passZmass(fabs(zll.mass()-91)<15);
+        bool passZpt(zll.pt()>50);
         //bool passtightZmass(fabs(zll.mass()-91)<5);
 
         //check alternative selections for the dilepton
@@ -426,7 +490,7 @@ int main(int argc, char* argv[])
 
 
         bool passLooseIdAndIso(true);
-	bool passTightIdAndIso(true);
+        bool passTightIdAndIso(true);
         bool isLep1_Tight(false);
         bool isLep2_Tight(false);
         int TL_bits = 0;
@@ -448,7 +512,7 @@ int main(int argc, char* argv[])
 
             //bool hasGoodId(false), isIso(false);
             bool hasLooseGoodId(false);
-	    bool hasTightGoodId(false);
+            bool hasTightGoodId(false);
 
             if(fabs(phys.leptons[ilep].id)==13) {
                 if( hasObjectId(ev.mn_idbits[lpid], MID_PF)
@@ -465,7 +529,7 @@ int main(int argc, char* argv[])
                     hasLooseGoodId = true;
                 }
                 if( hasObjectId(ev.mn_idbits[lpid], MID_TIGHT) && relIso<0.2)    {
-		    hasTightGoodId = true;
+                    hasTightGoodId = true;
                     if(ilep==0) isLep1_Tight = true;
                     if(ilep==1) isLep2_Tight = true;
                 }
@@ -492,7 +556,7 @@ int main(int argc, char* argv[])
                         hasLooseGoodId = true;
                     }
                     if(passWp && iwp==1 && relIso<0.15) {
-			hasTightGoodId = true;
+                        hasTightGoodId = true;
                         if(ilep==0) isLep1_Tight = true;
                         if(ilep==1) isLep2_Tight = true;
                     }
@@ -586,25 +650,36 @@ int main(int argc, char* argv[])
 
         passBveto=(nABtags==0);
 
-	/*
+
+
+        // compute dphi(zpt,redMet)
         double dphiZllmet=fabs(deltaPhi(zll.phi(),zvvs[0].phi()));
-        bool passdphiZllmetCut20(dphiZllmet>2.0);
-        bool passdphiZllmetCut24(dphiZllmet>2.4);
-        bool passdphiZllmetCut27(dphiZllmet>2.7);
+        bool passdphiZllmetCut(dphiZllmet>2.7);///2.6);
+        //bool passdphiZllmetCut20(dphiZllmet>2.0);
+        //bool passdphiZllmetCut24(dphiZllmet>2.4);
+        //bool passdphiMetmvaMet(dphiMet_mvaMet<0.2);
 
-        bool passMetCut60=(zvvs[0].pt()>60);
-        bool passMetCut80=(zvvs[0].pt()>80);
-        bool passMetCut100=(zvvs[0].pt()>100);
-        bool passMetCut120=(zvvs[0].pt()>120);
+        //transverse masses
+        //double aMT=METUtils::transverseMass(zll,zvvs[0],true);
+        double aMTmassless=METUtils::transverseMass(zll,zvvs[0],false);
 
-        bool passBalanceCut025=(zvvs[0].pt()/zll.pt()>0.75 && zvvs[0].pt()/zll.pt()<1.25);
-        bool passBalanceCut05=(zvvs[0].pt()/zll.pt()>0.5 && zvvs[0].pt()/zll.pt()<1.5);
-        bool passBalanceCut075=(zvvs[0].pt()/zll.pt()>0.25 && zvvs[0].pt()/zll.pt()<1.75);
-	*/
+
+        //missing ET
+        bool passMetCut=(zvvs[0].pt()>80);
+
+        //missing ET balance
+        bool passBalanceCut=(zvvs[0].pt()/zll.pt()>0.75 && zvvs[0].pt()/zll.pt()<1.25);
+
+
+
+
 
         //#########################################################
         //####  RUN PRESELECTION AND CONTROL REGION PLOTS  ########
         //#########################################################
+
+
+
 
         if(isMC && use2011Id) weight *= llScaleFactor*llTriggerEfficiency;
 
@@ -612,7 +687,7 @@ int main(int argc, char* argv[])
 
         // fire Trigger and LOOSE lepton selection
         //if(hasTrigger && passLooseIdAndIso) {
-	if(hasTrigger && passTightIdAndIso) {
+        if(hasTrigger && passTightIdAndIso) {
             mon.fillHisto("eventflow",tags,1,weight);
         } else continue;
 
@@ -634,6 +709,14 @@ int main(int argc, char* argv[])
         */
 
 
+        mon.fillHisto("zpt_raw"                         ,tags, zll.pt(),   weight);
+        mon.fillHisto("zmass_raw"                       ,tags, zll.mass(), weight);
+        mon.fillHisto("pfmet_raw"                       ,tags, zvvs[0].pt(), weight);
+        mon.fillHisto("mtless_zmet_raw"                 ,tags, aMTmassless, weight);
+        mon.fillHisto("nleptons_raw"                    ,tags, nextraleptons, weight);
+        mon.fillHisto("npfjets_raw"                     ,tags, nAJetsGood30, weight);
+        mon.fillHisto("npfbjets_raw"                    ,tags, nABtags, weight);
+
 
 
 
@@ -646,6 +729,30 @@ int main(int argc, char* argv[])
         //cout << "TL_bits: " << TL_bits << endl;
 
 
+        if(passZmass) {
+            mon.fillHisto("nvtx_raw",   tags, ev.nvtx,      1);
+	    mon.fillHisto("nvtx_sel",   tags, ev.nvtx,      weight);
+            mon.fillHisto("zpt_sel",    tags, zll.pt(),     weight);
+
+            if(passZpt) {
+                mon.fillHisto("nleptons_sel",tags,2+nextraleptons,weight);
+
+                if(pass3dLeptonVeto) {
+                    mon.fillHisto("npfjets_sel",              tags, nAJetsGood30,weight);
+                    mon.fillHisto("npfbjets_sel",		  tags, nABtags, weight);
+
+                    if(passBveto) {
+                        if(passdphiZllmetCut) {
+                            if(passMetCut) {
+                                if(passBalanceCut) {
+                                    mon.fillHisto("mt_final",	tags, aMTmassless, weight);
+                                }
+                            }
+                        }
+                    }
+                }
+            }
+        }
 
 
 
