@@ -595,9 +595,10 @@ void DileptonPlusMETEventAnalyzer::analyze(const edm::Event &event, const edm::E
 	ev.l2_ensferr              = selLeptonsSummary[l2idx].ensferr;
 	ev.l2_pid                  = addPidSummary( selLeptonsSummary[l2idx] );
       }
-    else{
-	return; //clean trashes of dileptonIdx.size() == 0 case
-    }
+    //In order to save photon event, this should be commentted out
+    //else{
+    //	return; //clean trashes of dileptonIdx.size() == 0 case, this will remove photon is this true
+    //}
     
     //save extra leptons (including softer ones)
     std::vector<ObjectIdSummary> looseMuonSummary;

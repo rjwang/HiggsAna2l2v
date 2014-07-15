@@ -419,7 +419,8 @@ void Draw2DHistogramSplitCanvas(JSONWrapper::Object& Root, std::string RootDir, 
    char Buffer[1024]; 
    if(isSim)	sprintf(Buffer, "CMS simulation, #it{ZH #rightarrow l^{+}l^{-}+#slash{E}_{T}}, #sqrt{s}=%.1f TeV, L=%.1f fb^{-1}", iEcm, iLumi/1000);
    //else		sprintf(Buffer, "CMS preliminary, #it{ZH #rightarrow l^{+}l^{-}+#slash{E}_{T}}, #sqrt{s}=%.1f TeV, L=%.1f fb^{-1}", iEcm, iLumi/1000);
-   else sprintf(Buffer, "CMS preliminary, #sqrt{s}=%.1f TeV, L=%.1f fb^{-1}", iEcm, iLumi/1000);
+   //else sprintf(Buffer, "CMS preliminary, #sqrt{s}=%.1f TeV, L=%.1f fb^{-1}", iEcm, iLumi/1000);
+   else sprintf(Buffer, "CMS preliminary, #sqrt{s}=%.1f TeV, L=19.7 fb^{-1}", iEcm);
    T->AddText(Buffer);
 
    std::vector<JSONWrapper::Object> Process = Root["proc"].daughters();
@@ -936,7 +937,7 @@ void Draw1DHistogram(JSONWrapper::Object& Root, std::string RootDir, NameAndType
    	if(isSim) sprintf(Buffer, "CMS simulation, #it{ZH #rightarrow l^{+}l^{-}+#slash{E}_{T}}, #sqrt{s}=%.1f TeV, L=%.1f fb^{-1}", iEcm, iLumi/1000);
    	//else      sprintf(Buffer, "CMS Preliminary, #it{ZH #rightarrow l^{+}l^{-}+#slash{E}_{T}}, #sqrt{s}=%.1f TeV, L=%.1f fb^{-1}", iEcm, iLumi/1000);
    	//else      sprintf(Buffer, "CMS Preliminary, #it{H #rightarrow ZZ_{d} #rightarrow l^{+}l^{-}+#slash{E}_{T}}, #sqrt{s}=%.1f TeV, L=%.1f fb^{-1}", iEcm, iLumi/1000);
-   	else      sprintf(Buffer, "CMS Preliminary, #sqrt{s}=%.1f TeV, L=%.2f fb^{-1}", iEcm, iLumi/1000);
+   	else      sprintf(Buffer, "CMS Preliminary, #sqrt{s}=%.1f TeV, L=19.7 fb^{-1}", iEcm);
    }else{
 	if(isSim) sprintf(Buffer, "CMS simulation, #it{ZH #rightarrow l^{+}l^{-}+#slash{E}_{T}}, #sqrt{s}=%.1f TeV, L=%.2f pb^{-1}", iEcm, iLumi);
 	else      sprintf(Buffer, "CMS Preliminary, #sqrt{s}=%.1f TeV, L=%.2f pb^{-1}", iEcm, iLumi);
@@ -1121,7 +1122,7 @@ void Draw1DHistogram(JSONWrapper::Object& Root, std::string RootDir, NameAndType
        t1->SetBottomMargin(0.12);
        t1->SetTopMargin(0.05);
        t1->SetLeftMargin(0.15);
-       stack->GetXaxis()->SetTitle(name_denRelUncH);
+       if(!stack) stack->GetXaxis()->SetTitle(name_denRelUncH);
      }
 
    t1->RedrawAxis();

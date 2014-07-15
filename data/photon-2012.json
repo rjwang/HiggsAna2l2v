@@ -1,0 +1,298 @@
+{
+  "proc": [
+    {
+      "isdata": false, 
+      "color": "856", 
+      "lcolor": "1", 
+      "tag": "V#gamma", 
+      "data": [
+        {
+          "dtag": "MC8TeV_WJets", 
+          "xsec": 37509, 
+          "split": 1, 
+          "br": [
+            1.0
+          ]
+        }, 
+        {
+          "dtag": "MC8TeV_W1Jets", 
+          "xsec": 37509, 
+          "split": 5, 
+          "br": [
+            0.178
+          ]
+        }, 
+        {
+          "dtag": "MC8TeV_W2Jets", 
+          "xsec": 37509, 
+          "split": 10, 
+          "br": [
+            0.058
+          ]
+        }, 
+        {
+          "dtag": "MC8TeV_W3Jets", 
+          "xsec": 37509, 
+          "split": 1, 
+          "br": [
+            0.017
+          ]
+        }, 
+        {
+          "dtag": "MC8TeV_W4Jets", 
+          "xsec": 37509, 
+          "split": 1, 
+          "br": [
+            0.007
+          ]
+        }, 
+        {
+          "dtag": "MC8TeV_WG", 
+          "xsec": 461.6, 
+          "split": 10
+        }, 
+        {
+          "dtag": "MC8TeV_ZG", 
+          "xsec": 123.9, 
+          "split": 10
+        }
+      ], 
+      "mctruthmode": 22
+    }, 
+    {
+      "isdata": false, 
+      "color": "393", 
+      "lcolor": "1", 
+      "tag": "Multijets", 
+      "data": [
+        {
+          "dtag": "MC8TeV_QCDPt20to30BCtoE", 
+          "xsec": 288600000, 
+          "split": 1, 
+          "br": [
+            0.00058
+          ]
+        }, 
+        {
+          "dtag": "MC8TeV_QCDPt30to80BCtoE", 
+          "xsec": 74240000, 
+          "split": 1, 
+          "br": [
+            0.00225
+          ]
+        }, 
+        {
+          "dtag": "MC8TeV_QCDPt80to170BCtoE", 
+          "xsec": 1191000, 
+          "split": 1, 
+          "br": [
+            0.0109
+          ]
+        }, 
+        {
+          "dtag": "MC8TeV_QCDPt170to250BCtoE", 
+          "xsec": 30980, 
+          "split": 1, 
+          "br": [
+            0.0204
+          ]
+        }, 
+        {
+          "dtag": "MC8TeV_QCDPt250to350BCtoE", 
+          "xsec": 4250, 
+          "split": 1, 
+          "br": [
+            0.0243
+          ]
+        }, 
+        {
+          "dtag": "MC8TeV_QCDPt350toInfBCtoE", 
+          "xsec": 811, 
+          "split": 1, 
+          "br": [
+            0.0295
+          ]
+        }, 
+        {
+          "dtag": "MC8TeV_QCDEMPt20to30", 
+          "xsec": 288600000, 
+          "split": 10, 
+          "br": [
+            0.0101
+          ]
+        }, 
+        {
+          "dtag": "MC8TeV_QCDEMPt30to80", 
+          "xsec": 74330000, 
+          "split": 2, 
+          "br": [
+            0.0621
+          ]
+        }, 
+        {
+          "dtag": "MC8TeV_QCDEMPt80to170", 
+          "xsec": 1191000, 
+          "split": 1, 
+          "br": [
+            0.1539
+          ]
+        }, 
+        {
+          "dtag": "MC8TeV_QCDEMPt170to250", 
+          "xsec": 30990, 
+          "split": 10, 
+          "br": [
+            0.148
+          ]
+        }, 
+        {
+          "dtag": "MC8TeV_QCDEMPt250to350", 
+          "xsec": 4250, 
+          "split": 10, 
+          "br": [
+            0.131
+          ]
+        }, 
+        {
+          "dtag": "MC8TeV_QCDEMPt350toInf", 
+          "xsec": 810, 
+          "split": 10, 
+          "br": [
+            0.11
+          ]
+        }
+      ], 
+      "mctruthmode": 111
+    }, 
+    {
+      "isdata": false, 
+      "color": "0", 
+      "lcolor": "1", 
+      "tag": "#gamma+jets", 
+      "data": [
+        {
+          "dtag": "MC8TeV_GJets_15to30", 
+          "xsec": 200061.7, 
+          "split": 5, 
+          "br": [
+            1.3
+          ]
+        }, 
+        {
+          "dtag": "MC8TeV_GJets_30to50", 
+          "xsec": 19931.62, 
+          "split": 5, 
+          "br": [
+            1.3
+          ]
+        }, 
+        {
+          "dtag": "MC8TeV_GJets_50to80", 
+          "xsec": 3322.309, 
+          "split": 5, 
+          "br": [
+            1.3
+          ]
+        }, 
+        {
+          "dtag": "MC8TeV_GJets_80to120", 
+          "xsec": 558.2865, 
+          "split": 5, 
+          "br": [
+            1.3
+          ]
+        }, 
+        {
+          "dtag": "MC8TeV_GJets_120to170", 
+          "xsec": 108.0068, 
+          "split": 5, 
+          "br": [
+            1.3
+          ]
+        }, 
+        {
+          "dtag": "MC8TeV_GJets_170to300", 
+          "xsec": 30.12207, 
+          "split": 5, 
+          "br": [
+            1.3
+          ]
+        }, 
+        {
+          "dtag": "MC8TeV_GJets_300to470", 
+          "xsec": 2.138632, 
+          "split": 5, 
+          "br": [
+            1.3
+          ]
+        }, 
+        {
+          "dtag": "MC8TeV_GJets_470to800", 
+          "xsec": 0.2119244, 
+          "split": 5, 
+          "br": [
+            1.3
+          ]
+        }, 
+        {
+          "dtag": "MC8TeV_GJets_800to1400", 
+          "xsec": 0.007077847, 
+          "split": 5, 
+          "br": [
+            1.3
+          ]
+        }, 
+        {
+          "dtag": "MC8TeV_GJets_1400to1800", 
+          "xsec": 0.00004510327, 
+          "split": 5, 
+          "br": [
+            1.3
+          ]
+        }, 
+        {
+          "dtag": "MC8TeV_GJets_1800toInf", 
+          "xsec": 0.000001867141, 
+          "split": 5, 
+          "br": [
+            1.3
+          ]
+        }, 
+        {
+          "dtag": "MC8TeV_DiPhotons", 
+          "xsec": 75.39, 
+          "split": 5, 
+          "br": [
+            1.3
+          ]
+        }
+      ], 
+      "mctruthmode": 22
+    }, 
+    {
+      "isdata": true, 
+      "color": 1, 
+      "tag": "Data (#gamma)", 
+      "data": [
+        {
+          "dtag": "Data8TeV_Photon2012A", 
+          "split": 2
+        }, 
+        {
+          "dtag": "Data8TeV_DoubleElectron2012B", 
+          "split": 10
+        }, 
+        {
+          "dtag": "Data8TeV_DoubleElectron2012C", 
+          "split": 10
+        }, 
+        {
+          "dtag": "Data8TeV_DoubleElectron2012D", 
+          "split": 10
+        }
+      ], 
+      "mctruthmode": 22, 
+      "fill": 0
+    }
+  ]
+}

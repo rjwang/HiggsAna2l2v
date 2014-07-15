@@ -93,9 +93,9 @@ int main(int argc, char* argv[])
     bool isDoubleMuPD(!isMC && url.Contains("DoubleMu"));
     bool isSingleElePD(!isMC && url.Contains("SingleEle"));
     bool isDoubleElePD(!isMC && url.Contains("DoubleEle"));
+    bool isMC_ZZ  = isMC && ( string(url.Data()).find("TeV_ZZ")  != string::npos);
+    bool isMC_WZ  = isMC && ( string(url.Data()).find("TeV_WZ")  != string::npos);
     /*
-        bool isMC_ZZ  = isMC && ( string(url.Data()).find("TeV_ZZ")  != string::npos);
-        bool isMC_WZ  = isMC && ( string(url.Data()).find("TeV_WZ")  != string::npos);
         bool isMC_ZH  = isMC && ( string(url.Data()).find("TeV_ZH")  != string::npos);
         bool isMC_HZZd= isMC && ( string(url.Data()).find("TeV_HZZd")  != string::npos);
     */
@@ -118,8 +118,8 @@ int main(int argc, char* argv[])
         outTxtFile_final = fopen(outTxtUrl_final.Data(), "w");
         printf("TextFile URL = %s\n",outTxtUrl_final.Data());
 
-        fprintf(outTxtFile_full,"run lumi event passId,passIdAndIso,passZmass,passZpt,pass3dLeptonVeto,passBveto,passLMetVeto,passdphiZllmetCut,passMet,passBalanceCut,passMTcut evCat \n");
-        //fprintf(outTxtFile_final,"run lumi event passId,passIdAndIso,passZmass,passZpt,pass3dLeptonVeto,passBveto,passLMetVeto,passdphiZllmetCut,passMet,passBalanceCut,passMTcut evCat \n");
+        fprintf(outTxtFile_full,"run lumi event passId,passIdAndIso,passZmass,passZpt,pass3dLeptonVeto,passBveto,passLMetVeto,passDphiZMETcut,passMet,passBalanceCut,passMTcut evCat \n");
+        //fprintf(outTxtFile_final,"run lumi event passId,passIdAndIso,passZmass,passZpt,pass3dLeptonVeto,passBveto,passLMetVeto,passDphiZMETcut,passMet,passBalanceCut,passMTcut evCat \n");
     */
 
     //tree info
@@ -133,9 +133,31 @@ int main(int argc, char* argv[])
     JetCorrectionUncertainty jecUnc(uncFile.Data());
 
     //ZHinvisible reweighting file input
-    //ZHUtils myZHUtils(runProcess);
-    //myZHUtils.get_frFile(runProcess);
+    ZHUtils myZHUtils(runProcess);
+    myZHUtils.get_frFile(runProcess); //get fakerate file
 
+    //systematics
+    bool runSystematics                        = runProcess.getParameter<bool>("runSystematics");
+    std::vector<TString> varNames(1,"");
+    if(runSystematics) {
+        cout << "Systematics will be computed for this analysis" << endl;
+        varNames.push_back("_jerup"); //1
+        varNames.push_back("_jerdown"); //2
+        varNames.push_back("_jesup"); //3
+        varNames.push_back("_jesdown"); //4
+        varNames.push_back("_umetup"); //5
+        varNames.push_back("_umetdown"); //6
+        varNames.push_back("_lesup"); //7
+        varNames.push_back("_lesdown"); //8
+        varNames.push_back("_puup"); //9
+        varNames.push_back("_pudown"); //10
+        varNames.push_back("_btagup"); //11
+        varNames.push_back("_btagdown"); //12
+        // will need to add ZZ and WZ shape uncertainty
+        //if(isMC_ZZ)             { varNames.push_back("_zzptup");   varNames.push_back("_zzptdown");     }
+        //if(isMC_WZ)             { varNames.push_back("_wzptup");   varNames.push_back("_wzptdown");     }
+    }
+    size_t nvarsToInclude=varNames.size();
 
 
     //##################################################################################
@@ -229,6 +251,57 @@ int main(int argc, char* argv[])
     }
 
 
+    //for data-driven DY re-weighting
+    Double_t qtaxis[100];
+    for(size_t i=0; i<40; i++)  qtaxis[i]=2.5*i;       //0-97.5
+    for(size_t i=0; i<20; i++)  qtaxis[40+i]=100+5*i;  //100-195
+    for(size_t i=0; i<15; i++)  qtaxis[60+i]=200+10*i; //200-340
+    for(size_t i=0; i<25; i++)  qtaxis[75+i]=350+25*i; //350-976
+    mon.addHistogram( new TH1D( "qt_dataDY",        ";#it{p}_{T}^{#it{#gamma}} [GeV];Events",99,qtaxis));
+
+    Double_t qtaxisType1[65];
+    for(size_t i=0; i<40; i++)  qtaxisType1[i]=2.5*i;
+    for(size_t i=0; i<20; i++)  qtaxisType1[40+i]=100+5*i;
+    for(size_t i=0; i<3; i++)   qtaxisType1[60+i]=200+50*i;
+    for(size_t i=0; i<2; i++)   qtaxisType1[63+i]=350+650*i;
+    mon.addHistogram( new TH1D( "qtType1_dataDY",        ";#it{p}_{T}^{#it{#gamma}} [GeV];Events",64,qtaxisType1));
+
+    mon.addHistogram( new TH1F( "nvtx_dataDY",      ";Vertices;Events", 50,0,50) );
+
+    double METBins[21]= {0,10,20,30,40,50,60,70,80,90,100,120,140,160,180,200,250,300,350,400,500};
+    mon.addHistogram( new TH1F( "pfmet_dataDY",      ";E_{T}^{miss} [GeV];Events", 20, METBins));
+
+    double METBinsType1[11]= {0,10,20,30,40,60,90,130,180,300,500};
+    mon.addHistogram( new TH1F( "pfmetType1_dataDY", ";E_{T}^{miss} [GeV];Events", 10, METBinsType1));
+
+    mon.addHistogram( new TH1F( "DphiZMET_dataDY",   ";#Delta#it{#phi}(#it{l^{+}l^{-}},E_{T}^{miss});Events", 50,0,TMath::Pi()) );
+    mon.addHistogram( new TH1D( "balancedif_dataDY", ";|E_{T}^{miss}-#it{q}_{T}|/#it{q}_{T};Events", 5,0,1.0) );
+
+
+    //for data-driven Wjets, QCD background
+    // run systematics
+    std::vector<TString> FRVarNames(1,"");
+    /*
+        FRVarNames.push_back("_mtup");
+        FRVarNames.push_back("_mtdown");
+        FRVarNames.push_back("_metup");
+        FRVarNames.push_back("_metdown");
+        FRVarNames.push_back("_jptup");
+        FRVarNames.push_back("_jptdown");
+        FRVarNames.push_back("_dphiup");
+        FRVarNames.push_back("_dphidown");
+        FRVarNames.push_back("_ewkup");
+        FRVarNames.push_back("_ewkdown");
+    */
+    size_t nvarsFR=FRVarNames.size();
+
+    for(size_t ifr=0; ifr<nvarsFR; ifr++) {
+	mon.addHistogram( new TH1F( TString("WjetCtrl_mt_final")+FRVarNames[ifr], "; #it{m}_{T}(Weighted W+jets);Events", 12,0,1200) );
+        mon.addHistogram( new TH1F( TString("QCDCtrl_mt_final")+FRVarNames[ifr],  "; #it{m}_{T}(Weighted QCD);Events",    12,0,1200) );
+    }
+
+
+
 
     //MC Truth
     mon.addHistogram( new TH1F( "mt_Gen", ";#it{m}_{T}(Z,#bar{#chi}#chi) [GeV];Events", 100,0,1500) );
@@ -236,11 +309,82 @@ int main(int argc, char* argv[])
     mon.addHistogram( new TH1F( "zpt_Gen", ";#it{p}_{T}(Z) [GeV];Events", 100,0,1500) );
     mon.addHistogram( new TH1F( "dphi_Gen", ";#Delta#phi(Z,#bar{#chi}#chi) [rad];Events", 100,0,TMath::Pi()) );
 
-
-
     // final distributions
-    mon.addHistogram( new TH1F( "mt_final",             ";#it{m}_{T} [GeV];Events", 8,200,1000) );
+    mon.addHistogram( new TH1F( "mt_final",             ";#it{m}_{T} [GeV];Events", 12,0,1200) );
 
+
+    //##################################################################################
+    //########################## STUFF FOR CUTS OPTIMIZATION  ##########################
+    //##################################################################################
+
+    //optimization
+    std::vector<double> optim_Cuts1_MET;
+    std::vector<double> optim_Cuts1_Balance;
+    std::vector<double> optim_Cuts1_DphiZMET;
+
+    bool runOptimization = runProcess.getParameter<bool>("runOptimization");
+    if(runOptimization) {
+        for(double met=90; met<=100; met+=10) {
+            for(double balance=0.2; balance<=0.2; balance+=0.05) {
+                for(double dphi=2.7; dphi<=2.7; dphi+=0.1) {
+                    optim_Cuts1_MET     .push_back(met);
+                    optim_Cuts1_Balance .push_back(balance);
+                    optim_Cuts1_DphiZMET.push_back(dphi);
+                }
+            }
+        }
+    }
+    size_t nOptims = optim_Cuts1_MET.size();
+
+
+    //make it as a TProfile so hadd does not change the value
+    TProfile* Hoptim_cuts1_MET 	    = (TProfile*) mon.addHistogram( new TProfile ("optim_cut1_MET",";cut index;met",nOptims,0,nOptims) );
+    TProfile* Hoptim_cuts1_Balance  = (TProfile*) mon.addHistogram( new TProfile ("optim_cut1_Balance",";cut index;dphi",nOptims,0,nOptims) );
+    TProfile* Hoptim_cuts1_DphiZMET = (TProfile*) mon.addHistogram( new TProfile ("optim_cut1_DphiZMET",";cut index;dphi",nOptims,0,nOptims) );
+
+    for(unsigned int index=0; index<nOptims; index++) {
+        Hoptim_cuts1_MET        ->Fill(index, optim_Cuts1_MET[index]);
+        Hoptim_cuts1_Balance    ->Fill(index, optim_Cuts1_Balance[index]);
+        Hoptim_cuts1_DphiZMET   ->Fill(index, optim_Cuts1_DphiZMET[index]);
+    }
+
+
+
+    TH1F* Hoptim_systs  =  (TH1F*) mon.addHistogram( new TH1F ("optim_systs"    , ";syst;", nvarsToInclude,0,nvarsToInclude) ) ;
+
+
+    // non-resonant background control
+    std::vector<TString> allshapesVars;
+    allshapesVars.push_back("mt_shapes");
+
+    //for data-driven Wjets, QCD background
+    for(size_t ifr=0; ifr<nvarsFR; ifr++) {
+        mon.addHistogram( new TH2F( TString("WjetCtrl_mt_shapes")+FRVarNames[ifr], ";cut index; #it{m}_{T}(Weighted W+jets);Events",nOptims,0,nOptims,12,0,1200) );
+        mon.addHistogram( new TH2F( TString("QCDCtrl_mt_shapes")+FRVarNames[ifr],  ";cut index; #it{m}_{T}(Weighted QCD);Events",   nOptims,0,nOptims,12,0,1200) );
+    }
+
+
+    for(size_t ivar=0; ivar<nvarsToInclude; ivar++) {
+        Hoptim_systs->GetXaxis()->SetBinLabel(ivar+1, varNames[ivar]);
+
+        //1D shapes for limit setting
+        mon.addHistogram( new TH2F (TString("mt_shapes")+varNames[ivar],";cut index; #it{m}_{T} [GeV];#Events (/100GeV)",nOptims,0,nOptims,12,0,1200) );
+
+        //2D shapes for limit setting
+
+
+        // non-resonant background control
+        for(size_t j=0; j<allshapesVars.size(); j++) {
+            TH2F *h2=(TH2F *) mon.addHistogram( new TH2F (allshapesVars[j]+"_NRBctrl"+varNames[ivar],";cut index;Selection region;Events",nOptims,0,nOptims,6,0,6) );
+            h2->GetYaxis()->SetBinLabel(1,"M_{in}^{ll}/=0 b-tags");
+            h2->GetYaxis()->SetBinLabel(2,"M_{out}^{ll}/=0 b-tags");
+            h2->GetYaxis()->SetBinLabel(3,"M_{out+}^{ll}/=0 b-tags");
+            h2->GetYaxis()->SetBinLabel(4,"M_{in}^{ll}/#geq 1 b-tag");
+            h2->GetYaxis()->SetBinLabel(5,"M_{out}^{ll}/#geq 1 b-tag");
+            h2->GetYaxis()->SetBinLabel(6,"M_{out+}^{ll}/#geq 1 b-tag");
+        }
+
+    }
 
     //##################################################################################
     //#############         GET READY FOR THE EVENT LOOP           #####################
@@ -448,8 +592,8 @@ int main(int argc, char* argv[])
 
         // ewk correction for diboson processes
         //if(isMC_ZH) weight *= myZHUtils.GetNLOZHWeight(phys);
-        //if(isMC_ZZ) weight *= myZHUtils.GetNLOZZWeight(phys);
-        //if(isMC_WZ) weight *= myZHUtils.GetNLOWZWeight(phys);
+        if(isMC_ZZ) weight *= myZHUtils.GetNLOZZWeight(phys);
+        if(isMC_WZ) weight *= myZHUtils.GetNLOWZWeight(phys);
 
 
         //#########################################################################
@@ -477,11 +621,13 @@ int main(int argc, char* argv[])
 
         LorentzVector lep1=phys.leptons[0];
         LorentzVector lep2=phys.leptons[1];
-        //int id1 = fabs(phys.leptons[0].id);
-        //int id2 = fabs(phys.leptons[1].id);
+        int id1 = fabs(phys.leptons[0].id);
+        int id2 = fabs(phys.leptons[1].id);
         LorentzVector zll(lep1+lep2);
         bool passZmass(fabs(zll.mass()-91)<15);
         bool passZpt(zll.pt()>50);
+        bool isZsideBand( (zll.mass()>40 && zll.mass()<70) || (zll.mass()>110 && zll.mass()<200));
+        bool isZsideBandPlus( (zll.mass()>110 && zll.mass()<200));
         //bool passtightZmass(fabs(zll.mass()-91)<5);
 
         //check alternative selections for the dilepton
@@ -641,7 +787,7 @@ int main(int argc, char* argv[])
             if(useJetsOnlyInTracker && fabs(aJets[ijet].eta())>2.5) continue;
 
             aGoodIdJets.push_back(aJets[ijet]);
-            if(aJets[ijet].pt()>30)nAJetsGood30++;
+            if(aJets[ijet].pt()>30) nAJetsGood30++;
 
             if(aJets[ijet].pt()>20 /*&& fabs(aJets[ijet].eta())<2.5*/)  nABtags += (aJets[ijet].btag6>0.244);
             if(aJets[ijet].pt()>20 /*&& fabs(aJets[ijet].eta())<2.5*/)  nCSVMtags += (aJets[ijet].btag6>0.679);
@@ -654,9 +800,9 @@ int main(int argc, char* argv[])
 
         // compute dphi(zpt,redMet)
         double dphiZllmet=fabs(deltaPhi(zll.phi(),zvvs[0].phi()));
-        bool passdphiZllmetCut(dphiZllmet>2.7);///2.6);
-        //bool passdphiZllmetCut20(dphiZllmet>2.0);
-        //bool passdphiZllmetCut24(dphiZllmet>2.4);
+        bool passDphiZMETcut(dphiZllmet>2.7);///2.6);
+        //bool passDphiZMETcut20(dphiZllmet>2.0);
+        //bool passDphiZMETcut24(dphiZllmet>2.4);
         //bool passdphiMetmvaMet(dphiMet_mvaMet<0.2);
 
         //transverse masses
@@ -665,10 +811,11 @@ int main(int argc, char* argv[])
 
 
         //missing ET
-        bool passMetCut=(zvvs[0].pt()>80);
+        bool passMETcut=(zvvs[0].pt()>90);
 
         //missing ET balance
-        bool passBalanceCut=(zvvs[0].pt()/zll.pt()>0.75 && zvvs[0].pt()/zll.pt()<1.25);
+        bool passBalanceCut=(zvvs[0].pt()/zll.pt()>0.80 && zvvs[0].pt()/zll.pt()<1.20);
+        double balanceDif=fabs(zvvs[0].pt()-zll.pt())/zll.pt();
 
 
 
@@ -687,9 +834,35 @@ int main(int argc, char* argv[])
 
         // fire Trigger and LOOSE lepton selection
         //if(hasTrigger && passLooseIdAndIso) {
-        if(hasTrigger && passTightIdAndIso) {
-            mon.fillHisto("eventflow",tags,1,weight);
+
+        // fire Trigger and Tight lepton selections for main analysis
+        /*
+                if(hasTrigger && passTightIdAndIso) {
+                    mon.fillHisto("eventflow",tags,1,weight);
+                } else continue;
+        */
+
+
+        //for testing
+        //prepare the tag's vectors for loose id and iso selection for data
+        std::vector<TString> FRtags;
+        if(hasTrigger) {
+            if(isMC) {
+                if(passTightIdAndIso) {
+                    mon.fillHisto("eventflow",tags,1,weight);
+                    FRtags.push_back("");
+                } else continue;
+            } else {
+                if(!passTightIdAndIso && !passLooseIdAndIso) continue;
+                if(passTightIdAndIso) {
+                    FRtags.push_back("");
+                    mon.fillHisto("eventflow",tags,1,weight);
+                }
+                if(passLooseIdAndIso) FRtags.push_back("_FR");
+            }
         } else continue;
+
+
 
 
 
@@ -699,14 +872,22 @@ int main(int argc, char* argv[])
 
 
         tags.push_back(tag_cat); //add ee, mumu, emu category
-        /*
-            tags.push_back(tag_cat+tag_subcat); // add jet binning category
-            if(tag_subcat=="eq0jets" || tag_subcat=="eq1jets") tags.push_back(tag_cat+"lesq1jets");
-            if(tag_cat=="mumu" || tag_cat=="ee") {
-                tags.push_back("ll"+tag_subcat);
-                if(tag_subcat=="eq0jets" || tag_subcat=="eq1jets") tags.push_back("lllesq1jets");
+
+        tags.push_back(tag_cat+tag_subcat); // add jet binning category
+        if(tag_subcat=="eq0jets" || tag_subcat=="eq1jets") tags.push_back(tag_cat+"lesq1jets");
+        if(tag_cat=="mumu" || tag_cat=="ee") {
+            tags.push_back("ll"+tag_subcat);
+            if(tag_subcat=="eq0jets" || tag_subcat=="eq1jets") tags.push_back("lllesq1jets");
+        }
+
+        //add fakerate tags
+        std::vector<TString> newFRtags;
+        for(size_t i=0; i<FRtags.size(); i++) {
+            for(size_t j=0; j<tags.size(); j++) {
+                newFRtags.push_back(tags[j]+FRtags[i]);
             }
-        */
+        }
+        tags = newFRtags;
 
 
         mon.fillHisto("zpt_raw"                         ,tags, zll.pt(),   weight);
@@ -728,37 +909,251 @@ int main(int argc, char* argv[])
         //TL_bits: 00(LL) 01(TL) 10(LT) 11(TT)
         //cout << "TL_bits: " << TL_bits << endl;
 
+        for(size_t ifr=0; ifr<nvarsFR; ifr++) {
+            TString key = "FakePt_syst"+FRVarNames[ifr];
+            double Wjet_weight = 1.0;
+            double QCD_weight = 1.0;
 
-        if(passZmass) {
-            mon.fillHisto("nvtx_raw",   tags, ev.nvtx,      1);
-	    mon.fillHisto("nvtx_sel",   tags, ev.nvtx,      weight);
-            mon.fillHisto("zpt_sel",    tags, zll.pt(),     weight);
+            if(!isMC) {
+                double N_PFweights = myZHUtils.getN_PFweight(TL_bits,lep1,id1,lep2,id2,key);
+                double N_FPweights = myZHUtils.getN_FPweight(TL_bits,lep1,id1,lep2,id2,key);
+                double N_FFweights = myZHUtils.getN_FFweight(TL_bits,lep1,id1,lep2,id2,key);
 
-            if(passZpt) {
-                mon.fillHisto("nleptons_sel",tags,2+nextraleptons,weight);
+                double p_1 = myZHUtils.promptRate( id1, lep1.pt(), fabs(lep1.eta()) );
+                double p_2 = myZHUtils.promptRate( id2, lep2.pt(), fabs(lep2.eta()) );
+                double f_1 = myZHUtils.fakeRate( id1, lep1.pt(), fabs(lep1.eta()), key);
+                double f_2 = myZHUtils.fakeRate( id2, lep2.pt(), fabs(lep2.eta()), key);
 
-                if(pass3dLeptonVeto) {
-                    mon.fillHisto("npfjets_sel",              tags, nAJetsGood30,weight);
-                    mon.fillHisto("npfbjets_sel",		  tags, nABtags, weight);
+                Wjet_weight = N_PFweights * p_1*f_2 + N_FPweights * f_1*p_2;
+                QCD_weight = N_FFweights * f_1*f_2;
+            }
 
-                    if(passBveto) {
-                        if(passdphiZllmetCut) {
-                            if(passMetCut) {
-                                if(passBalanceCut) {
-                                    mon.fillHisto("mt_final",	tags, aMTmassless, weight);
+
+            if(passZmass) {
+                mon.fillHisto("nvtx_raw",   tags, ev.nvtx,      1);
+                mon.fillHisto("nvtx_sel",   tags, ev.nvtx,      weight);
+                mon.fillHisto("zpt_sel",    tags, zll.pt(),     weight);
+
+                if(passZpt) {
+                    mon.fillHisto("nleptons_sel",tags,2+nextraleptons,weight);
+
+                    if(pass3dLeptonVeto) {
+                        mon.fillHisto("npfjets_sel",              tags, nAJetsGood30,weight);
+                        mon.fillHisto("npfbjets_sel",		  tags, nABtags, weight);
+
+                        if(passBveto) {
+                            mon.fillHisto("qt_dataDY", tags, zll.pt(), weight, true);
+                            mon.fillHisto("qtType1_dataDY", tags, zll.pt(), weight, true);
+                            mon.fillHisto("nvtx_dataDY", tags, ev.nvtx, weight);
+                            mon.fillHisto("pfmet_dataDY", tags, zvvs[0].pt(), weight, true);
+                            mon.fillHisto("pfmetType1_dataDY",tags, zvvs[0].pt(), weight, true);
+                            mon.fillHisto("DphiZMET_dataDY",tags, dphiZllmet, weight);
+                            mon.fillHisto("balancedif_dataDY",tags, balanceDif, weight);
+
+                            if(passDphiZMETcut) {
+
+                                if(passMETcut) {
+
+                                    if(passBalanceCut) {
+
+                                        mon.fillHisto("mt_final",	tags, aMTmassless, weight);
+                                        //data-driven Wjet/QCD
+					mon.fillHisto(TString("WjetCtrl_mt_final")+FRVarNames[ifr],tags,aMTmassless,weight*Wjet_weight);
+                                        mon.fillHisto(TString("QCDCtrl_mt_final")+FRVarNames[ifr], tags,aMTmassless,weight*QCD_weight);
+                                    }
                                 }
                             }
                         }
                     }
                 }
             }
-        }
+
+
+
+            //##############################################################################
+            //### HISTOS FOR STATISTICAL ANALYSIS (include systematic variations)
+            //##############################################################################
+
+            //Fill histogram for posterior optimization, or for control regions
+            for(size_t ivar=0; ivar<nvarsToInclude; ivar++) {
+                float iweight = weight;                                               //nominal
+                if(varNames[ivar]=="_puup")        iweight *=TotalWeight_plus;        //pu up
+                if(varNames[ivar]=="_pudown")      iweight *=TotalWeight_minus;       //pu down
+
+
+                //##############################################
+                // recompute MET/MT if JES/JER was varied
+                //##############################################
+                LorentzVector zvv = zvvs[ivar>8 ? 0 : ivar];
+                PhysicsObjectJetCollection &varJets = ( ivar<=4 ? variedAJets[ivar] : ( useJERsmearing ? variedAJets[0] : recoJets ) );
+                PhysicsObjectJetCollection tightVarJets;
+                LorentzVector clusteredMetP4(zll);
+                clusteredMetP4 *= -1;
+
+                bool passLocalBveto(true);
+                float localmindphijmet(999999.),localmindphijmet15(999999.);
+                int localNAJetsGood30(0);
+                for(size_t ijet=0; ijet<varJets.size(); ijet++) {
+                    if(varJets[ijet].pt()<15) continue;
+                    // dphijmet
+                    float idphijmet( fabs(deltaPhi(varJets[ijet].phi(),zvv.phi()) ) );
+                    if(varJets[ijet].pt()>15) if(idphijmet<localmindphijmet15) localmindphijmet15 = idphijmet;
+                    if(varJets[ijet].pt()>30) if(idphijmet<localmindphijmet)   localmindphijmet   = idphijmet;
+
+                    bool isGoodJet = hasObjectId(aJets[ijet].pid,JETID_LOOSE);
+                    if(usePUsubJetId) isGoodJet = hasObjectId(aJets[ijet].pid,JETID_CUTBASED_LOOSE);
+                    if(!isGoodJet) continue;
+
+                    clusteredMetP4 -= varJets[ijet];
+
+                    if(useJetsOnlyInTracker && fabs(varJets[ijet].eta())>2.5) continue;
+
+                    tightVarJets.push_back( varJets[ijet] );
+                    if(varJets[ijet].pt()>30)localNAJetsGood30++;
+
+                    if(varJets[ijet].pt()>20 /*&& fabs(varJets[ijet].eta())<2.5*/) {
+                        if(ivar==11)      passLocalBveto &= (varJets[ijet].btag6<0.250);
+                        else if(ivar==12) passLocalBveto &= (varJets[ijet].btag6<0.240);
+                        else              passLocalBveto &= (varJets[ijet].btag6<0.244);
+                    }
+                }
+
+                double mt_massless = METUtils::transverseMass(zll,zvv,false); //massless mt
+                double LocalDphiZMET=fabs(deltaPhi(zll.phi(),zvv.phi()));
+
+
+
+                //##############################################
+                //re-assign the event category if jets were varied
+                //##############################################
+                int eventSubCat  = eventCategoryInst.Get(phys,&tightVarJets);
+                TString tag_subcat = eventCategoryInst.GetLabel(eventSubCat);
+                tags.clear();
+
+                if(tag_subcat != "geq2jets") {
+                    //tags.push_back(tag_cat);
+                    tags.push_back(tag_cat+tag_subcat);
+                    if(tag_cat=="mumu" || tag_cat=="ee") tags.push_back(string("ll")+tag_subcat);
+                }
+
+                //add fakerate tags
+                std::vector<TString> newFRtags;
+                for(size_t i=0; i<FRtags.size(); i++) {
+                    for(size_t j=0; j<tags.size(); j++) {
+                        newFRtags.push_back(tags[j]+FRtags[i]);
+                    }
+                }
+                tags = newFRtags;
+
+                bool passBaseSelection( passZmass && passZpt && pass3dLeptonVeto && passLocalBveto);
+
+
+                //############
+                //optimization
+                //############
+                for(unsigned int index=0; index<nOptims; index++) {
+
+                    double minMET = optim_Cuts1_MET[index];
+                    double minBalance = optim_Cuts1_Balance[index];
+                    double minDphi = optim_Cuts1_DphiZMET[index];
+
+                    bool passLocalMETcut(zvv.pt()>minMET);
+                    bool passLocalBalanceCut=(zvv.pt()/zll.pt()>(1.-minBalance) && zvv.pt()/zll.pt()<(1.+minBalance));
+                    bool passLocalDphiZMETcut(LocalDphiZMET>minDphi);
+
+                    bool passOptimSelection(passBaseSelection && passLocalMETcut && passLocalBalanceCut && passLocalDphiZMETcut);
+
+                    // fill shapes for limit setting
+                    if( passOptimSelection ) {
+                        mon.fillHisto(TString("mt_shapes")+varNames[ivar],tags,index, mt_massless, iweight);
+                        //for data-driven Wjet/QCD
+                        if(ivar==0) {
+                            mon.fillHisto(TString("WjetCtrl_mt_shapes")+FRVarNames[ifr],tags,index,mt_massless,iweight*Wjet_weight);
+                            mon.fillHisto(TString("QCDCtrl_mt_shapes" )+FRVarNames[ifr],tags,index,mt_massless,iweight*QCD_weight);
+                        }
+                    }
+
+
+                    //for NRB
+                    //need to add/understand more
+                    bool passNRBctrlMET(zvv.pt()>65);
+                    bool passNRBctrlZpt(zll.pt()>50.);
+                    bool passNRBctrlBalance=(zvv.pt()/zll.pt()>0.4 && zvv.pt()/zll.pt()<1.8);
+                    bool passPreselectionNRBctrl = ( passNRBctrlMET && passNRBctrlZpt && pass3dLeptonVeto && passNRBctrlBalance );
 
 
 
 
 
+                    //changing eventCategory for NRB control sample, i.e., no jetveto
+                    //prepare the tag's vectors for histo filling
+                    std::vector<TString> NRBtags(1,"all");
+                    NRBtags.clear();
+                    //NRBtags.push_back(tag_cat);
+                    NRBtags.push_back(tag_cat+"eq0jets");
+                    NRBtags.push_back(tag_cat+"eq1jets");
+                    if(tag_cat=="mumu" || tag_cat=="ee") {
+                        NRBtags.push_back(string("ll")+"eq0jets");
+                        NRBtags.push_back(string("ll")+"eq1jets");
+                    }
 
+                    //add fakerate tags
+                    std::vector<TString> newFRtags_NRB;
+                    for(size_t i=0; i<FRtags.size(); i++) {
+                        for(size_t j=0; j<tags.size(); j++) {
+                            newFRtags_NRB.push_back(NRBtags[j]+FRtags[i]);
+                        }
+                    }
+                    NRBtags = newFRtags_NRB;
+
+
+                    if( passPreselectionNRBctrl && passLocalBveto ) {
+                        if( passZmass ) {
+                            for(size_t j=0; j<allshapesVars.size(); j++) {
+                                mon.fillHisto(allshapesVars[j]+"_NRBctrl"+varNames[ivar],NRBtags,index,0,iweight);
+                            }
+                        }
+                        if( isZsideBand ) {
+                            for(size_t j=0; j<allshapesVars.size(); j++) {
+                                mon.fillHisto(allshapesVars[j]+"_NRBctrl"+varNames[ivar],NRBtags,index,1,iweight);
+                            }
+                        }
+                        if( isZsideBandPlus ) {
+                            for(size_t j=0; j<allshapesVars.size(); j++) {
+                                mon.fillHisto(allshapesVars[j]+"_NRBctrl"+varNames[ivar],NRBtags,index,2,iweight);
+                            }
+                        }
+                    }
+
+                    if( passPreselectionNRBctrl && !passLocalBveto ) {
+                        if( passZmass ) {
+                            for(size_t j=0; j<allshapesVars.size(); j++) {
+                                mon.fillHisto(allshapesVars[j]+"_NRBctrl"+varNames[ivar],NRBtags,index,3,iweight);
+                            }
+                        }
+                        if( isZsideBand ) {
+                            for(size_t j=0; j<allshapesVars.size(); j++) {
+                                mon.fillHisto(allshapesVars[j]+"_NRBctrl"+varNames[ivar],NRBtags,index,4,iweight);
+                            }
+                        }
+                        if( isZsideBandPlus ) {
+                            for(size_t j=0; j<allshapesVars.size(); j++) {
+                                mon.fillHisto(allshapesVars[j]+"_NRBctrl"+varNames[ivar],NRBtags,index,5,iweight);
+                            }
+                        }
+                    }
+
+
+
+                }//all optimization END
+
+
+
+            }//Systematic variation END
+
+
+
+        } //nvarsFR
 
 
 

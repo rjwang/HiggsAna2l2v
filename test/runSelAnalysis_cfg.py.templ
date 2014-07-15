@@ -46,6 +46,7 @@ runProcess = cms.PSet(
     brnew = cms.double(@brnew),	
     saveSummaryTree = cms.bool(@saveSummaryTree),
     runSystematics = cms.bool(@runSystematics),	
+    runOptimization = cms.bool(@runOptimization),
     weightsFile = cms.vstring(@weightsFile),	 
     fakeRateFile = cms.vstring("${CMSSW_BASE}/src/CMGTools/HiggsAna2l2v/data/fr_pt.root"),
 #    hqtWeightsFile = cms.vstring(
