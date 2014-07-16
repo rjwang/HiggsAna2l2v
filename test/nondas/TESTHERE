@@ -1,0 +1,27 @@
+#!/bin/sh
+# script to run interactively the crab wrapper
+# works on lxplus
+# takes as argument the crab work directory
+# by default runs job #1 (change by changing 1 in last line)
+# usage:
+# 1. crab -create
+# 2. open a new shell, make sure you do not setup cmssw nor crab
+# 3. cd to the directory where crab -create was run
+# 4. TESTHERE <crabworkdirectory>
+#
+export VO_CMS_SW_DIR=/afs/cern.ch/cms/
+cd $1
+mkdir uu
+cd uu
+ln -s ../share/default.tgz .
+ln -s ../share/arguments.xml . 
+ln -s ../job/CMSSW.sh  .
+ln -s ../job/CMSSW.py . 
+ln -s ../job/CMSSW.py.pkl .
+
+#./CMSSW.sh 1 0 >CMSSW_1.stdout 2>CMSSW_1.stderr
+#./CMSSW.sh 2 0 >CMSSW_2.stdout 2>CMSSW_2.stderr
+./CMSSW.sh 180 0 >CMSSW_180.stdout 2>CMSSW_180.stderr
+
+
+#./CMSSW.sh 112 0 >CMSSW_112.stdout 2>CMSSW_112.stderr

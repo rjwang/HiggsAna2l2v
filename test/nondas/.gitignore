@@ -1,0 +1,26 @@
+# no emacs temp files
+*~
+# no tables files
+*.tex
+*.aux
+*.log
+*.pdf
+LSFJOB*
+# no python compiled files:
+*pyc
+# no python init file
+python/__init__.py
+
+# no private directory
+backup
+save
+private
+script_*.sh
+Multicrab_*.cfg
+
+# no CRAB files
+MC8TeV_*
+Data8TeV_*
+crab.history
+tmp_multicrab
+multicrab_*_*

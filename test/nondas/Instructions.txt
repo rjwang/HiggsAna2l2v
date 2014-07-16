@@ -1,0 +1,29 @@
+
+using non-DBS data in Crab (aka can I use Crab to read my files/ntuples ? )
+
+CRAB can only do job splitting (i.e. look at which files are to be read, how big they are, and create jobs and job arguments to process those according to user specifications) if those files are described in a dataset registered in DBS.
+
+If you want to process your own list of files, you need to do your own splitting, i.e. make a list of jobs and of corresponding inputs for cmsRun. Then, instead of using internal Crab mechanism to pass the input to each job, you will need to wrap cmsRun with a script (see: script_exe) provided by you which gives the correct input to cmsRun in each job. Using this script requires to understand the corresponding script_arguments
+
+In order to make the best of crab status reporting, monitoring etc. you should make your script terminate with the cmsRun exit code and provide a properly named framework job report file.
+
+That gives the user almost unlimited functionality at a small price, therefore implementation can vary.
+
+Only for sake of an illustrative example, one possibility is indicated here :
+
+    assume you want N jobs to process N files
+    make a file of N lines, each contains one Logical File Name
+    pass this file to jobs via additional_input_files
+    use crab witn datasetpath None to create a task with N jobs and set script_exe to your script
+    use se_white_list to make sure jobs run at a site where your files are available to WN's
+    in your script_exe : 
+
+   -  find out that I am job j out of the N
+   -  look up line j in the file you prepared and find j-th LFN
+******
+   -  edit the cmssw config that you sent via crab to set the input source (sed, awk, cat, echo.. you name it)
+******
+   -  call cmsRun with correct -p and -j
+   -  exit with correct exit code
+
+It may take a few iterations to get your script_exe correct, so you may want to try to execute the crab job wrapper interactively for faster debugging. This FAQ explains how to do it. 
