@@ -2641,6 +2641,7 @@ void convertHistosForLimits_core(DataCardInputs& dci, TString& proc, TString& bi
     proc.ReplaceAll("wz3lnu","WZ");
     proc.ReplaceAll("zjetsdata","Zjets");
     proc.ReplaceAll("topwwwjetsdata","EM");
+    proc.ReplaceAll("wjetsdata","Wjets");
      
 
 

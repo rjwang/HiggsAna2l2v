@@ -80,6 +80,7 @@ int main(int argc, char* argv[])
     bool isMC = runProcess.getParameter<bool>("isMC");
     int mctruthmode = runProcess.getParameter<int>("mctruthmode");
     TString myTag = runProcess.getParameter<std::string>("tag");
+    bool applyQtweights = runProcess.getParameter<bool>("applyQtweights");
 
     TString dirname = runProcess.getParameter<std::string>("dirName");
     TString uncFile =  runProcess.getParameter<std::string>("jesUncFileName");
@@ -478,18 +479,20 @@ int main(int argc, char* argv[])
             //passMTcut &= passdphi2l;
             float iweight=weight;
 
-
-            if(isGammaEvent && dilCats[idc] != "ll") {
+	    
+            if(isGammaEvent && dilCats[idc] != "ll" && applyQtweights) {
 
                 if(tag_subcat=="eq0jets") {
-                    if(gamma.pt()>150)	iweight*=qtWeights[dilCats[idc]]; //new method
-                    else		iweight*=Gweights_[dilCats[idc]];   //old method
+                    if(gamma.pt()>150)	iweight*=qtWeights[dilCats[idc]];   //fit method
+                    else		iweight*=Gweights_[dilCats[idc]];   //ratio method
                 }
                 if(tag_subcat=="eq1jets") {
-                    if(gamma.pt()>200)	iweight*=qtWeights[dilCats[idc]]; //new method
-                    else 		iweight*=Gweights_[dilCats[idc]];   //old method
+                    if(gamma.pt()>200)	iweight*=qtWeights[dilCats[idc]];   //fit method
+                    else 		iweight*=Gweights_[dilCats[idc]];   //ratio method
                 }
             }
+	    
+
             //if(isGammaEvent && dilCats[idc] == "ll") {
             //    //iweight*=qtWeights["ee"]+qtWeights["mumu"]; //new method
             //    iweight*=Gweights_["ee"]+Gweights_["mumu"];   //new method
