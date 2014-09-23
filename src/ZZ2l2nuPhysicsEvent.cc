@@ -115,6 +115,9 @@ PhysicsEvent_t getPhysicsEventFrom(ZZ2l2nuSummary_t &ev)
 	case 1009: case -1009:
 	  phys.genWIMPs.push_back( PhysicsObject(p4,ev.mc_id[ipart]) );
 	  break;
+	case 5000039: case -5000039:
+	  phys.genUnparticles.push_back( PhysicsObject(p4,ev.mc_id[ipart]) );
+	  break;
 	case 11: case -11: case 13: case -13: case 15: case -15:
 	  //check overlap with other leptons
 	  bool overlap(false);

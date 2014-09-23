@@ -37,7 +37,39 @@
 
 using namespace std;
 double NonResonnantSyst = 0.25; //0.1;//0.25;
-double GammaJetSyst = 1.0; //0.5;//0.5, 1.0;
+double WWtopSyst_ee0jet = 0.20; 
+double WWtopSyst_ee1jet = 0.78;
+double WWtopSyst_mm0jet = 0.16;
+double WWtopSyst_mm1jet = 0.32;
+double GammaJetSyst = 0.7;//1.0; //0.5;//0.5, 1.0;
+double WjetsSyst_ee = 0.146;
+double WjetsSyst_mm = 0.229;
+
+struct YIELDS_T{
+    double WZ;
+    double ZZ; 
+    double Zjets; 
+    double WWtop;
+    double Wjets;
+    double Data;
+    double Sig;
+    double totBkg;
+
+    double WZ_StatErr;
+    double ZZ_StatErr; 
+    double Zjets_StatErr; 
+    double WWtop_StatErr;
+    double Wjets_StatErr;
+    double Data_StatErr;
+    double Sig_StatErr;
+    double totBkg_StatErr;
+
+    YIELDS_T():WZ(0.),ZZ(0.),Zjets(0.),WWtop(0.),Wjets(0.),Data(0.),Sig(0.),totBkg(0.),
+	WZ_StatErr(0.),ZZ_StatErr(0.),Zjets_StatErr(0.),WWtop_StatErr(0.),
+	Wjets_StatErr(0.),Data_StatErr(0.),Sig_StatErr(0.),totBkg_StatErr(0.){ }
+};
+
+
 
 
 TFile *fOut_binbybinNuisance   = TFile::Open("BinbyBinNuisance.root","RECREATE");
@@ -112,7 +144,7 @@ void showShape(std::vector<TString>& selCh ,map<TString, Shape_t>& allShapes, TS
 void Draw1DHistogram(TH1* mc, THStack *stack, TH1 *mcPlusRelUnc, TGraphErrors *errors, std::vector<TH1 *>& spimpose, TH1 *data, TLegend *legA, bool noLog, TString finstate, TString AnalysisBins);
 void Draw2DHistogram(std::map<TString, TH1*>& mapbkgs, std::vector<TH1 *>& spimpose, TH1 *data, TString finstate, TString AnalysisBins);
 
-void getYieldsFromShape(std::vector<TString> ch, const map<TString, Shape_t> &allShapes, TString shName);
+void getYieldsFromShape(std::vector<TString> ch, const map<TString, Shape_t> &allShapes, TString shName, bool isdataBlinded);
 void getEffFromShape(std::vector<TString> ch, const map<TString, Shape_t> &allShapes, TString shName);
 
 
@@ -123,9 +155,10 @@ DataCardInputs convertHistosForLimits(Int_t mass,TString histo="finalmt",TString
 DataCardInputs convertHistosForLimits(TString atgcpar,Int_t mass,TString histo="finalmt",TString url="plotter.root",TString Json="");
 std::vector<TString> buildDataCard(Int_t mass, TString histo="finalmt", TString url="plotter.root",TString Json="");
 std::vector<TString> buildDataCard(TString atgcpar,Int_t mass, TString histo="finalmt", TString url="plotter.root",TString Json="");
-void doBackgroundSubtraction(std::vector<TString>& selCh,TString ctrlCh,map<TString, Shape_t> &allShapes, TString mainHisto, TString sideBandHisto, TString url, JSONWrapper::Object &Root);
-void dodataDrivenWWtW(std::vector<TString>& selCh,TString ctrlCh,map<TString, Shape_t> &allShapes, TString mainHisto);
+void doBackgroundSubtraction(std::vector<TString>& selCh,TString ctrlCh,map<TString, Shape_t> &allShapes, TString mainHisto, TString sideBandHisto, TString url, JSONWrapper::Object &Root, bool isMCclosureTest);
+void dodataDrivenWWtW(std::vector<TString>& selCh,TString ctrlCh,map<TString, Shape_t> &allShapes, TString mainHisto,bool isMCclosureTest);
 void doWjetsBackground(std::vector<TString>& selCh,map<TString, Shape_t> &allShapes, TString mainHisto);
+void doDYextrapolation(std::vector<TString>& selCh,map<TString, Shape_t> &allShapes, TString mainHisto);
 void doQCDBackground(std::vector<TString>& selCh,map<TString, Shape_t> &allShapes, TString mainHisto);
 void doDYReplacement(std::vector<TString>& selCh,TString ctrlCh,map<TString, Shape_t>& allShapes, TString mainHisto, TString metHistoForRescale);
 void doWZSubtraction(std::vector<TString>& selCh,TString ctrlCh,map<TString, Shape_t>& allShapes, TString mainHisto, TString sideBandHisto);
@@ -190,10 +223,10 @@ void initNormalizationSysts()
     normSysts["pdf_VV_wz_7TeV"] = 0.0116;
     normSysts["pdf_VV_zz_8TeV"] = 0.0112;
     normSysts["pdf_VV_wz_8TeV"] = 0.0120;
-    normSysts["sys_zlldata_7TeV"] = GammaJetSyst;
-    normSysts["sys_zlldata_8TeV"] = GammaJetSyst;
-    normSysts["sys_topwwwjetsdata_8TeV"] = NonResonnantSyst;
-    normSysts["sys_topwwwjetsdata_7TeV"] = NonResonnantSyst;
+    //normSysts["sys_zlldata_7TeV"] = GammaJetSyst;
+    //normSysts["sys_zlldata_8TeV"] = GammaJetSyst;
+    //normSysts["sys_topwwwjetsdata_8TeV"] = NonResonnantSyst;
+    //normSysts["sys_topwwwjetsdata_7TeV"] = NonResonnantSyst;
     normSysts["EM_7TeV"] = 1.0;
     normSysts["EM_8TeV"] = 1.0;
     //
@@ -201,6 +234,28 @@ void initNormalizationSysts()
     normSysts["CMS_zllwimps_eeeq0jets_leptonVeto"] = 0.01;
     normSysts["CMS_zllwimps_mumueq1jets_leptonVeto"] = 0.013;
     normSysts["CMS_zllwimps_eeeq1jets_leptonVeto"] = 0.013;
+
+    //
+    normSysts["CMS_zllwimps_pdf"] = 0.;
+
+    //unparticle
+    normSysts["QCDscale_UnPart1p01"]=1.027561608;
+    normSysts["QCDscale_UnPart1p02"]=1.027560594;
+    normSysts["QCDscale_UnPart1p04"]=1.027107579;
+    normSysts["QCDscale_UnPart1p06"]=1.026726974;
+    normSysts["QCDscale_UnPart1p09"]=1.026031746;
+    normSysts["QCDscale_UnPart1p10"]=1.025737817;
+    normSysts["QCDscale_UnPart1p20"]=1.023378111;
+    normSysts["QCDscale_UnPart1p30"]=1.019920319;
+    normSysts["QCDscale_UnPart1p40"]=1.016645015;
+    normSysts["QCDscale_UnPart1p50"]=1.012751678;
+    normSysts["QCDscale_UnPart1p60"]=1.009233738;
+    normSysts["QCDscale_UnPart1p70"]=1.004749134;
+    normSysts["QCDscale_UnPart1p80"]=1.001779359;
+    normSysts["QCDscale_UnPart1p90"]=1.006003132;
+    normSysts["QCDscale_UnPart2p00"]=1.008754209;
+    normSysts["QCDscale_UnPart2p20"]=1.017029328;
+
 }
 
 void printHelp()
@@ -427,7 +482,7 @@ Shape_t getShapeFromFile(TFile* inF, TString ch, TString shapeName, int cutBin, 
                 hshape->SetMarkerStyle(marker);
                 hshape->SetLineStyle(lstyle);
             } else {
-                if(!histoName.Contains("FR_WjetCtrl") && !histoName.Contains("FR_QCDCtrl")) 
+                if(!histoName.Contains("FR_WjetCtrl") && !histoName.Contains("FR_QCDCtrl") && !histoName.Contains("pfmet_minus_shapes")) 
 			printf("Histo %s does not exist for syst:%s\n", histoName.Data(), varName.Data());
                 continue;
             }
@@ -618,8 +673,8 @@ Shape_t getShapeFromFile(TFile* inF, TString ch, TString shapeName, int cutBin, 
 //
 void showShape(std::vector<TString>& selCh ,map<TString, Shape_t>& allShapes, TString mainHisto, TString SaveName)
 {
+    cout << "########################## showShape ##########################" << endl;
     std::map<TString, TH1*> CCHistos;
-
 
     TCanvas* c1 = new TCanvas("c1","c1",300*AnalysisBins.size(),300*selCh.size());
     c1->SetTopMargin(0.00);
@@ -652,7 +707,7 @@ void showShape(std::vector<TString>& selCh ,map<TString, Shape_t>& allShapes, TS
             TH1* alldata=NULL;
 
             Shape_t& shape = allShapes.find(selCh[s]+AnalysisBins[b]+mainHisto)->second;
-            cout << "selCh[s]+AnalysisBins[b]+mainHisto: " << selCh[s]+AnalysisBins[b]+mainHisto << endl;
+            cout << " Limit setting shapes: " << selCh[s]+AnalysisBins[b]+"_"+mainHisto << endl;
 
             if(!allbkg) {
                 allbkg=(TH1*)shape.totalBckg->Clone("mc");
@@ -666,11 +721,8 @@ void showShape(std::vector<TString>& selCh ,map<TString, Shape_t>& allShapes, TS
             }
 
             for(size_t i=0; i<shape.bckg.size(); i++) {
-                //cout << "----------------------------------------------" << endl;
-                //cout << "shape.bckg[i]->GetTitle(): " << shape.bckg[i]->GetTitle() << "  Integral: " << shape.bckg[i]->Integral() << endl;
-                //cout << "----------------------------------------------" << endl;
                 if(shape.bckg[i]->Integral()<=1E-6) continue;
-                cout << "\n ishape.bckg[i]->GetTitle(): " << shape.bckg[i]->GetTitle() << "\n";
+                cout << " Backgrounds: " << shape.bckg[i]->GetTitle() << endl;
                 if(mapbkg.find(shape.bckg[i]->GetTitle())!=mapbkg.end()) {
                     mapbkg[shape.bckg[i]->GetTitle()]->Add(shape.bckg[i]);
                 } else {
@@ -705,6 +757,7 @@ void showShape(std::vector<TString>& selCh ,map<TString, Shape_t>& allShapes, TS
 		else if(mass>0 && proc.Contains("D5")                        )proc = "D5_"+massStr+"GeV";
 		else if(mass>0 && proc.Contains("D8")                        )proc = "D8_"+massStr+"GeV";
 		else if(mass>0 && proc.Contains("D9")                        )proc = "D9_"+massStr+"GeV";
+		else if(mass>0 && proc.Contains("C3")                        )proc = "C3_"+massStr+"GeV";
                 else if(mass>0 && proc.Contains("qqH") && proc.Contains("ZZ"))proc = "qqHZZ2l2v";
                 else if(mass>0 && proc.Contains("ggH") && proc.Contains("WW"))proc = "ggHWW2l2v";
                 else if(mass>0 && proc.Contains("qqH") && proc.Contains("WW"))proc = "qqHWW2l2v";
@@ -807,7 +860,6 @@ void showShape(std::vector<TString>& selCh ,map<TString, Shape_t>& allShapes, TS
                                 ErrShape.push_back( std::max(fabs(ErrShape_down[isel]), fabs(ErrShape_up[isel])) );
                             }
                             // Non-shape uncertainties ("lnN")
-                            //for(unsigned int inormsys=0; inormsys<normSysts.size(); ++inormsys) {
                             for(std::map<TString, double>::const_iterator kt=normSysts.begin(); kt!=normSysts.end(); ++kt) {
                                 if(kt->first.Contains("7TeV") && !systpostfix.Contains("7TeV")) continue;
                                 if(kt->first.Contains("8TeV") && !systpostfix.Contains("8TeV")) continue;
@@ -979,10 +1031,7 @@ void showShape(std::vector<TString>& selCh ,map<TString, Shape_t>& allShapes, TS
     //c1->SaveAs(SaveName+"_Shape.pdf");
     //c1->SaveAs(SaveName+"_Shape.C");
     delete c1;
-//  if(alldata)delete alldata;
-//  if(allbkg)delete allbkg;
-//  if(stack) delete stack;
-//  if(ratio) delete ratio;
+    cout << "########################## showShape ##########################" << endl;
 }
 
 
@@ -1420,17 +1469,11 @@ void Draw2DHistogram(std::map<TString, TH1*>& mapbkgs, std::vector<TH1 *>& spimp
 
 
 
-
-
 //
-void getYieldsFromShape(std::vector<TString> ch, const map<TString, Shape_t> &allShapes, TString shName)
+void getYieldsFromShape(std::vector<TString> ch, const map<TString, Shape_t> &allShapes, TString shName, bool isdataBlinded)
 {
-    FILE* pFile = fopen("Yields.tex","w");
-    fprintf(pFile,"\\begin{table}[htbp]\n\\begin{center}\n\\caption{Event yields expected for background and signal processes and observed in data.}\n\\label{tab:table}\n\\footnotesize\n");
-
-    string Ccol   = "\\begin{tabular}{|c|";
-    string Cname  = "channel";
-    string Cval   = "";
+    cout << endl;
+    cout << "########################## getYieldsFromShape ##########################" << endl;
 
     TString massStr("");
     if(mass>0)massStr += mass;
@@ -1438,49 +1481,64 @@ void getYieldsFromShape(std::vector<TString> ch, const map<TString, Shape_t> &al
     TString massStr2 = atgcpar2;
 
 
-    TH1* h;
-    Double_t valerr, val, syst;
-    for(size_t b=0; b<AnalysisBins.size(); b++) {
-        for(size_t ich=0; ich<ch.size(); ich++) {
-            TString icol(ch[ich]+" "+AnalysisBins[b]);
-            icol.ReplaceAll("mu","\\mu");
-            icol.ReplaceAll("_"," ");
-            Cval = "$ "+icol+" $";
+    YIELDS_T ee0jet_Yields;
+    YIELDS_T ee1jet_Yields;
+    YIELDS_T mm0jet_Yields;
+    YIELDS_T mm1jet_Yields;
 
-            //bckg
+    TH1* h;
+    Double_t valerr, val;// syst;
+    for(size_t b=0; b<AnalysisBins.size(); b++) 
+    {
+        for(size_t ich=0; ich<ch.size(); ich++) 
+	{
+	    YIELDS_T fortableYields;
+	    TString YieldsLabel = ch[ich]+AnalysisBins[b];
+	    cout << "Channels: " << YieldsLabel << endl;
+
+            //nbckgs
             size_t nbckg=allShapes.find(ch[ich]+AnalysisBins[b]+shName)->second.bckg.size();
             for(size_t ibckg=0; ibckg<nbckg; ibckg++) {
                 TH1* h=allShapes.find(ch[ich]+AnalysisBins[b]+shName)->second.bckg[ibckg];
                 TString procTitle(h->GetTitle());
-                if(procTitle.Contains("QCD"))continue;
-                if(procTitle.Contains("W+jets"))continue;
-                if(procTitle.Contains("Z#rightarrow #tau#tau"))continue;
-                procTitle.ReplaceAll("#","\\");
-                if(b==0&&ich==0)Ccol  += "c|";
-                if(b==0&&ich==0)Cname += "&$" + procTitle + "$";
+		cout << "backgrounds:  " << procTitle << endl;
+                //if(procTitle.Contains("QCD"))continue;
+                //if(procTitle.Contains("Z#rightarrow #tau#tau"))continue;
 
                 val = h->IntegralAndError(1,h->GetXaxis()->GetNbins(),valerr);
-                syst = h->GetBinError(0)<=0 ? -1 : h->GetBinError(0);
-                if(val<1E-6) {
-                    val=0.0;
-                    valerr=0.0;
-                    syst=-1;
-                }
-                Cval += "&" + toLatexRounded(val,valerr, syst);
-            }
+                //syst = h->GetBinError(0)<=0 ? -1 : h->GetBinError(0);
+
+
+		if(procTitle.Contains("ZZ#rightarrow 2l2#nu")){
+			fortableYields.ZZ = val;
+			fortableYields.ZZ_StatErr = valerr; 	
+		}
+		else if(procTitle.Contains("WZ#rightarrow 3l#nu")){
+                        fortableYields.WZ = val;
+                        fortableYields.WZ_StatErr = valerr;
+		}
+		else if(procTitle.Contains("Z+jets (data)")){
+                        fortableYields.Zjets = val;
+                        fortableYields.Zjets_StatErr = valerr;
+		}
+		else if(procTitle.Contains("Top/WW/W+Jets (data)")){
+                        fortableYields.WWtop = val;
+                        fortableYields.WWtop_StatErr = valerr;
+		}
+		else if(procTitle.Contains("Wjets(data)")){
+                        fortableYields.Wjets = val;
+                        fortableYields.Wjets_StatErr = valerr;
+		}
+            } //nbckgs END!
+
 
             //total bckg
-            if(b==0&&ich==0)Ccol  += "c|";
-            if(b==0&&ich==0)Cname += "&$Total$";
             h=allShapes.find(ch[ich]+AnalysisBins[b]+shName)->second.totalBckg;
             val = h->IntegralAndError(1,h->GetXaxis()->GetNbins(),valerr);
-            syst = h->GetBinError(0)<=0 ? -1 : h->GetBinError(0);
-            if(val<1E-6) {
-                val=0.0;
-                valerr=0.0;
-                syst=-1;
-            }
-            Cval += "&\\boldmath " + toLatexRounded(val,valerr,syst);
+            //syst = h->GetBinError(0)<=0 ? -1 : h->GetBinError(0);
+
+	    fortableYields.totBkg = val;
+	    fortableYields.totBkg_StatErr = valerr; 
 
             //signal
             size_t nsig=allShapes.find(ch[ich]+AnalysisBins[b]+shName)->second.signal.size();
@@ -1490,7 +1548,31 @@ void getYieldsFromShape(std::vector<TString> ch, const map<TString, Shape_t> &al
                 procTitle.ReplaceAll("#","\\");
 
                 if(mass>0 && !procTitle.Contains(massStr))continue;
-		cout << "procTitle >>>>>>> " << procTitle << endl;
+		//MonoZ
+                if(procTitle.Contains("D1")){
+                        if(mass>0 && !procTitle.Contains("D1("+massStr+"GeV)"))continue;
+                }
+                if(procTitle.Contains("D4")){
+                        if(mass>0 && !procTitle.Contains("D4("+massStr+"GeV)"))continue;
+                }
+                if(procTitle.Contains("D5")){
+                        if(mass>0 && !procTitle.Contains("D5("+massStr+"GeV)"))continue;
+                }
+                if(procTitle.Contains("D8")){
+                        if(mass>0 && !procTitle.Contains("D8("+massStr+"GeV)"))continue;
+                }
+                if(procTitle.Contains("D9")){
+                        if(mass>0 && !procTitle.Contains("D9("+massStr+"GeV)"))continue;
+                }
+                if(procTitle.Contains("C3")){
+                        if(mass>0 && !procTitle.Contains("C3("+massStr+"GeV)"))continue;
+                }
+                if(procTitle.Contains("Unpart")){
+                        if(mass>0 && !procTitle.Contains("Unpart("+massStr+")"))continue;
+                }
+		cout << "Signals >>>>>>> " << procTitle << endl;
+
+
                 if(mass>0 && procTitle.Contains("ggH") && procTitle.Contains("ZZ"))procTitle = "ggH("+massStr+")";
                 else if(mass>0 && procTitle.Contains("qqH") && procTitle.Contains("ZZ"))procTitle = "qqH("+massStr+")";
                 else if(mass>0 && procTitle.Contains("ggH") && procTitle.Contains("WW"))procTitle = "ggH("+massStr+")WW";
@@ -1501,196 +1583,117 @@ void getYieldsFromShape(std::vector<TString> ch, const map<TString, Shape_t> &al
                 if(atgcpar.Length()>0 && !procTitle.EndsWith(massStr)) continue;
                 if(atgcpar.Length()>0) procTitle = "ZZ("+massStr+")";
 
-                if(b==0&&ich==0)Ccol  += "c|";
-                if(b==0&&ich==0)Cname += "&$" + procTitle+"$";
-
                 val = h->IntegralAndError(1,h->GetXaxis()->GetNbins(),valerr);
-                if(val<1E-6) {
-                    val=0.0;
-                    valerr=0.0;
-                }
-                Cval += "&" + toLatexRounded(val,valerr);
-            }
+
+		fortableYields.Sig = val;
+		fortableYields.Sig_StatErr = valerr;	
+
+            }// signal END!
+
 
             //data
-            //if(b==0&&ich==0)Ccol  += "c|";
-            //if(b==0&&ich==0)Cname += "&$Data$";
             h=allShapes.find(ch[ich]+AnalysisBins[b]+shName)->second.data;
             val = h->IntegralAndError(1,h->GetXaxis()->GetNbins(),valerr);
-            if(val<1E-6) {
-                val=0.0;
-                valerr=0.0;
-            }
-            //char tmpchar[255];
-            ////sprintf(tmpchar,"%.0f",val);
-            //Cval += "&\\boldmath $" + string(tmpchar)+"$";
-//    Cval += "&\\boldmath " + toLatexRounded(val,0.0);
 
-            //endline
-            if(b==0&&ich==0)fprintf(pFile,"%s}\\hline\n", Ccol.c_str());
-            if(b==0&&ich==0)fprintf(pFile,"%s\\\\\\hline\n", Cname.c_str());
-            fprintf(pFile,"%s\\\\\n", Cval.c_str());
+            fortableYields.Data = val;
+            fortableYields.Data_StatErr = valerr;
+
+	    if(YieldsLabel.Contains("eeeq0jets")) ee0jet_Yields = fortableYields;
+	    if(YieldsLabel.Contains("eeeq1jets")) ee1jet_Yields = fortableYields;
+	    if(YieldsLabel.Contains("mumueq0jets")) mm0jet_Yields = fortableYields;
+	    if(YieldsLabel.Contains("mumueq1jets")) mm1jet_Yields = fortableYields;
+
         }
+    }
+
+    //print out yields table
+
+    FILE* pFile = fopen("Yields.tex","w");
+    fprintf(pFile,"\n");
+    fprintf(pFile,"\\begin{table}[h!]\n");
+    fprintf(pFile,"\\begin{center}\n");
+    fprintf(pFile,"\\begin{tabular}{c|cc|cc}\n");
+    fprintf(pFile,"\\hline\\hline\n");
+    fprintf(pFile,"Process & $ee$ & $\\mu\\mu$ & $ee$ & $\\mu\\mu$ \\\\\n");
+    fprintf(pFile,"        & \\multicolumn{2}{c|}{0 jet selection} & \\multicolumn{2}{c}{1 jet selection} \\\\\n");
+    fprintf(pFile,"\\hline\\hline\n");
+    fprintf(pFile,"%40s & %.3f $\\pm$ %.3f & %.3f $\\pm$ %.3f & %.3f $\\pm$ %.3f & %.3f $\\pm$ %.3f \\\\\n"
+				,"Signal"
+				,ee0jet_Yields.Sig, ee0jet_Yields.Sig_StatErr
+				,mm0jet_Yields.Sig, mm0jet_Yields.Sig_StatErr
+				,ee1jet_Yields.Sig, ee1jet_Yields.Sig_StatErr
+				,mm1jet_Yields.Sig, mm1jet_Yields.Sig_StatErr
+	   );
+
+    fprintf(pFile,"\\hline\n");
+    fprintf(pFile,"%40s & %.2f $\\pm$ %.2f & %.2f $\\pm$ %.2f & %.2f $\\pm$ %.2f & %.2f $\\pm$ %.2f \\\\\n"
+				,"$Z/\\gamma^*\\rightarrow\\ell^+\\ell^-$"
+				,ee0jet_Yields.Zjets, ee0jet_Yields.Zjets_StatErr
+				,mm0jet_Yields.Zjets, mm0jet_Yields.Zjets_StatErr
+				,ee1jet_Yields.Zjets, ee1jet_Yields.Zjets_StatErr
+				,mm1jet_Yields.Zjets, mm1jet_Yields.Zjets_StatErr
+	   );
+    fprintf(pFile,"%40s & %.2f $\\pm$ %.2f & %.2f $\\pm$ %.2f & %.2f $\\pm$ %.2f & %.2f $\\pm$ %.2f \\\\\n"
+				,"$WZ\\rightarrow 3\\ell\\nu$"
+				,ee0jet_Yields.WZ, ee0jet_Yields.WZ_StatErr
+				,mm0jet_Yields.WZ, mm0jet_Yields.WZ_StatErr
+				,ee1jet_Yields.WZ, ee1jet_Yields.WZ_StatErr
+				,mm1jet_Yields.WZ, mm1jet_Yields.WZ_StatErr
+	   );
+    fprintf(pFile,"%40s & %.2f $\\pm$ %.2f & %.2f $\\pm$ %.2f & %.2f $\\pm$ %.2f & %.2f $\\pm$ %.2f \\\\\n"
+				,"$ZZ\\rightarrow 2\\ell2\\nu$"
+				,ee0jet_Yields.ZZ, ee0jet_Yields.ZZ_StatErr
+				,mm0jet_Yields.ZZ, mm0jet_Yields.ZZ_StatErr
+				,ee1jet_Yields.ZZ, ee1jet_Yields.ZZ_StatErr
+				,mm1jet_Yields.ZZ, mm1jet_Yields.ZZ_StatErr
+	   );
+    fprintf(pFile,"%40s & %.2f $\\pm$ %.2f & %.2f $\\pm$ %.2f & %.2f $\\pm$ %.2f & %.2f $\\pm$ %.2f \\\\\n"
+				,"Top/WW"
+				,ee0jet_Yields.WWtop, ee0jet_Yields.WWtop_StatErr
+				,mm0jet_Yields.WWtop, mm0jet_Yields.WWtop_StatErr
+				,ee1jet_Yields.WWtop, ee1jet_Yields.WWtop_StatErr
+				,mm1jet_Yields.WWtop, mm1jet_Yields.WWtop_StatErr
+	   );
+
+
+    fprintf(pFile,"%40s & %.2f $\\pm$ %.2f & %.2f $\\pm$ %.2f & %.2f $\\pm$ %.2f & %.2f $\\pm$ %.2f \\\\\n"
+				,"W+jets"
+				,ee0jet_Yields.Wjets, ee0jet_Yields.Wjets_StatErr
+				,mm0jet_Yields.Wjets, mm0jet_Yields.Wjets_StatErr
+				,ee1jet_Yields.Wjets, ee1jet_Yields.Wjets_StatErr
+				,mm1jet_Yields.Wjets, mm1jet_Yields.Wjets_StatErr
+	   );
+    fprintf(pFile,"\\hline\n");
+    fprintf(pFile,"%40s & %.2f $\\pm$ %.2f & %.2f $\\pm$ %.2f & %.2f $\\pm$ %.2f & %.2f $\\pm$ %.2f \\\\\n"
+				,"total bkg."
+				,ee0jet_Yields.totBkg, ee0jet_Yields.totBkg_StatErr
+				,mm0jet_Yields.totBkg, mm0jet_Yields.totBkg_StatErr
+				,ee1jet_Yields.totBkg, ee1jet_Yields.totBkg_StatErr
+				,mm1jet_Yields.totBkg, mm1jet_Yields.totBkg_StatErr
+	   );
+
+    fprintf(pFile,"\\hline\n");
+    if(isdataBlinded){
+    	fprintf(pFile,"%40s & %s & %s & %s & %s \\\\\n","Data","-","-","-","-");
+    }else{
+    	fprintf(pFile,"%40s & %.0f & %.0f & %.0f & %.0f \\\\\n","Data",ee0jet_Yields.Data,mm0jet_Yields.Data,ee1jet_Yields.Data,mm1jet_Yields.Data);
     }
     fprintf(pFile,"\\hline\n");
-    fprintf(pFile,"\\end{tabular}\n\\end{center}\n\\end{table}\n");
-    fprintf(pFile,"\n\n\n\n");
+    fprintf(pFile,"\\hline\n");
 
-
-//SAME THING BUT SUMMING UP ALL CHANNELS
-
-
-
-//    fprintf(pFile,"\\begin{table}[H]\n\\begin{center}\n\\caption{Event yields expected for background and signal processes and observed in data.}\n\\label{tab:table}\n");
-
-    Ccol   = "\\begin{tabular}{|c|";
-    Cname  = "channel";
-    Cval   = "";
-
-    double VAL = 0;
-    double VALERR = 0;
-    double SYST = 0;
-
-    for(size_t b=0; b<AnalysisBins.size(); b++) {
-        //TString icol(AnalysisBins[b]);
-        TString icol("ll");
-        icol.ReplaceAll("mu","\\mu");
-        icol.ReplaceAll("_"," ");
-        Cval = "$ "+icol+" $";
-
-        //bckg
-        size_t nbckg=allShapes.find(ch[0]+AnalysisBins[b]+shName)->second.bckg.size();
-        for(size_t ibckg=0; ibckg<nbckg; ibckg++) {
-            VAL = 0;
-            VALERR = 0;
-            SYST = 0;
-            for(size_t ich=0; ich<ch.size(); ich++) {
-                TH1* h=allShapes.find(ch[ich]+AnalysisBins[b]+shName)->second.bckg[ibckg];
-                TString procTitle(h->GetTitle());
-                if(procTitle.Contains("QCD"))continue;
-                if(procTitle.Contains("W#rightarrow l#nu"))continue;
-                if(procTitle.Contains("Z#rightarrow #tau#tau"))continue;
-                procTitle.ReplaceAll("#","\\");
-                if(b==0&&ich==0)Ccol  += "c|";
-                if(b==0&&ich==0)Cname += "&$" + procTitle + "$";
-
-                val = h->IntegralAndError(1,h->GetXaxis()->GetNbins(),valerr);
-                syst = h->GetBinError(0)<=0 ? -1 : h->GetBinError(0);
-                if(val<1E-6) {
-                    val=0.0;
-                    valerr=0.0;
-                    syst=-1;
-                }
-                VAL += val;
-
-
-                cout << "procTitle: " << procTitle << endl;
-                if(procTitle.Contains("rightarrow ll (data)") ||
-                        procTitle.Contains("Top/WW/W+Jets (data)")) { //RENJIE
-                    VALERR=VALERR+valerr;
-                    SYST+=syst;
-                } //RENJIE, stat. & syst. 100% correlated
-                else 	VALERR=sqrt(VALERR*VALERR+valerr*valerr);
-                SYST=syst;
-            }
-            if(toLatexRounded(VAL,VALERR, SYST) == "") continue;
-            Cval += "&" + toLatexRounded(VAL,VALERR, SYST);
-        }
-
-        //total bckg
-        if(b==0)Ccol  += "c|";
-        if(b==0)Cname += "&$Total$";
-        VAL = 0;
-        VALERR = 0;
-        SYST = 0;
-        for(size_t ich=0; ich<ch.size(); ich++) {
-            h=allShapes.find(ch[ich]+AnalysisBins[b]+shName)->second.totalBckg;
-            val = h->IntegralAndError(1,h->GetXaxis()->GetNbins(),valerr);
-            syst = h->GetBinError(0)<=0 ? -1 : h->GetBinError(0);
-            if(val<1E-6) {
-                val=0.0;
-                valerr=0.0;
-                syst=-1;
-            }
-            VAL += val;
-            VALERR=sqrt(VALERR*VALERR+valerr*valerr);
-            SYST=syst;
-        }
-        Cval += "&\\boldmath " + toLatexRounded(VAL,VALERR,SYST);
-
-        //signal
-        size_t nsig=allShapes.find(ch[0]+AnalysisBins[b]+shName)->second.signal.size();
-        for(size_t isig=0; isig<nsig; isig++) {
-            h=allShapes.find(ch[0]+AnalysisBins[b]+shName)->second.signal[isig];
-            TString procTitle(h->GetTitle());
-            procTitle.ReplaceAll("#","\\");
-
-            if(mass>0 && !procTitle.Contains(massStr))continue;
-            if(mass>0 && procTitle.Contains("ggH") && procTitle.Contains("ZZ"))procTitle = "ggH("+massStr+")";
-            else if(mass>0 && procTitle.Contains("qqH") && procTitle.Contains("ZZ"))procTitle = "qqH("+massStr+")";
-            else if(mass>0 && procTitle.Contains("ggH") && procTitle.Contains("WW"))procTitle = "ggH("+massStr+")WW";
-            else if(mass>0 && procTitle.Contains("qqH") && procTitle.Contains("WW"))procTitle = "qqH("+massStr+")WW";
-            else if(mass>0 && procTitle.Contains("ZH")                             )procTitle = "ZH("+massStr+")2lMET";
-
-            //if(atgcpar.Length()>0 && !procTitle.Contains(massStr)) continue;
-            if(atgcpar.Length()>0 && !procTitle.EndsWith(massStr)) continue;
-            if(atgcpar.Length()>0) procTitle = "ZZ("+massStr+")";
-
-            if(b==0)Ccol  += "c|";
-            if(b==0)Cname += "&$" + procTitle+"$";
-
-            VAL = 0;
-            VALERR = 0;
-            SYST = 0;
-            for(size_t ich=0; ich<ch.size(); ich++) {
-                h=allShapes.find(ch[ich]+AnalysisBins[b]+shName)->second.signal[isig];
-
-                val = h->IntegralAndError(1,h->GetXaxis()->GetNbins(),valerr);
-                if(val<1E-6) {
-                    val=0.0;
-                    valerr=0.0;
-                }
-                VAL += val;
-                VALERR=sqrt(VALERR*VALERR+valerr*valerr);
-            }
-            Cval += "&" + toLatexRounded(VAL, VALERR);
-        }
-
-        //data
-        if(b==0)Ccol  += "c|";
-        if(b==0)Cname += "&$Data$";
-        VAL = 0;
-        VALERR = 0;
-        SYST = 0;
-        for(size_t ich=0; ich<ch.size(); ich++) {
-            h=allShapes.find(ch[ich]+AnalysisBins[b]+shName)->second.data;
-            val = h->IntegralAndError(1,h->GetXaxis()->GetNbins(),valerr);
-            if(val<1E-6) {
-                val=0.0;
-                valerr=0.0;
-            }
-            VAL += val;
-        }
-        char tmpchar[255];
-        sprintf(tmpchar,"%.0f",VAL);
-        Cval += "&\\boldmath $" + string(tmpchar)+"$";
-//    Cval += "&\\boldmath " + toLatexRounded(val,0.0);
-
-        //endline
-        //if(b==0)fprintf(pFile,"%s}\\hline\n", Ccol.c_str());
-        //if(b==0)fprintf(pFile,"%s\\\\\\hline\n", Cname.c_str());
-        //fprintf(pFile,"%s\\\\\n", Cval.c_str());
-    }
-    //fprintf(pFile,"\\hline\n");
-    //fprintf(pFile,"\\end{tabular}\n\\end{center}\n\\end{table}\n");
-    //fprintf(pFile,"\n\n\n\n");
-
-
+    fprintf(pFile,"\\end{tabular}\n");
+    fprintf(pFile,"\\caption{Observed(blinded) yields, pre-fit background estimates and signal predictions.}\n");
+    fprintf(pFile,"\\label{tab:seltable}\n");
+    fprintf(pFile,"\\end{center}\n");
+    fprintf(pFile,"\\end{table}\n");
+    fprintf(pFile,"\n");
 
 
 
 
     fclose(pFile);
+    cout << "########################## getYieldsFromShape ##########################" << endl;
+    cout << endl;
 }
 
 
@@ -1835,7 +1838,8 @@ std::vector<TString>  buildDataCard(TString atgcpar, Int_t mass, TString histo, 
         fprintf(pFile,"%45s ", "rate");
         for(size_t j=1; j<=dci.procs.size(); j++) {
             if(dci.rates.find(RateKey_t(dci.procs[j-1],dci.ch[i-1]))==dci.rates.end()) continue;
-            fprintf(pFile,"%e ", dci.rates[RateKey_t(dci.procs[j-1],dci.ch[i-1])] );
+            fprintf(pFile,"%6f ", dci.rates[RateKey_t(dci.procs[j-1],dci.ch[i-1])] );
+	    //fprintf(pFile,"%e ", dci.rates[RateKey_t(dci.procs[j-1],dci.ch[i-1])] );
         }
         fprintf(pFile,"\n");
         fprintf(pFile, "-------------------------------\n");
@@ -1849,7 +1853,7 @@ std::vector<TString>  buildDataCard(TString atgcpar, Int_t mass, TString histo, 
                 fprintf(pFile,"%35s %10s ", "lumi_8TeV", "lnN");
                 for(size_t j=1; j<=dci.procs.size(); j++) {
                     if(dci.rates.find(RateKey_t(dci.procs[j-1],dci.ch[i-1]))==dci.rates.end()) continue;
-                    if(!dci.procs[j-1].Contains("EM") && !dci.procs[j-1].Contains("Zjets")) {
+                    if(!dci.procs[j-1].Contains("EM") && !dci.procs[j-1].Contains("Zjets") && !dci.procs[j-1].Contains("Wjets")) {
                         fprintf(pFile,"%6f ",1.0+normSysts["lumi_8TeV"]);
                     } else {
                         fprintf(pFile,"%6s ","-");
@@ -1916,7 +1920,7 @@ std::vector<TString>  buildDataCard(TString atgcpar, Int_t mass, TString histo, 
                 fprintf(pFile,"%35s %10s ", "CMS_eff_e", "lnN");
                 for(size_t j=1; j<=dci.procs.size(); j++) {
                     if(dci.rates.find(RateKey_t(dci.procs[j-1],dci.ch[i-1]))==dci.rates.end()) continue;
-                    if(!dci.procs[j-1].Contains("EM") && !dci.procs[j-1].Contains("Zjets")) {
+                    if(!dci.procs[j-1].Contains("EM") && !dci.procs[j-1].Contains("Zjets") && !dci.procs[j-1].Contains("Wjets")) {
                         fprintf(pFile,"%6f ",1.0+normSysts["CMS_eff_e"]);
                     } else {
                         fprintf(pFile,"%6s ","-");
@@ -1927,7 +1931,7 @@ std::vector<TString>  buildDataCard(TString atgcpar, Int_t mass, TString histo, 
                 fprintf(pFile,"%35s %10s ", "CMS_eff_m", "lnN");
                 for(size_t j=1; j<=dci.procs.size(); j++) {
                     if(dci.rates.find(RateKey_t(dci.procs[j-1],dci.ch[i-1]))==dci.rates.end()) continue;
-                    if(!dci.procs[j-1].Contains("EM") && !dci.procs[j-1].Contains("Zjets")) {
+                    if(!dci.procs[j-1].Contains("EM") && !dci.procs[j-1].Contains("Zjets") && !dci.procs[j-1].Contains("Wjets")) {
                         fprintf(pFile,"%6f ",1.0+normSysts["CMS_eff_m"]);
                     } else {
                         fprintf(pFile,"%6s ","-");
@@ -1939,6 +1943,7 @@ std::vector<TString>  buildDataCard(TString atgcpar, Int_t mass, TString histo, 
 
 //##############################
 //# temporily take values from Guillelmo
+/*
             if(systpostfix.Contains('8')) {
                 fprintf(pFile,"%35s %10s ", "CMS_zllwimps_EM_8TeV", "lnN");
                 for(size_t j=1; j<=dci.procs.size(); j++) {
@@ -1970,9 +1975,11 @@ std::vector<TString>  buildDataCard(TString atgcpar, Int_t mass, TString histo, 
                 }
                 fprintf(pFile,"\n");
             }
-
+*/
 //##############################
 	    
+
+
 
 
             //Oct 30, 2013
@@ -2002,6 +2009,7 @@ std::vector<TString>  buildDataCard(TString atgcpar, Int_t mass, TString histo, 
                 }
                 fprintf(pFile,"\n");
             }
+
 
 
 
@@ -2046,6 +2054,7 @@ std::vector<TString>  buildDataCard(TString atgcpar, Int_t mass, TString histo, 
 //             }fprintf(pFile,"\n");
 //          }
 
+/*
             if(mass>0) {
 
                 fprintf(pFile,"%35s %10s ", "UEPS", "lnN");
@@ -2060,38 +2069,11 @@ std::vector<TString>  buildDataCard(TString atgcpar, Int_t mass, TString histo, 
                 fprintf(pFile,"\n");
                 
             } //mass>0
-
+*/
 
             ///////////////////////////////////////////////
             // RJ, for count and cut
             ///////////////////////////////////////////////
-
-            fprintf(pFile,"%35s %10s ", "pdf_qqbar", "lnN");
-            for(size_t j=1; j<=dci.procs.size(); j++) {
-                if(dci.rates.find(RateKey_t(dci.procs[j-1],dci.ch[i-1]))==dci.rates.end()) continue;
-                if(dci.procs[j-1].BeginsWith("ZH")) {
-                    if(systpostfix.Contains('8')) {
-                        fprintf(pFile,"%6f ",1.055);
-                    } else {
-                        fprintf(pFile,"%6f ",1.055);
-                    }
-                } else if(dci.procs[j-1].BeginsWith("ZZ")) {
-                    if(systpostfix.Contains('8')) {
-                        fprintf(pFile,"%6f ",1.057);
-                    } else {
-                        fprintf(pFile,"%6f ",1.057);
-                    }
-                } else if(dci.procs[j-1].BeginsWith("WZ")) {
-                    if(systpostfix.Contains('8')) {
-                        fprintf(pFile,"%6f ",1.048);
-                    } else {
-                        fprintf(pFile,"%6f ",1.048);
-                    }
-                } else {
-                    fprintf(pFile,"%6s ","-");
-                }
-            }
-            fprintf(pFile,"\n");
 
             fprintf(pFile,"%35s %10s ", "QCDscale_VV", "lnN");
             for(size_t j=1; j<=dci.procs.size(); j++) {
@@ -2114,6 +2096,50 @@ std::vector<TString>  buildDataCard(TString atgcpar, Int_t mass, TString histo, 
             }
             fprintf(pFile,"\n");
 
+
+            fprintf(pFile,"%35s %10s ", "QCDscale_DM", "lnN");
+            for(size_t j=1; j<=dci.procs.size(); j++) {
+                if(dci.rates.find(RateKey_t(dci.procs[j-1],dci.ch[i-1]))==dci.rates.end()) continue;
+                if(dci.procs[j-1].BeginsWith("D5") || dci.procs[j-1].BeginsWith("D8") 
+			|| dci.procs[j-1].BeginsWith("C3") || dci.procs[j-1].BeginsWith("D9") ) {
+                    fprintf(pFile,"%6f ",1.054);
+                } else {
+                    fprintf(pFile,"%6s ","-");
+                }
+            }
+            fprintf(pFile,"\n");
+
+
+            fprintf(pFile,"%35s %10s ", "QCDscale_UnPart", "lnN");
+            for(size_t j=1; j<=dci.procs.size(); j++) {
+                if(dci.rates.find(RateKey_t(dci.procs[j-1],dci.ch[i-1]))==dci.rates.end()) continue;
+                if     (dci.procs[j-1].BeginsWith("UnPart1p01") ) fprintf(pFile,"%6f ",normSysts["QCDscale_UnPart1p01"]);
+		else if(dci.procs[j-1].BeginsWith("UnPart1p02") ) fprintf(pFile,"%6f ",normSysts["QCDscale_UnPart1p02"]);
+		else if(dci.procs[j-1].BeginsWith("UnPart1p04") ) fprintf(pFile,"%6f ",normSysts["QCDscale_UnPart1p04"]);
+		else if(dci.procs[j-1].BeginsWith("UnPart1p06") ) fprintf(pFile,"%6f ",normSysts["QCDscale_UnPart1p06"]);
+		else if(dci.procs[j-1].BeginsWith("UnPart1p09") ) fprintf(pFile,"%6f ",normSysts["QCDscale_UnPart1p09"]);
+		else if(dci.procs[j-1].BeginsWith("UnPart1p10") ) fprintf(pFile,"%6f ",normSysts["QCDscale_UnPart1p10"]);
+		else if(dci.procs[j-1].BeginsWith("UnPart1p20") ) fprintf(pFile,"%6f ",normSysts["QCDscale_UnPart1p20"]);
+		else if(dci.procs[j-1].BeginsWith("UnPart1p30") ) fprintf(pFile,"%6f ",normSysts["QCDscale_UnPart1p30"]);
+		else if(dci.procs[j-1].BeginsWith("UnPart1p40") ) fprintf(pFile,"%6f ",normSysts["QCDscale_UnPart1p40"]);
+		else if(dci.procs[j-1].BeginsWith("UnPart1p50") ) fprintf(pFile,"%6f ",normSysts["QCDscale_UnPart1p50"]);
+		else if(dci.procs[j-1].BeginsWith("UnPart1p60") ) fprintf(pFile,"%6f ",normSysts["QCDscale_UnPart1p60"]);
+		else if(dci.procs[j-1].BeginsWith("UnPart1p70") ) fprintf(pFile,"%6f ",normSysts["QCDscale_UnPart1p70"]);
+		else if(dci.procs[j-1].BeginsWith("UnPart1p80") ) fprintf(pFile,"%6f ",normSysts["QCDscale_UnPart1p80"]);
+		else if(dci.procs[j-1].BeginsWith("UnPart1p90") ) fprintf(pFile,"%6f ",normSysts["QCDscale_UnPart1p90"]);
+		else if(dci.procs[j-1].BeginsWith("UnPart2p00") ) fprintf(pFile,"%6f ",normSysts["QCDscale_UnPart2p00"]);
+		else if(dci.procs[j-1].BeginsWith("UnPart2p20") ) fprintf(pFile,"%6f ",normSysts["QCDscale_UnPart2p20"]);
+		else{
+                    fprintf(pFile,"%6s ","-");
+                }
+            }
+            fprintf(pFile,"\n");
+
+
+
+
+
+	    /*
             fprintf(pFile,"%35s %10s ", "QCDscale_VH", "lnN");
             for(size_t j=1; j<=dci.procs.size(); j++) {
                 if(dci.rates.find(RateKey_t(dci.procs[j-1],dci.ch[i-1]))==dci.rates.end()) continue;
@@ -2136,6 +2162,7 @@ std::vector<TString>  buildDataCard(TString atgcpar, Int_t mass, TString histo, 
                 }
             }
             fprintf(pFile,"\n");
+	    */
 
             /*
             	 if(dci.ch[i-1].Contains("ee"))
@@ -2232,6 +2259,10 @@ std::vector<TString>  buildDataCard(TString atgcpar, Int_t mass, TString histo, 
                             if(it->first.Contains("sherpa") && (!dci.procs[j-1].Contains("zz2l2nu"))) {
                                 sprintf(sFile,"%s%6s ",sFile,"-");
                             } else {
+				if(it->first.Contains("CMS_zllwimps_pdf")){
+					normSysts["CMS_zllwimps_pdf"]=it->second[RateKey_t(dci.procs[j-1],dci.ch[i-1])];
+					continue;
+				}
                                 sprintf(sFile,"%s%6.3f ",sFile,it->second[RateKey_t(dci.procs[j-1],dci.ch[i-1])]);
                                 isSyst=true;
                             }
@@ -2241,7 +2272,46 @@ std::vector<TString>  buildDataCard(TString atgcpar, Int_t mass, TString histo, 
                     }
                     if(isSyst)fprintf(pFile,"%s\n",sFile);
                 }
+            }//end of shape uncertainty 
+
+
+
+
+            fprintf(pFile,"%35s %10s ", "pdf_qqbar", "lnN");
+            for(size_t j=1; j<=dci.procs.size(); j++) {
+                if(dci.rates.find(RateKey_t(dci.procs[j-1],dci.ch[i-1]))==dci.rates.end()) continue;
+                if(dci.procs[j-1].BeginsWith("ZH")) {
+                    if(systpostfix.Contains('8')) {
+                        fprintf(pFile,"%6f ",1.055);
+                    } else {
+                        fprintf(pFile,"%6f ",1.055);
+                    }
+                } else if(dci.procs[j-1].BeginsWith("ZZ")) {
+                    if(systpostfix.Contains('8')) {
+                        fprintf(pFile,"%6f ",1.057);
+                    } else {
+                        fprintf(pFile,"%6f ",1.057);
+                    }
+                } else if(dci.procs[j-1].BeginsWith("WZ")) {
+                    if(systpostfix.Contains('8')) {
+                        fprintf(pFile,"%6f ",1.048);
+                    } else {
+                        fprintf(pFile,"%6f ",1.048);
+                    }
+                } else if(dci.procs[j-1].BeginsWith("D5") || dci.procs[j-1].BeginsWith("D8")
+                                || dci.procs[j-1].BeginsWith("C3") || dci.procs[j-1].BeginsWith("D9") 
+				|| dci.procs[j-1].BeginsWith("UnPart")) {
+                    fprintf(pFile,"%6f ",normSysts["CMS_zllwimps_pdf"]); //convert shape -> normalization
+                } else {
+                    fprintf(pFile,"%6s ","-");
+                }
             }
+            fprintf(pFile,"\n");
+
+
+
+
+
         }
 
 
@@ -2306,8 +2376,9 @@ DataCardInputs convertHistosForLimits(TString atgcpar,Int_t mass,TString histo,T
     if(subNRB2011 || subNRB2012)sh.push_back(histo+"_NRBctrl");
     if(subNRB2012)		sh.push_back(histo+"BTagSB");
     if(subWZ)			sh.push_back(histo+"_3rdLepton");
-    sh.push_back("FR_WjetCtrl_mt_shapes");
-    //sh.push_back("FR_QCDCtrl_mt_shapes");
+    sh.push_back("FR_WjetCtrl_"+histo);
+    sh.push_back("FR_QCDCtrl_mt_shapes");
+    sh.push_back("pfmet_minus_shapes");
     const size_t nsh=sh.size();
     for(size_t i=0; i<nch; i++) {
         for(size_t b=0; b<AnalysisBins.size(); b++) {
@@ -2321,9 +2392,9 @@ DataCardInputs convertHistosForLimits(TString atgcpar,Int_t mass,TString histo,T
                 cutMax=shapeMaxVBF;
             }
             for(size_t j=0; j<nsh; j++) {
-                printf("i=%i b=%i j=%i\n",(int)i,(int)b,(int)j);
+                //printf("i=%i b=%i j=%i\n",(int)i,(int)b,(int)j);
                 allShapes[ch[i]+AnalysisBins[b]+sh[j]]=getShapeFromFile(inF, ch[i]+AnalysisBins[b],sh[j],indexcut_,Root,cutMin, cutMax);
-                cout << "allShapes: " << ch[i]+AnalysisBins[b]+sh[j] << endl; //RJ
+                cout << "Loading shapes: " << ch[i]+AnalysisBins[b]+sh[j] << endl;
                 if(indexcutL>=0 && indexcutR>=0) {
                     if(indexvbf>=0 && AnalysisBins[b].Contains("vbf")) {
                         allShapesL[ch[i]+AnalysisBins[b]+sh[j]]=getShapeFromFile(inF, ch[i]+AnalysisBins[b],sh[j],indexvbf,Root,cutMin, cutMax);
@@ -2340,7 +2411,7 @@ DataCardInputs convertHistosForLimits(TString atgcpar,Int_t mass,TString histo,T
     //all done with input file
     inF->Close();
 
-    printf("done loading all shapes\n");
+    //printf("done loading all shapes\n");
 
     //define vector for search
     std::vector<TString>& selCh = Channels;
@@ -2353,16 +2424,20 @@ DataCardInputs convertHistosForLimits(TString atgcpar,Int_t mass,TString histo,T
 
     // Mono-Z analysis (new) 
     //new data-driven WW/tW/Ztautau background
-    dodataDrivenWWtW(selCh,"emu",allShapes,histo);
+    dodataDrivenWWtW(selCh,"emu",allShapes,histo,false);
+    //MC closure test
+    //dodataDrivenWWtW(selCh,"emu",allShapes,histo,true);
 
     //remove the non-resonant background from data
-    //if(subNRB2011 || subNRB2012)doBackgroundSubtraction(selCh,"emu",allShapes,histo,histo+"_NRBctrl", url, Root);
+    //if(subNRB2011 || subNRB2012)doBackgroundSubtraction(selCh,"emu",allShapes,histo,histo+"_NRBctrl", url, Root, false);
 
     doWjetsBackground(selCh,allShapes,histo);
     //doQCDBackground(selCh,allShapes,histo);
 
     //replace WZ by its estimate from 3rd Lepton SB
     if(subWZ)doWZSubtraction(selCh,"emu",allShapes,histo,histo+"_3rdLepton");
+
+    doDYextrapolation(selCh,allShapes,histo);
 
     //replace Z+Jet background by Gamma+Jet estimates
     if(subDY)doDYReplacement(selCh,"gamma",allShapes,histo,"met_met");
@@ -2380,14 +2455,11 @@ DataCardInputs convertHistosForLimits(TString atgcpar,Int_t mass,TString histo,T
 
 
     //print event yields from the mt shapes
-    if(!fast)getYieldsFromShape(selCh,allShapes,histo);
-    cout << " >>>>>>>>>>> getYieldsFromShape(selCh,allShapes,histo) Done! " << endl;
+    if(!fast)getYieldsFromShape(selCh,allShapes,histo,true); //blind data
 
     if(!fast)getEffFromShape(selCh,allShapes,histo);
-    cout << " >>>>>>>>>>> getEffFromShape(selCh,allShapes,histo) Done! " << endl;
 
     if(!fast)showShape(selCh,allShapes,histo,"plot");
-    cout << " >>>>>>>>>>> showShape(selCh,allShapes,histo,\"plot\") Done! " << endl;
 
 
     //prepare the output
@@ -2427,13 +2499,20 @@ DataCardInputs convertHistosForLimits(TString atgcpar,Int_t mass,TString histo,T
 		if(proc.Contains("D9")){
 			if(mass>0 && !proc.Contains("D9("+massStr+"GeV)"))continue;
 		}
+		if(proc.Contains("C3")){
+			if(mass>0 && !proc.Contains("C3("+massStr+"GeV)"))continue;
+		}
+		if(proc.Contains("Unpart")){
+			if(mass>0 && !proc.Contains("Unpart("+massStr+")"))continue;
+		}
 
-		cout << "############## proc: " << proc << "##############" << endl;
                 if(mass>0 && proc.Contains("ggH") && proc.Contains("ZZ"))proc = "ggHZZ2l2v";
                 else if(mass>0 && proc.Contains("qqH") && proc.Contains("ZZ"))proc = "qqHZZ2l2v";
                 else if(mass>0 && proc.Contains("ggH") && proc.Contains("WW"))proc = "ggHWW2l2v";
                 else if(mass>0 && proc.Contains("qqH") && proc.Contains("WW"))proc = "qqHWW2l2v";
                 else if(mass>0 && proc.Contains("ZH")                        )proc = "ZH"+massStr+"2lMET";
+
+		cout << "############## Signal: " << proc << "##############" << endl;
 
                 //if(atgcpar.Length()>0 && !proc.Contains(massStr)) continue;
                 if(atgcpar.Length()>0 && !proc.EndsWith(massStr)) continue;
@@ -2596,7 +2675,7 @@ void convertHistosForLimits_core(DataCardInputs& dci, TString& proc, TString& bi
     proc.ReplaceAll("{","");
     proc.ToLower();
 
-    cout << "proc: " << proc << endl;
+    cout << "Process: " << proc << endl;
     proc.ReplaceAll("zh1052lmet","ZH_hinv");
     proc.ReplaceAll("zh1152lmet","ZH_hinv");
     proc.ReplaceAll("zh1252lmet","ZH_hinv");
@@ -2606,35 +2685,73 @@ void convertHistosForLimits_core(DataCardInputs& dci, TString& proc, TString& bi
     proc.ReplaceAll("zh2002lmet","ZH_hinv");
     proc.ReplaceAll("zh3002lmet","ZH_hinv");
 
+
+    proc.ReplaceAll("c31gev","C3");
     proc.ReplaceAll("d11gev","D1");
     proc.ReplaceAll("d41gev","D4");
     proc.ReplaceAll("d51gev","D5");
     proc.ReplaceAll("d81gev","D8");
     proc.ReplaceAll("d91gev","D9");    
 
+    proc.ReplaceAll("c310gev","C3");
     proc.ReplaceAll("d110gev","D1");
     proc.ReplaceAll("d410gev","D4");
     proc.ReplaceAll("d510gev","D5");
     proc.ReplaceAll("d810gev","D8");
     proc.ReplaceAll("d910gev","D9");    
 
+    proc.ReplaceAll("c3100gev","C3");
+    proc.ReplaceAll("d1100gev","D1");
+    proc.ReplaceAll("d4100gev","D4");
+    proc.ReplaceAll("d5100gev","D5");
+    proc.ReplaceAll("d8100gev","D8");
+    proc.ReplaceAll("d9100gev","D9");    
+
+    proc.ReplaceAll("c3200gev","C3");
     proc.ReplaceAll("d1200gev","D1");
     proc.ReplaceAll("d4200gev","D4");
     proc.ReplaceAll("d5200gev","D5");
     proc.ReplaceAll("d8200gev","D8");
     proc.ReplaceAll("d9200gev","D9");
 
+    proc.ReplaceAll("c3300gev","C3");
+    proc.ReplaceAll("d1300gev","D1");
+    proc.ReplaceAll("d4300gev","D4");
+    proc.ReplaceAll("d5300gev","D5");
+    proc.ReplaceAll("d8300gev","D8");
+    proc.ReplaceAll("d9300gev","D9");
+
+    proc.ReplaceAll("c3500gev","C3");
     proc.ReplaceAll("d1500gev","D1");
     proc.ReplaceAll("d4500gev","D4");
     proc.ReplaceAll("d5500gev","D5");
     proc.ReplaceAll("d8500gev","D8");
     proc.ReplaceAll("d9500gev","D9");
 
+    proc.ReplaceAll("c31000gev","C3");
     proc.ReplaceAll("d11000gev","D1");
     proc.ReplaceAll("d41000gev","D4");
     proc.ReplaceAll("d51000gev","D5");
     proc.ReplaceAll("d81000gev","D8");
     proc.ReplaceAll("d91000gev","D9");
+
+    proc.ReplaceAll("unpart101","UnPart1p01");
+    proc.ReplaceAll("unpart102","UnPart1p02");
+    proc.ReplaceAll("unpart104","UnPart1p04");
+    proc.ReplaceAll("unpart106","UnPart1p06");
+    proc.ReplaceAll("unpart109","UnPart1p09");
+    proc.ReplaceAll("unpart110","UnPart1p10");
+    proc.ReplaceAll("unpart120","UnPart1p20");
+    proc.ReplaceAll("unpart130","UnPart1p30");
+    proc.ReplaceAll("unpart140","UnPart1p40");
+    proc.ReplaceAll("unpart150","UnPart1p50");
+    proc.ReplaceAll("unpart160","UnPart1p60");
+    proc.ReplaceAll("unpart170","UnPart1p70");
+    proc.ReplaceAll("unpart180","UnPart1p80");
+    proc.ReplaceAll("unpart190","UnPart1p90");
+    proc.ReplaceAll("unpart200","UnPart2p00");
+    proc.ReplaceAll("unpart220","UnPart2p20");
+    
 
   
     proc.ReplaceAll("zz2l2nu","ZZ");
@@ -2714,9 +2831,9 @@ void convertHistosForLimits_core(DataCardInputs& dci, TString& proc, TString& bi
                     TH1* statup=(TH1 *)hshape->Clone(proc+"_stat"+ch+proc+"Up");
                     TH1* statdown=(TH1 *)hshape->Clone(proc+"_stat"+ch+proc+"Down");
                     //RENJIE
-                    if(proc.Contains("EM")) { // || proc=="zlldata") {
-                        statup=(TH1 *)hshape->Clone(proc+"_stat"+proc+"Up");
-                        statdown=(TH1 *)hshape->Clone(proc+"_stat"+proc+"Down");
+                    if(proc.Contains("EM")) {
+                        statup=(TH1 *)hshape->Clone(proc+"_stat"+ch+proc+"Up");
+                        statdown=(TH1 *)hshape->Clone(proc+"_stat"+ch+proc+"Down");
                     }
                     if(proc.Contains("Zjets")) {
                         statup=(TH1 *)hshape->Clone(proc+"_stat"+zjetsch+proc+"Up");
@@ -2734,15 +2851,16 @@ void convertHistosForLimits_core(DataCardInputs& dci, TString& proc, TString& bi
                     bool useBinbyBin(false);
                     useBinbyBin &= (proc.Contains("ZH") || proc.Contains("ZZ") || proc.Contains("WZ") || proc.Contains("EM") ||
 					proc.Contains("D1") || proc.Contains("D4") || proc.Contains("D5") || 
-					proc.Contains("D8") ||  proc.Contains("D9") );
+					proc.Contains("D8") ||  proc.Contains("D9") || proc.Contains("C3")
+				);
 		    useBinbyBin &= (shape);
 
 
 		    if(!useBinbyBin){
 
                     if(proc.Contains("EM")) {
-                        statup  ->Write(proc+postfix+"_CMS_zllwimps_stat_"+proc+systpostfix+"Up");
-                        statdown->Write(proc+postfix+"_CMS_zllwimps_stat_"+proc+systpostfix+"Down");
+                        statup  ->Write(proc+postfix+"_CMS_zllwimps_stat_"+ch+"_"+proc+systpostfix+"Up");
+                        statdown->Write(proc+postfix+"_CMS_zllwimps_stat_"+ch+"_"+proc+systpostfix+"Down");
                     }
                     else if(proc.Contains("Zjets")) {
                         statup  ->Write(proc+postfix+"_CMS_zllwimps_stat"+zjetsch+"_"+proc+systpostfix+"Up");
@@ -2755,16 +2873,17 @@ void convertHistosForLimits_core(DataCardInputs& dci, TString& proc, TString& bi
 
                     if(shape) { //RENJIE  Jun15
                         if(proc.Contains("EM"))
-		 	     cout << "Skiping " << proc <<" stat" << endl;
-                             //dci.systs["CMS_zllwimps_stat_"+proc+systpostfix][RateKey_t(proc,ch)]=1.0;
+		 	     //cout << "Skiping " << proc <<" stat" << endl;
+			     //cout << "removing EM stat" << endl;
+                             dci.systs["CMS_zllwimps_stat_"+ch+"_"+proc+systpostfix][RateKey_t(proc,ch)]=1.0;
                         else if(proc.Contains("Zjets"))
                              dci.systs["CMS_zllwimps_stat"+zjetsch+"_"+proc+systpostfix][RateKey_t(proc,ch)]=1.0;
                         else
                             dci.systs["CMS_zllwimps_stat_"+ch+"_"+proc+systpostfix][RateKey_t(proc,ch)]=1.0;
                     } else {
                         if(proc.Contains("EM"))
-  			    cout << "removing EM stat" << endl;
-                            //dci.systs["CMS_zllwimps_stat_"+proc+systpostfix][RateKey_t(proc,ch)]=(statup->Integral()/hshapes[0]->Integral());
+  			    //cout << "removing EM stat" << endl;
+                            dci.systs["CMS_zllwimps_stat_"+ch+"_"+proc+systpostfix][RateKey_t(proc,ch)]=(statup->Integral()/hshapes[0]->Integral());
 			else if(proc.Contains("Zjets"))
 			    dci.systs["CMS_zllwimps_stat"+zjetsch+"_"+proc+systpostfix][RateKey_t(proc,ch)]=(statup->Integral()/hshapes[0]->Integral());
                         else
@@ -2884,11 +3003,8 @@ void convertHistosForLimits_core(DataCardInputs& dci, TString& proc, TString& bi
                         
                     
 
-
+		    //data driven Systematics
                     if(systUncertainty>0) {
-                        if(proc.Contains("ggh") || proc.Contains("qqh")) {
-                            dci.systs["CMS_zllwimps_interpol_"+bin+"_"+proc+systpostfix][RateKey_t(proc,ch)]=systUncertainty;
-                        } else {
                             printf("SYST in %s - %s - %s = %f\n",bin.Data(), ch.Data(), proc.Data(), systUncertainty);
                             //makesure that syst+stat error is never bigger than 100%
                             //double valerr, val  = hshape->IntegralAndError(1,hshape->GetXaxis()->GetNbins(),valerr);
@@ -2897,9 +3013,13 @@ void convertHistosForLimits_core(DataCardInputs& dci, TString& proc, TString& bi
                             //add syst uncertainty as bin dependent or not
                             //dci.systs["CMS_zllwimps_sys_"+bin+"_"+proc+systpostfix][RateKey_t(proc,ch)]=systUncertainty;
 
-			    // skip WW+Top syst. uncertainty 
-                            if(!proc.Contains("EM")) dci.systs["CMS_zllwimps_sys_"+proc+systpostfix][RateKey_t(proc,ch)]=systUncertainty;
-                        }
+			    TString wjetsch="";
+                	    if(ch.Contains("eeeq")) wjetsch="ee";
+                	    if(ch.Contains("mumueq")) wjetsch="mumu";
+			
+			    if(proc.Contains("EM")) dci.systs["CMS_zllwimps_sys_"+ch+"_"+proc+systpostfix][RateKey_t(proc,ch)]=systUncertainty;
+			    else if(proc.Contains("Wjets")) dci.systs["CMS_zllwimps_sys_"+wjetsch+"_"+proc+systpostfix][RateKey_t(proc,ch)]=systUncertainty;
+			    else dci.systs["CMS_zllwimps_sys_"+proc+systpostfix][RateKey_t(proc,ch)]=systUncertainty;
                     }
                 }
             }
@@ -2938,7 +3058,7 @@ void convertHistosForLimits_core(DataCardInputs& dci, TString& proc, TString& bi
             TH1 *temp=(TH1*) hshape->Clone();
             temp->Add(hshapes[0],-1);
             if(temp->Integral()!=0 || syst.BeginsWith("_interf" )) {
-                if(shape) {
+                if(shape && !systName.Contains("_pdf")) { //convert pdf shape uncertaint to normalization one
                     dci.systs[systName][RateKey_t(proc,ch)]=1.0;
                 } else {
                     double Unc = 1 + fabs(temp->Integral()/hshapes[0]->Integral());
@@ -2952,10 +3072,7 @@ void convertHistosForLimits_core(DataCardInputs& dci, TString& proc, TString& bi
 
 
             delete temp;
-        //else if(proc=="asignal" && syst==""){dci.rates[RateKey_t(proc,ch)]=hshape->Integral();
-        //else if(proc!="data" && syst==""){if(hshape->Integral()>1E-6)dci.rates[RateKey_t(proc,ch)]=hshape->Integral();
         } else if(proc!="data" && syst=="") {
-            //dci.rates[RateKey_t(proc,ch)]= hshape->Integral()>1E-6 ? hshape->Integral() : 0.0;
 	    dci.rates[RateKey_t(proc,ch)]= hshape->Integral();
         } else if(proc=="data" && syst=="") {
             dci.obs[RateKey_t("obs",ch)]=hshape->Integral();
@@ -2964,12 +3081,125 @@ void convertHistosForLimits_core(DataCardInputs& dci, TString& proc, TString& bi
     
 }//convertHistosForLimits_core END
 
+void doDYextrapolation(std::vector<TString>& selCh,map<TString, Shape_t>& allShapes, TString mainHisto)
+{
+    cout << "\n#################### doDYextrapolation #######################\n" << endl;
+    for(size_t b=0; b<AnalysisBins.size(); b++) {
+	for(size_t i=0; i<selCh.size(); i++) {
+
+
+		THStack *stack = new THStack("stack","stack");
+
+		Shape_t& shapeChan = allShapes.find(selCh[i]+AnalysisBins[b]+"pfmet_minus_shapes")->second;
+		TH1* hChan_data=shapeChan.data;
+		cout << "DY extrapolation shapes: " << selCh[i]+AnalysisBins[b]+"_pfmet_minus_shapes" << endl;
+		cout << "Bins: " << hChan_data->GetXaxis()->GetNbins() << endl;
+
+		TH1* hChan_MCnonDY = (TH1*)shapeChan.totalBckg->Clone("hChan_totMCnonDY");
+		TH1* hChan_MCDY=NULL;//= (TH1*)shapeChan.totalBckg->Clone("hChan_MCDY");
+		hChan_MCnonDY->Reset();
+		//hChan_MCDY->Reset();
+		for(size_t ibckg=0; ibckg<shapeChan.bckg.size(); ibckg++) {
+		    TString proc(shapeChan.bckg[ibckg]->GetTitle());
+		    //cout << "proc: " << proc << endl; 
+		    if(proc.Contains("Z+jets")){
+			hChan_MCDY=(TH1*)shapeChan.bckg[ibckg]->Clone("hChan_MCDY");
+			hChan_MCDY->Reset();
+			hChan_MCDY->Add(shapeChan.bckg[ibckg], 1);
+		    }else{
+			hChan_MCnonDY->Add(shapeChan.bckg[ibckg], 1);
+			stack->Add(shapeChan.bckg[ibckg],"HIST");
+		    }
+
+		    //stack->Add(shapeChan.bckg[ibckg],"HIST");
+		}
+
+		int thre_bin(0);
+		int total_bin=hChan_MCnonDY->GetXaxis()->GetNbins();
+		for(int bin=0; bin<=hChan_MCnonDY->GetXaxis()->GetNbins()+1; bin++) {
+			double lowedge = hChan_MCnonDY->GetBinLowEdge(bin);
+			if(lowedge>=65) { 
+			    thre_bin = bin;
+			    break;
+			}
+		}
+
+		double data_CR(0.);
+		double subt_CR(0.);
+    		double zjet_SR(0.),zjet_CR(0.);
+    		double data_err2_CR(0.);
+    		double subt_err2_CR(0.);
+    		double zjet_err2_SR(0.),zjet_err2_CR(0.);
+
+		data_CR = hChan_data	->IntegralAndError(0,thre_bin-1,data_err2_CR);
+		subt_CR = hChan_MCnonDY	->IntegralAndError(0,thre_bin-1,subt_err2_CR); 
+		zjet_CR = hChan_MCDY	->IntegralAndError(0,thre_bin-1,zjet_err2_CR);
+
+		//data_SR = hChan_data	->IntegralAndError(thre_bin,total_bin+1,data_err2_SR);
+		//subt_SR = hChan_MCnonDY	->IntegralAndError(thre_bin,total_bin+1,subt_err2_SR); 
+		zjet_SR = hChan_MCDY	->IntegralAndError(thre_bin,total_bin+1,zjet_err2_SR);
+
+		double sf=(data_CR-subt_CR)/zjet_CR;
+		double zjet_Est = sf*zjet_SR;
+		cout << "sf: " << sf << "\t" << "Est: " << zjet_Est << "\t" << "MC: " << zjet_SR << endl;
+
+		hChan_MCDY->Scale(sf);
+		stack->Add(hChan_MCDY,"HIST");
+
+
+
+		TCanvas *c = new TCanvas("c", "c", 700, 700);
+    		TPad* t1 = new TPad("t1","t1", 0.0, 0.0, 1.0, 1.00);
+    		t1->Draw();
+		t1->SetLogy(true);
+    		t1->cd();
+    		//t1->SetBottomMargin(0.3);
+    		t1->SetRightMargin(0.05);
+    		//c->Divide(1,2);
+
+		stack->Draw("");
+		hChan_data->Draw("E1 same");
+
+		stack->SetMinimum(5e-3);
+		stack->GetXaxis()->SetTitle(hChan_data->GetXaxis()->GetTitle());
+		//stack->GetYaxis()->SetTitle("#it{m}_{T} [GeV]");
+		
+		c->SaveAs(selCh[i]+AnalysisBins[b]+"pfmet_DYextrapolation.pdf");
+		c->SaveAs(selCh[i]+AnalysisBins[b]+"pfmet_DYextrapolation.png");
+		delete c;
+
+		
+		//add data-driven backgrounds
+		Shape_t& shapeChan_SI = allShapes.find(selCh[i]+AnalysisBins[b]+mainHisto)->second;	
+		TH1* hChan_DATADY = NULL;
+
+                for(size_t ibckg=0; ibckg<shapeChan_SI.bckg.size(); ibckg++) {
+                    TString proc(shapeChan_SI.bckg[ibckg]->GetTitle());
+                    if(proc.Contains("Z+jets")){
+                        hChan_DATADY=(TH1*)shapeChan_SI.bckg[ibckg]->Clone("hChan_DATADY");
+			hChan_DATADY->SetTitle("DY_Test");
+                        //hChan_DATADY->Reset();
+		    }
+		}
+		
+		cout << "DY MC: " << hChan_DATADY->Integral() << endl;
+		hChan_DATADY->Scale(sf);
+		cout << "DY Extrapolation: " << hChan_DATADY->Integral() << endl;
+		shapeChan_SI.bckg.push_back(hChan_DATADY);
+
+
+	}
+    }
+    cout << "\n#################### doDYextrapolation #######################\n" << endl;
+}
+
 
 void doWjetsBackground(std::vector<TString>& selCh,map<TString, Shape_t>& allShapes, TString mainHisto)
 {
     cout << "\n#################### doWjetsBackground #######################\n" << endl;
     for(size_t b=0; b<AnalysisBins.size(); b++) {
 	for(size_t i=0; i<selCh.size(); i++) {
+	    TString label_Syst = selCh[i]+AnalysisBins[b];
 
 	    Shape_t& shapeChan_SI = allShapes.find(selCh[i]+AnalysisBins[b]+mainHisto)->second;
             Shape_t& shapeChan_Wjet = allShapes.find(selCh[i]+AnalysisBins[b]+"FR_WjetCtrl_"+mainHisto)->second;
@@ -3026,6 +3256,14 @@ void doWjetsBackground(std::vector<TString>& selCh,map<TString, Shape_t>& allSha
                 cout << "bin: " << b << "\t" << val << " +/- " << err << endl;
             }
 
+		
+	    double sysErr(0.); 
+	    if(label_Syst.Contains("ee"))   sysErr = val_hChan_data*WjetsSyst_ee;
+	    else if(label_Syst.Contains("mumu")) sysErr = val_hChan_data*WjetsSyst_mm;
+	    h_Wjet->SetBinError(0,sysErr);
+	    
+
+
             shapeChan_SI.bckg.push_back(h_Wjet);
 	}
     }
@@ -3066,7 +3304,7 @@ void doQCDBackground(std::vector<TString>& selCh,map<TString, Shape_t>& allShape
 
 
 
-void dodataDrivenWWtW(std::vector<TString>& selCh,TString ctrlCh,map<TString, Shape_t>& allShapes, TString mainHisto)
+void dodataDrivenWWtW(std::vector<TString>& selCh,TString ctrlCh,map<TString, Shape_t>& allShapes, TString mainHisto, bool isMCclosureTest)
 {
 
     cout << "\n#################### dodataDrivenWWtW #######################\n" << endl;
@@ -3082,8 +3320,14 @@ void dodataDrivenWWtW(std::vector<TString>& selCh,TString ctrlCh,map<TString, Sh
     fprintf(pFile,"\\scriptsize\\begin{tabular}{c|ccccc|cc|cc}\n");
     fprintf(pFile,"\\hline\n");
     fprintf(pFile,"\\hline\n");
-    fprintf(pFile,"Cut & $N_{ee}^{data}$ & $N_{\\mu\\mu}^{data}$ & $N_{e\\mu}^{data}$ & $N_{e\\mu}^{mc,subtr}$ & $N_{e\\mu}^{corr}$ \n");
-    fprintf(pFile,"& $N_{bkg,ee}^{est}$ & $N_{bkg,ee}^{mc}$ & $N_{bkg,\\mu\\mu}^{est}$ & $N_{bkg,\\mu\\mu}^{mc}$ \\\\\n");
+    if(isMCclosureTest) {
+	fprintf(pFile,"Bin & $N_{ee}^{mc}$ & $N_{\\mu\\mu}^{mc}$ & $N_{e\\mu}^{mc}$ & $N_{e\\mu}^{mc,subtr}$ & $N_{e\\mu}^{corr}$ \n");
+	fprintf(pFile,"& $N_{bkg,ee}^{closure}$ & $N_{bkg,ee}^{mc}$ & $N_{bkg,\\mu\\mu}^{closure}$ & $N_{bkg,\\mu\\mu}^{mc}$ \\\\\n");
+    }
+    else{
+	fprintf(pFile,"Bin & $N_{ee}^{data}$ & $N_{\\mu\\mu}^{data}$ & $N_{e\\mu}^{data}$ & $N_{e\\mu}^{mc,subtr}$ & $N_{e\\mu}^{corr}$ \n");
+	fprintf(pFile,"& $N_{bkg,ee}^{est}$ & $N_{bkg,ee}^{mc}$ & $N_{bkg,\\mu\\mu}^{est}$ & $N_{bkg,\\mu\\mu}^{mc}$ \\\\\n");
+    }
     fprintf(pFile,"\\hline\n");
     
     for(size_t b=0; b<AnalysisBins.size(); b++) {
@@ -3105,6 +3349,11 @@ void dodataDrivenWWtW(std::vector<TString>& selCh,TString ctrlCh,map<TString, Sh
 	    TH1* hCtrl_data=shapeCtrl_SI.data;
             Shape_t& shapeChan_SI = allShapes.find(selCh[i]+AnalysisBins[b]+mainHisto)->second;
 	    TH1* hChan_data=shapeChan_SI.data;
+
+    	    if(isMCclosureTest) {
+		hCtrl_data=shapeCtrl_SI.totalBckg;
+		hChan_data=shapeChan_SI.totalBckg;
+    	    }
 
 
             TH1* hCtrl_MCnonNRB = (TH1*)shapeCtrl_SI.totalBckg->Clone("hCtrl_MCnonNRB");
@@ -3132,7 +3381,6 @@ void dodataDrivenWWtW(std::vector<TString>& selCh,TString ctrlCh,map<TString, Sh
                         || proc.Contains("Single top")
                         || proc.Contains("WW#rightarrow l#nul#nu")
                         || proc.Contains("Z#rightarrow #tau#tau")
-                        //|| proc.Contains("W+jets") 
 			)
 		{
 		    hCtrl_MCNRB->Add(shapeCtrl_SI.bckg[ibckg], 1);
@@ -3154,7 +3402,6 @@ void dodataDrivenWWtW(std::vector<TString>& selCh,TString ctrlCh,map<TString, Sh
                         || proc.Contains("Single top")
                         || proc.Contains("WW#rightarrow l#nul#nu")
                         || proc.Contains("Z#rightarrow #tau#tau")
-                        //|| proc.Contains("W+jets") 
 			)
 		{
 		    hChan_MCNRB->Add(shapeChan_SI.bckg[ibckg], 1);
@@ -3238,7 +3485,8 @@ void dodataDrivenWWtW(std::vector<TString>& selCh,TString ctrlCh,map<TString, Sh
 	cout << "N_est_ee: " << N_est_ee << "\t" 
 		<< "N_est_mm: " << N_est_mm << endl;
 
-        fprintf(pFile,"%s & %.0f $\\pm$ %.2f & %.0f $\\pm$ %.2f & %.0f $\\pm$ %.2f & %.2f $\\pm$ %.2f & %.2f $\\pm$ %.2f & %.2f $\\pm$ %.2f & %.2f $\\pm$ %.2f & %.2f $\\pm$ %.2f & %.2f $\\pm$ %.2f  \\\\ \n",
+	if(isMCclosureTest) {
+            fprintf(pFile,"%s & %.2f $\\pm$ %.2f & %.2f $\\pm$ %.2f & %.2f $\\pm$ %.2f & %.2f $\\pm$ %.2f & %.2f $\\pm$ %.2f & %.2f $\\pm$ %.2f & %.2f $\\pm$ %.2f & %.2f $\\pm$ %.2f & %.2f $\\pm$ %.2f  \\\\ \n",
                 (AnalysisBins[b]).Data(),
                 N_data_ee,Err_data_ee,
                 N_data_mm,Err_data_mm,
@@ -3248,12 +3496,27 @@ void dodataDrivenWWtW(std::vector<TString>& selCh,TString ctrlCh,map<TString, Sh
                 N_est_ee,Err_est_ee, N_mc_ee,Err_mc_ee,
                 N_est_mm,Err_est_mm, N_mc_mm,Err_mc_mm
           );
+	}
+	else{
+            fprintf(pFile,"%s & %.0f $\\pm$ %.2f & %.0f $\\pm$ %.2f & %.0f $\\pm$ %.2f & %.2f $\\pm$ %.2f & %.2f $\\pm$ %.2f & %.2f $\\pm$ %.2f & %.2f $\\pm$ %.2f & %.2f $\\pm$ %.2f & %.2f $\\pm$ %.2f  \\\\ \n",
+                (AnalysisBins[b]).Data(),
+                N_data_ee,Err_data_ee,
+                N_data_mm,Err_data_mm,
+                N_data_em,Err_data_em,
+                N_mcsubtr_em,Err_mcsubtr_em,
+                N_data_corr,Err_data_corr,
+                N_est_ee,Err_est_ee, N_mc_ee,Err_mc_ee,
+                N_est_mm,Err_est_mm, N_mc_mm,Err_mc_mm
+          );
+	}
+
+
 
 
 
 	//add data-driven backgrounds
         for(size_t i=0; i<selCh.size(); i++) {
-
+	    TString labelChan = selCh[i]+AnalysisBins[b];
             Shape_t& shapeChan_SI = allShapes.find(selCh[i]+AnalysisBins[b]+mainHisto)->second;
             TH1* hChan_MCNRB = (TH1*)shapeChan_SI.totalBckg->Clone("hChan_MCNRB");
             hChan_MCNRB->Reset();
@@ -3265,7 +3528,6 @@ void dodataDrivenWWtW(std::vector<TString>& selCh,TString ctrlCh,map<TString, Sh
                         || proc.Contains("Single top")
                         || proc.Contains("WW#rightarrow l#nul#nu")
                         || proc.Contains("Z#rightarrow #tau#tau")
-                        //|| proc.Contains("W+jets") 
                         )
                 {
                     hChan_MCNRB->Add(shapeChan_SI.bckg[ibckg], 1);
@@ -3291,6 +3553,8 @@ void dodataDrivenWWtW(std::vector<TString>& selCh,TString ctrlCh,map<TString, Sh
 		dataDrivenScale = N_est_mm/N_mc_mm;
 		dataDarvenScale_err = dataDrivenScale*sqrt(pow(Err_est_mm/N_est_mm,2)+pow(Err_mc_mm/N_mc_mm,2));
 	    }
+
+	    cout << "DATA/MC scale factors: " << dataDrivenScale << endl;
 	    
             for(int b=1; b<=NonResonant->GetXaxis()->GetNbins()+1; b++) {
                 double val = NonResonant->GetBinContent(b);
@@ -3299,17 +3563,22 @@ void dodataDrivenWWtW(std::vector<TString>& selCh,TString ctrlCh,map<TString, Sh
                 double newerr = newval*sqrt(pow(err/val,2)+pow(dataDarvenScale_err/dataDrivenScale,2));
 
                 NonResonant->SetBinContent(b, newval );
-                NonResonant->SetBinError  (b, newerr );
+                if(newval!=0)NonResonant->SetBinError(b, newerr );
             }
+
+	    double Syst_WWTop(0.);
+	    if(labelChan.Contains("eeeq0jets")) 	Syst_WWTop = WWtopSyst_ee0jet; 
+	    if(labelChan.Contains("mumueq0jets")) 	Syst_WWTop = WWtopSyst_mm0jet;
+	    if(labelChan.Contains("eeeq1jets")) 	Syst_WWTop = WWtopSyst_ee1jet;
+	    if(labelChan.Contains("mumueq1jets")) 	Syst_WWTop = WWtopSyst_mm1jet;
+
+
+	    cout << "labelchan: " << labelChan << " >>> Adding syst: " << Syst_WWTop << endl;
+	    NonResonant->SetBinError(0, Syst_WWTop*NonResonant->Integral());
+	   
 
             shapeChan_SI.bckg.push_back(NonResonant);
 	}
-
-
-
-
-
-
 
 
     } //0jet, 1jet END
@@ -3327,7 +3596,7 @@ void dodataDrivenWWtW(std::vector<TString>& selCh,TString ctrlCh,map<TString, Sh
 }
 
 
-void doBackgroundSubtraction(std::vector<TString>& selCh,TString ctrlCh,map<TString, Shape_t>& allShapes, TString mainHisto, TString sideBandHisto, TString url, JSONWrapper::Object &Root)
+void doBackgroundSubtraction(std::vector<TString>& selCh,TString ctrlCh,map<TString, Shape_t>& allShapes, TString mainHisto, TString sideBandHisto, TString url, JSONWrapper::Object &Root, bool isMCclosureTest)
 {
 
     cout << "########################## doBackgroundSubtraction ##########################" << endl;
@@ -3338,7 +3607,7 @@ void doBackgroundSubtraction(std::vector<TString>& selCh,TString ctrlCh,map<TStr
     string Lyield   = "yield data";
     string LyieldMC = "yield mc";
 
-    string Ccol   = "\\begin{tabular}{|c|c|c|c|c|";
+    string Ccol   = "\\begin{tabular}{|c|c|c|c|c|c|";
     string Cname  = "channel & $\\alpha$ measured & $\\alpha$ used & yields $e\\mu$ & yield data & yield mc";
     string Cval   = "";
     FILE* pFile = NULL;
@@ -3365,6 +3634,12 @@ void doBackgroundSubtraction(std::vector<TString>& selCh,TString ctrlCh,map<TStr
             Shape_t& shapeChan_SI = allShapes.find(selCh[i]+AnalysisBins[b]+mainHisto)->second;
 
 
+	    if(isMCclosureTest){
+		hCtrl_SB=shapeCtrl_SB.totalBckg;
+		hCtrl_SI=shapeCtrl_SI.totalBckg;
+		hChan_SB=shapeChan_SB.totalBckg;
+	    }
+
 	    //to subtract non WW/Top background from data
             TH1* tosubtrChan_SB = (TH1*)shapeChan_SB.totalBckg->Clone("tosubtrChan_SB");
 	    TH1* tosubtrCtrl_SB = (TH1*)shapeCtrl_SB.totalBckg->Clone("tosubtrCtrl_SB");
@@ -3377,7 +3652,7 @@ void doBackgroundSubtraction(std::vector<TString>& selCh,TString ctrlCh,map<TStr
                         || proc.Contains("WZ#rightarrow 3l#nu")
                         || proc.Contains("Z+jets")
                         || proc.Contains("W+jets")
-                        )
+                )
                 {
                     tosubtrChan_SB->Add(shapeChan_SB.bckg[ibckg], 1);
                 }
@@ -3402,12 +3677,11 @@ void doBackgroundSubtraction(std::vector<TString>& selCh,TString ctrlCh,map<TStr
 		double err1 = sqrt(pow(hChan_SB->GetBinError(5),2)+pow(tosubtrChan_SB->GetBinError(5),2));
 		double err2 = sqrt(pow(hCtrl_SB->GetBinError(5),2)+pow(tosubtrCtrl_SB->GetBinError(5),2));	
 		alpha_err = alpha * sqrt(pow(err1/(hChan_SB->GetBinContent(5)-tosubtrChan_SB->GetBinContent(5)),2)+pow(err2/(hCtrl_SB->GetBinContent(5)-tosubtrCtrl_SB->GetBinContent(5)),2));
+		cout << "alpha: " << alpha << endl;
 		//old method
 		//alpha     = hChan_SB->GetBinContent(5) / hCtrl_SB->GetBinContent(5);
                 //alpha_err = ( fabs( hChan_SB->GetBinContent(5) * hCtrl_SB->GetBinError(5) ) + fabs(hChan_SB->GetBinError(5) * hCtrl_SB->GetBinContent(5) )  ) / pow(hCtrl_SB->GetBinContent(5), 2);
             }
-
-
 
 
             Lalph1 += string(" &") + toLatexRounded(alpha,alpha_err);
@@ -3489,11 +3763,12 @@ void doBackgroundSubtraction(std::vector<TString>& selCh,TString ctrlCh,map<TStr
             for(size_t ibckg=0; ibckg<shapeChan_SI.bckg.size(); ibckg++) {
                 TString proc(shapeChan_SI.bckg[ibckg]->GetTitle());
 		cout << "proc: " << proc << endl;
-                if(proc.Contains("t#bar{t}") || 
-			proc.Contains("Single top") || 
-			proc.Contains("WW#rightarrow l#nul#nu") || 
-			proc.Contains("Z#rightarrow #tau#tau") || 
-			proc.Contains("W+jets") )
+                if(proc.Contains("t#bar{t}") 
+			|| proc.Contains("Single top")
+			|| proc.Contains("WW#rightarrow l#nul#nu")
+			|| proc.Contains("Z#rightarrow #tau#tau") 
+			//|| proc.Contains("W+jets") 
+		)
 		{ 
                     MCNRB->Add(shapeChan_SI.bckg[ibckg], 1);
                     NonResonant->SetFillColor(shapeChan_SI.bckg[ibckg]->GetFillColor());
@@ -3561,6 +3836,7 @@ void doBackgroundSubtraction(std::vector<TString>& selCh,TString ctrlCh,map<TStr
 
 void doDYReplacement(std::vector<TString>& selCh,TString ctrlCh,map<TString, Shape_t>& allShapes, TString mainHisto, TString metHistoForRescale)
 {
+    cout << "########################## doDYReplacement ##########################" << endl;
     TString DYProcName = "Z+jets";
     TString GammaJetProcName = "Instr. background (data)";
     std::map<TString, double> LowMetIntegral;
@@ -3594,14 +3870,6 @@ void doDYReplacement(std::vector<TString>& selCh,TString ctrlCh,map<TString, Sha
         return;
     }
 
-    /*
-      //Just to redo what we did for the HIGHMASS pape
-      for(size_t i=0;i<selCh.size();i++){
-      for(size_t b=0; b<AnalysisBins.size(); b++){
-         TH1* met = (TH1*)pdir->Get(selCh[i]+AnalysisBins[b]+"_"+metHistoForRescale);
-         LowMetIntegral[selCh[i]+AnalysisBins[b]] = met->Integral(1,met->GetXaxis()->FindBin(50));
-      }}
-    */
     //all done with input file
     inF->Close();
 
@@ -3629,16 +3897,7 @@ void doDYReplacement(std::vector<TString>& selCh,TString ctrlCh,map<TString, Sha
                 TString proc(shapeChan_SI.bckg[ibckg]->GetTitle());
                 if( proc.Contains(DYProcName) ) {
 
-                    std::cout<<"DYTEST >>>>>  " << selCh[i]+string(" - ")+AnalysisBins[b] << "  \n";
-
                     double rescaleFactor = 1.0;
-                    /*
-                               //compute rescale factor using low MET events
-                               TH1* met = (TH1*)pdir->Get(selCh[i]+AnalysisBins[b]+"_"+metHistoForRescale);
-                               double integral = met->Integral(1,met->GetXaxis()->FindBin(50));
-                               double rescaleFactor = LowMetIntegral[selCh[i]+AnalysisBins[b]] / integral; //Just to redo what we did for the HIGHMASS paper
-                               printf("Rescale in %s = %f/%f = %f\n",  (selCh[i]+AnalysisBins[b]).Data(), LowMetIntegral[selCh[i]+AnalysisBins[b]], integral, rescaleFactor);
-                    */
                     char buffer[255];
                     sprintf(buffer,"%6.3f",rescaleFactor);
                     Cval   += string(" &") + buffer;
@@ -3662,7 +3921,7 @@ void doDYReplacement(std::vector<TString>& selCh,TString ctrlCh,map<TString, Sha
                         cutMax=shapeMaxVBF;
                     }
 
-                    std::cout<<"DYTEST >>>>>  " << selCh[i]+AnalysisBins[b]+"_"+mainHisto <<"\n";
+                    std::cout<<">>>>>  " << selCh[i]+AnalysisBins[b]+"_"+mainHisto <<"\n";
                     fprintf(gjFile,"[%-10.10s - %s]\n", (selCh[i]+AnalysisBins[b]).Data(), mainHisto.Data());
 
                     TH2* gjets2Dshape  = (TH2*)pdir->Get(selCh[i]+AnalysisBins[b]+"_"+mainHisto);
@@ -3680,7 +3939,6 @@ void doDYReplacement(std::vector<TString>& selCh,TString ctrlCh,map<TString, Sha
                     //gjets1Dshape->Rebin(2);
 
                     shapeChan_SI.bckg[ibckg]->SetTitle(DYProcName + " (data)");
-                    //for(int i=0; i<shapeChan_SI.bckg[ibckg]->GetNbinsX(); i++) { //THIS IS A BUG!
                     for(int i=1; i<=shapeChan_SI.bckg[ibckg]->GetNbinsX(); i++) {
                         double val = gjets1Dshape->GetBinContent(i);
                         cout << "i: " << i << " \tval: " << val << endl;
@@ -3698,6 +3956,7 @@ void doDYReplacement(std::vector<TString>& selCh,TString ctrlCh,map<TString, Sha
                     shapeChan_SI.bckg[ibckg]->Scale(DDRescale);
 
                     val  = shapeChan_SI.bckg[ibckg]->IntegralAndError(1,shapeChan_SI.bckg[ibckg]->GetXaxis()->GetNbins(),valerr);
+		    cout << "Normalization: " << val << " $pm$ " << valerr << "(stat.)" << endl;
                     //systError = std::min(GammaJetSyst * val, fabs(systError - val) ); //syst is difference between G+Jet estimate and MC
                     systError = GammaJetSyst * val; //syst completely coming from G+Jet estimate
                     shapeChan_SI.bckg[ibckg]->SetBinError(0,systError);//save syst error in underflow bin that is always empty
@@ -3739,6 +3998,7 @@ void doDYReplacement(std::vector<TString>& selCh,TString ctrlCh,map<TString, Sha
 
     //all done with gamma+jet file
     inF->Close();
+    cout << "########################## doDYReplacement ##########################" << endl;
 }
 
 

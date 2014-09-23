@@ -375,7 +375,7 @@
       "data": [
         {
           "dtag": "MC8TeV_FermionWIMP_M1_D5", 
-          "xsec": 0.74921, 
+          "xsec": 0.00074921, 
           "split": 1
         }
       ], 
@@ -394,7 +394,26 @@
       "data": [
         {
           "dtag": "MC8TeV_FermionWIMP_M10_D5", 
-          "xsec": 0.75051, 
+          "xsec": 0.00075051, 
+          "split": 1
+        }
+      ], 
+      "fill": 0, 
+      "spimpose": true, 
+      "lcolor": "90", 
+      "lstyle": 1
+    }, 
+    {
+      "isdata": false, 
+      "color": "90", 
+      "issignal": true, 
+      "tag": "D5(100GeV)", 
+      "lwidth": 2, 
+      "marker": 90, 
+      "data": [
+        {
+          "dtag": "MC8TeV_FermionWIMP_M100_D5", 
+          "xsec": 0.00071582, 
           "split": 1
         }
       ], 
@@ -413,13 +432,32 @@
       "data": [
         {
           "dtag": "MC8TeV_FermionWIMP_M200_D5", 
-          "xsec": 0.59946, 
+          "xsec": 0.00059946, 
           "split": 1
         }
       ], 
       "fill": 0, 
       "spimpose": true, 
       "lcolor": "91", 
+      "lstyle": 1
+    }, 
+    {
+      "isdata": false, 
+      "color": "90", 
+      "issignal": true, 
+      "tag": "D5(300GeV)", 
+      "lwidth": 2, 
+      "marker": 90, 
+      "data": [
+        {
+          "dtag": "MC8TeV_FermionWIMP_M300_D5", 
+          "xsec": 0.00046314, 
+          "split": 1
+        }
+      ], 
+      "fill": 0, 
+      "spimpose": true, 
+      "lcolor": "90", 
       "lstyle": 1
     }, 
     {
@@ -432,7 +470,7 @@
       "data": [
         {
           "dtag": "MC8TeV_FermionWIMP_M500_D5", 
-          "xsec": 0.23760, 
+          "xsec": 0.00023760, 
           "split": 1
         }
       ], 
@@ -451,7 +489,7 @@
       "data": [
         {
           "dtag": "MC8TeV_FermionWIMP_M1000_D5", 
-          "xsec": 0.027093, 
+          "xsec": 0.000027093, 
           "split": 1
         }
       ], 

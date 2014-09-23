@@ -62,8 +62,8 @@ LorentzVector redMET(RedMetType Type, const LorentzVector& theLepton1, double si
   TVector2 redMETxy;
   double redMET_l,redMET_t;
   double redMET;
-  int prefRecminRmet;
-  int prefRec_l, prefRec_t;
+  //int prefRecminRmet;
+  //int prefRec_l, prefRec_t;
   double recoilProj_l,recoilProj_t;
   double dileptonProj_l,dileptonProj_t;
   double deltaDileptonProj_l, deltaDileptonProj_t;
@@ -141,11 +141,11 @@ LorentzVector redMET(RedMetType Type, const LorentzVector& theLepton1, double si
      //recoil is minimized independently
      recoilProj_l = min(-1.0*uncl1Proj_l, min(-1.0*uncl2Proj_l,-1.0*uncl3Proj_l));
      recoilProj_l = min(recoilProj_l,0.);
-     prefRec_l    = ( (-1.0*uncl1Proj_l)< min(-1.*uncl2Proj_l,-1.*uncl3Proj_l) ? CLUSTERED : UNCLUSTERED);
+     //prefRec_l    = ( (-1.0*uncl1Proj_l)< min(-1.*uncl2Proj_l,-1.*uncl3Proj_l) ? CLUSTERED : UNCLUSTERED);
 
      recoilProj_t = min(-1.0*uncl1Proj_t, min(-1.0*uncl2Proj_t,-1.0*uncl3Proj_t));
      recoilProj_t = min(recoilProj_t,0.);
-     prefRec_t    = ( (-1.0*uncl1Proj_t)<min(-1.*(uncl2Proj_t),-1.*(uncl3Proj_t)) ? CLUSTERED : UNCLUSTERED);
+     //prefRec_t    = ( (-1.0*uncl1Proj_t)<min(-1.*(uncl2Proj_t),-1.*(uncl3Proj_t)) ? CLUSTERED : UNCLUSTERED);
   
      //compute the reduced met components
      redMET_l = max( (dileptonProj_l + kRecoil_l*recoilProj_l + kSigmaPt_l*deltaDileptonProj_l), 0.);
@@ -158,15 +158,15 @@ LorentzVector redMET(RedMetType Type, const LorentzVector& theLepton1, double si
      // CMS MINIMIZED VERSION
      //   
      if(uncl1RedMet<uncl2RedMet && uncl1RedMet<uncl3RedMet){
-        prefRecminRmet         = UNCLUSTERED;
+        //prefRecminRmet         = UNCLUSTERED;
         redMET_l = uncl1RedMet_l;
         redMET_t = uncl1RedMet_t;
      }else if(uncl2RedMet<uncl1RedMet && uncl2RedMet<uncl3RedMet){
-        prefRecminRmet         = CLUSTERED;
+        //prefRecminRmet         = CLUSTERED;
         redMET_l = uncl2RedMet_l;
         redMET_t = uncl2RedMet_t;
      }else{
-        prefRecminRmet         = CLUSTERED;
+        //prefRecminRmet         = CLUSTERED;
         redMET_l = uncl3RedMet_l;
         redMET_t = uncl3RedMet_t;
      }
@@ -177,28 +177,28 @@ LorentzVector redMET(RedMetType Type, const LorentzVector& theLepton1, double si
      //
      // CMS INDEPEDENT MINIMIZATION VERSION
      //
-     prefRec_l     = (fabs(uncl1RedMet_l) < fabs(uncl2RedMet_l) ? UNCLUSTERED : CLUSTERED );
-     prefRec_t     = (fabs(uncl1RedMet_t) < fabs(uncl2RedMet_t) ? UNCLUSTERED : CLUSTERED );
+     //prefRec_l     = (fabs(uncl1RedMet_l) < fabs(uncl2RedMet_l) ? UNCLUSTERED : CLUSTERED );
+     //prefRec_t     = (fabs(uncl1RedMet_t) < fabs(uncl2RedMet_t) ? UNCLUSTERED : CLUSTERED );
 
      if(fabs(uncl1RedMet_l)<fabs(uncl2RedMet_l) && fabs(uncl1RedMet_l)<fabs(uncl3RedMet_l)){
-        prefRec_l  = UNCLUSTERED;
+        //prefRec_l  = UNCLUSTERED;
         redMET_l   = uncl1RedMet_l;
      }else if(fabs(uncl2RedMet_l)<fabs(uncl1RedMet_l) && fabs(uncl2RedMet_l)<fabs(uncl3RedMet_l)){
-        prefRec_l  = CLUSTERED;
+        //prefRec_l  = CLUSTERED;
         redMET_l   = uncl2RedMet_l;
      }else{
-        prefRec_l  = CLUSTERED;
+        //prefRec_l  = CLUSTERED;
         redMET_l   = uncl3RedMet_l;
      }
 
      if(fabs(uncl1RedMet_t)<fabs(uncl2RedMet_t) && fabs(uncl1RedMet_t)<fabs(uncl3RedMet_t)){
-        prefRec_t  = UNCLUSTERED;
+        //prefRec_t  = UNCLUSTERED;
         redMET_t   = uncl1RedMet_t;
      }else if(fabs(uncl2RedMet_t)<fabs(uncl1RedMet_t) && fabs(uncl2RedMet_t)<fabs(uncl3RedMet_t)){
-        prefRec_t  = CLUSTERED;
+        //prefRec_t  = CLUSTERED;
         redMET_t   = uncl2RedMet_t;
      }else{
-        prefRec_t  = CLUSTERED;
+        //prefRec_t  = CLUSTERED;
         redMET_t   = uncl3RedMet_t;
      }
      redMET = sqrt(pow(redMET_l,2)+pow(redMET_t,2));
@@ -293,6 +293,94 @@ LorentzVector redMET(RedMetType Type, const LorentzVector& theLepton1, double si
       }
       return -1;
   }
+
+
+  double response(LorentzVector &Z, LorentzVector &MET)
+  {
+	TVector2 z(Z.px(),Z.py());
+	TVector2 met(MET.px(),MET.py());
+	TVector2 sum = z+met;
+	sum *= -1;
+	double cos_ = (sum*z)/(sum.Mod()*z.Mod());
+	return cos_*sum.Mod()/z.Mod();
+  }
+
+
+  LorentzVector correctionTermsPfMetShiftXY(LorentzVector met, bool isMC, int nvtx)
+  {
+   	double corX = 0.;
+   	double corY = 0.;
+   	if(isMC){
+		//corX = 0.0982473 + 0.0137847*nvtx;
+         	//corY = 0.180283 - 0.134661*nvtx;
+		//official
+    		//corX = 1.62861e-01 - 2.38517e-02*nvtx;
+    		//corY = 3.60860e-01 - 1.30335e-01*nvtx;
+		//for rawMET
+		//corX = 0.08684 - 0.003939*nvtx;
+		//corY = 0.4369 - 0.2019*nvtx;
+		//for MET-Type1
+		corX = 0.08013 - 0.02523*nvtx;
+		corY = 0.3086 - 0.09355*nvtx;
+   	}
+   	else{
+         	//corX = 0.0798741 + 0.239297*nvtx;
+         	//corY = -0.137049 - 0.0802186*nvtx;
+    		//corX = 4.83642e-02 + 2.48870e-01*nvtx;
+		//corY = -1.50135e-01 - 8.27917e-02*nvtx;
+		//for rawMET
+		//corX = -0.2862 + 0.2702*nvtx;
+		//corY = -0.01393 - 0.1451*nvtx;
+		//for MET-Type1
+		corX = -0.2099 + 0.2237*nvtx;
+		corY = -0.0322 - 0.06459*nvtx;
+   	}
+
+
+	double px = met.px()-corX;
+	double py = met.py()-corY;
+	return LorentzVector(px,py,0,sqrt(px*px+py*py));
+  }
+
+  //
+  LorentzVector PFMET2XYCorr(LorentzVector met, bool isMC, int nvtx)
+  {
+        double corX = 0.;
+	double corY = 0.;
+	if(isMC){
+  		corX = 0.1061349 + (-0.0183431*nvtx);
+  		corY = 0.2032245 + (-0.0914390*nvtx);
+	}
+	else{
+  		corX = -0.1165639 + (0.2277539*nvtx);
+  		corY = -0.1435665 + (-0.0620699*nvtx);
+	}
+
+        double px = met.px()-corX;
+        double py = met.py()-corY;
+        return LorentzVector(px,py,0,sqrt(px*px+py*py));
+  }
+
+
+
+  //
+  LorentzVector GammaJetsPfMetShiftXY(LorentzVector met, bool isMC, int nvtx)
+  {
+   	double corX = 0.;
+   	double corY = 0.;
+	if(isMC){
+  		corX = -0.0179602 + (0.0054213*nvtx);
+  		corY = -0.2255654 + (-0.0002388*nvtx);
+	}
+	else{
+  		corX = 0.2286250 + (0.0065800*nvtx);
+  		corY = -0.2975716 + (0.0090580*nvtx);
+	}
+	double px = met.px()-corX;
+	double py = met.py()-corY;
+	return LorentzVector(px,py,0,sqrt(px*px+py*py));
+  }
+
 
   //
   LorentzVector correctForPhiAsymmetry(LorentzVector &met,float sumEt,bool isMC, bool isRunA)

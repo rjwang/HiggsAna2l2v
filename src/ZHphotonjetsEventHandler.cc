@@ -270,8 +270,8 @@ std::map<TString,double> ZHphotonjetsEventHandler::getQtFitWeights(PhysicsEvent_
         TString key = dilCats[id]+evCategoryLabel;
         double weight(1.0);
 
-        double *Zjets_pars;
-        double *Gjets_pars;
+        double *Zjets_pars=0;
+        double *Gjets_pars=0;
         //get all parameters, call ZHphotonjetsEventHandler::getQtFit
         if(isMC_) {
             if(key.Contains("eeeq0jets")) {
@@ -347,8 +347,8 @@ std::map<TString,double> ZHphotonjetsEventHandler::get2011QtFitWeights(PhysicsEv
         TString key = dilCats[id]+evCategoryLabel;
         double weight(1.0);
 
-        double *Zjets_pars;
-        double *Gjets_pars;
+        double *Zjets_pars=0;
+        double *Gjets_pars=0;
         //get all parameters, call ZHphotonjetsEventHandler::getQtFit
         if(isMC_) {
             if(key.Contains("eeeq0jets")) {

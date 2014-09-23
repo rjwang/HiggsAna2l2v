@@ -96,7 +96,7 @@ PuShifter_t getPUshifters(std::vector< float > &Lumi_distr, float puUnc)
 
 //
 double weightVBF(std::string SampleName, double m_gen, double mass){
-   bool isZZ = (SampleName.find("ZZ")!=std::string::npos) ;
+   //bool isZZ = (SampleName.find("ZZ")!=std::string::npos) ;
 
    double decay_width = -1;
 
@@ -121,7 +121,7 @@ double weightVBF(std::string SampleName, double m_gen, double mass){
    }
 */
 
-   double WeightInt  = -1;
+   //double WeightInt  = -1;
          if(m_gen == 130){    decay_width =   0.00487; 
    }else if(m_gen == 140){    decay_width =   0.00812; 
    }else if(m_gen == 150){    decay_width =   0.01730; 
@@ -159,10 +159,10 @@ double weightVBF(std::string SampleName, double m_gen, double mass){
 double weightNarrowResonnance(std::string SampleName, double m_gen, double mass, double Cprime, double BRnew, TGraph* hLineShapeNominal, TF1 *decayProbPdf){
   if((Cprime<0 || BRnew<0) || (Cprime==0 && BRnew==0)) return 1.0;
 
-   bool isZZ = (SampleName.find("ZZ")!=std::string::npos) ;
+   //bool isZZ = (SampleName.find("ZZ")!=std::string::npos) ;
 
    double decay_width = -1;
-   double WeightInt  = -1;
+   //double WeightInt  = -1;
          if(m_gen == 130){    decay_width =   0.00487; 
    }else if(m_gen == 140){    decay_width =   0.00812; 
    }else if(m_gen == 150){    decay_width =   0.01730; 
@@ -256,7 +256,7 @@ std::pair<TH1 *,TH1 *> generateHistoEnvelope(TH1 *h,bool debug)
   if(ymin==0) return toReturn;
 
   //now get the max variations to the left and to the right of this point
-  int imaxL(imin),           imaxR(imin);
+  //int imaxL(imin),           imaxR(imin);
   float ymaxL(ymin),         ymaxR(ymin);
   float ymaxL_err(ymin_err), ymaxR_err(ymin_err);
   float xmaxL(xmin),         xmaxR(xmin);
@@ -269,14 +269,14 @@ std::pair<TH1 *,TH1 *> generateHistoEnvelope(TH1 *h,bool debug)
       if(y==0) continue;
       if(x<xmin && ymaxL_err/ymaxL<y_err/y)
 	{
-	  imaxL     = ibin;
+	  //imaxL     = ibin;
 	  xmaxL     = x;
 	  ymaxL     = y;
 	  ymaxL_err = y_err;
 	}
       if(x>xmin && ymaxR_err/ymaxR<y_err/y)
 	{
-	  imaxR     = ibin;
+	  //imaxR     = ibin;
 	  xmaxR     = x;
 	  ymaxR     = y;
 	  ymaxR_err = y_err;

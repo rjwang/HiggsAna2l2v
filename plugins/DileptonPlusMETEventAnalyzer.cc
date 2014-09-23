@@ -270,7 +270,7 @@ void DileptonPlusMETEventAnalyzer::saveMCtruth(const edm::Event &event, const ed
     {
       const reco::Candidate *genpart = genEvent.second[i];
       
-      if(fabs(genpart->pdgId())==25 || fabs(genpart->pdgId())==39) 
+      if(fabs(genpart->pdgId())==25 || fabs(genpart->pdgId())==39 ) 
 	{
 	  ev.h_px=genpart->px();
 	  ev.h_py=genpart->py();

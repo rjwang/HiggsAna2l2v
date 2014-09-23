@@ -219,11 +219,11 @@ TLegend *showPlots(TPad *c, TList &origstack, TList &origspimpose, TList &origda
 	}
       
       //draw the data
-      bool hasData(false);
+      //bool hasData(false);
       dataIt = data.MakeIterator();
       while ( (key = dataIt->Next()) ) 
 	{
-	  hasData=true;
+	  //hasData=true;
 	  ipad++;
 	  TPad *p=(TPad *)c->cd(ipad);
 	  if(p==0) continue;

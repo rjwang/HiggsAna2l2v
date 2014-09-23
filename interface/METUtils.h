@@ -124,6 +124,10 @@ namespace METUtils{
   double getRedMETCut(int eventCategory, int workingpoint=MEDIUMWP);
   LorentzVector projectedMET(const LorentzVector& lepton1, const LorentzVector& lepton2, const LorentzVector& met, stRedMET* out=NULL);
   double transverseMass(LorentzVector &visible, LorentzVector &invisible, bool assumeSameMass=false);
+  double response(LorentzVector &Z, LorentzVector &MET);
+  LorentzVector correctionTermsPfMetShiftXY(LorentzVector met, bool isMC, int nvtx);
+  LorentzVector PFMET2XYCorr(LorentzVector met, bool isMC, int nvtx);
+  LorentzVector GammaJetsPfMetShiftXY(LorentzVector met, bool isMC, int nvtx);
 
   LorentzVector correctForPhiAsymmetry(LorentzVector &met,float sumEt,bool isMC, bool isRunA);
 

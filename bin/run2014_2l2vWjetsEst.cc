@@ -581,19 +581,19 @@ int main(int argc, char* argv[])
         passBveto=(nABtags==0);
 
 
-        double dphiZllmet=fabs(deltaPhi(zll.phi(),zvvs[0].phi()));
-        bool passdphiZllmetCut20(dphiZllmet>2.0);
-        bool passdphiZllmetCut24(dphiZllmet>2.4);
-        bool passdphiZllmetCut27(dphiZllmet>2.7);
+        //double dphiZllmet=fabs(deltaPhi(zll.phi(),zvvs[0].phi()));
+        //bool passdphiZllmetCut20(dphiZllmet>2.0);
+        //bool passdphiZllmetCut24(dphiZllmet>2.4);
+        //bool passdphiZllmetCut27(dphiZllmet>2.7);
 
-        bool passMetCut60=(zvvs[0].pt()>60);
+        //bool passMetCut60=(zvvs[0].pt()>60);
         bool passMetCut80=(zvvs[0].pt()>80);
-        bool passMetCut100=(zvvs[0].pt()>100);
-        bool passMetCut120=(zvvs[0].pt()>120);
+        //bool passMetCut100=(zvvs[0].pt()>100);
+        //bool passMetCut120=(zvvs[0].pt()>120);
 
-        bool passBalanceCut025=(zvvs[0].pt()/zll.pt()>0.75 && zvvs[0].pt()/zll.pt()<1.25);
-        bool passBalanceCut05=(zvvs[0].pt()/zll.pt()>0.5 && zvvs[0].pt()/zll.pt()<1.5);
-        bool passBalanceCut075=(zvvs[0].pt()/zll.pt()>0.25 && zvvs[0].pt()/zll.pt()<1.75);
+        //bool passBalanceCut025=(zvvs[0].pt()/zll.pt()>0.75 && zvvs[0].pt()/zll.pt()<1.25);
+        //bool passBalanceCut05=(zvvs[0].pt()/zll.pt()>0.5 && zvvs[0].pt()/zll.pt()<1.5);
+        //bool passBalanceCut075=(zvvs[0].pt()/zll.pt()>0.25 && zvvs[0].pt()/zll.pt()<1.75);
 
 
         //#########################################################

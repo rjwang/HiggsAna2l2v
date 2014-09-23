@@ -130,6 +130,19 @@ int main(int argc, char* argv[])
 
     bool runOptimization = runProcess.getParameter<bool>("runOptimization");
     if(runOptimization) {
+
+        for(double met=60; met<=160; met+=10) { // 60,70,80,90,100,110,120,130,140,150,160
+            for(double balance=0.1; balance<=0.5; balance+=0.05) { //0.1,0.15,0.2,0.25,0.3,0.35,0.4,0.45,0.5
+                for(double dphi=2.7; dphi<2.8; dphi+=0.1) { // 2.7
+                    optim_Cuts1_MET.push_back(met);
+                    optim_Cuts1_Balance.push_back(balance);
+                    optim_Cuts1_DphiZMET.push_back(dphi);
+                }
+            }
+        }
+
+
+/*
         for(double met=90; met<=100; met+=10) {
             for(double balance=0.2; balance<=0.2; balance+=0.05) {
                 for(double dphi=2.7; dphi<=2.7; dphi+=0.1) {
@@ -139,16 +152,17 @@ int main(int argc, char* argv[])
                 }
             }
         }
+*/
     }
     size_t nOptims = optim_Cuts1_MET.size();
 
 
     //make it as a TProfile so hadd does not change the value
     TProfile* Hoptim_cuts1_MET      = (TProfile*) mon.addHistogram( new TProfile ("optim_cut1_MET",";cut index;met",nOptims,0,nOptims) );
-    TProfile* Hoptim_cuts1_Balance  = (TProfile*) mon.addHistogram( new TProfile ("optim_cut1_Balance",";cut index;dphi",nOptims,0,nOptims) );
+    TProfile* Hoptim_cuts1_Balance  = (TProfile*) mon.addHistogram( new TProfile ("optim_cut1_Balance",";cut index;balance",nOptims,0,nOptims) );
     TProfile* Hoptim_cuts1_DphiZMET = (TProfile*) mon.addHistogram( new TProfile ("optim_cut1_DphiZMET",";cut index;dphi",nOptims,0,nOptims) );
 
-    for(unsigned int index=0; index<nOptims; index++) {
+    for(size_t index=0; index<nOptims; index++) {
         Hoptim_cuts1_MET        ->Fill(index, optim_Cuts1_MET[index]);
         Hoptim_cuts1_Balance    ->Fill(index, optim_Cuts1_Balance[index]);
         Hoptim_cuts1_DphiZMET   ->Fill(index, optim_Cuts1_DphiZMET[index]);
@@ -160,6 +174,15 @@ int main(int argc, char* argv[])
     //1D shapes for limit setting
     //############################
     mon.addHistogram( new TH2F (TString("mt_shapes"),";cut index; #it{m}_{T} [GeV];#Events (/100GeV)",nOptims,0,nOptims,12,0,1200) );
+
+    //const int nBinType1MT = 15;
+    //double xbinsType1MT[nBinType1MT+1] = {0, 100, 125, 150, 175, 200, 225, 250, 275, 300, 350, 400, 500, 600, 800, 1200};
+    //mon.addHistogram( new TH2F (TString("Type1mt_shapes"),";cut index; #it{m}_{T} [GeV];#Events (/100GeV)",nOptims,0,nOptims,nBinType1MT,xbinsType1MT) );
+
+  
+    double xbinsPFMET[] = {50., 60., 70,  80., 90., 100., 125., 150., 400., 800.};
+    const int nBinPFMET = sizeof(xbinsPFMET)/sizeof(double) - 1;
+    mon.addHistogram( new TH2F (TString("pfmet_shapes"),";cut index;E_{T}^{miss} [GeV];#Events",nOptims,0,nOptims,nBinPFMET,xbinsPFMET) );
 
     //############################
     //2D shapes for limit setting
@@ -202,12 +225,25 @@ int main(int argc, char* argv[])
     double METBins[21]= {0,10,20,30,40,50,60,70,80,90,100,120,140,160,180,200,250,300,350,400,500};
     mon.addHistogram( new TH1F( "pfmet_dataDY",      ";E_{T}^{miss} [GeV];Events", 20, METBins));
 
+    mon.addHistogram( new TH1F( "response_dataDY", ";Response ;Events", 50,-2.5,2.5));
+
     double METBinsType1[11]= {0,10,20,30,40,60,90,130,180,300,500};
     mon.addHistogram( new TH1F( "pfmetType1_dataDY", ";E_{T}^{miss} [GeV];Events", 10, METBinsType1));
+   
+    double METBinsType2[15] = {0,50,100,150,200,250,300,350,400,500,600,700,800,900,1000};
+    mon.addHistogram( new TH1F( "pfmetType2_dataDY", ";E_{T}^{miss} [GeV];Events", 14, METBinsType2));
 
     mon.addHistogram( new TH1F( "DphiZMET_dataDY",   ";#Delta#it{#phi}(#it{l^{+}l^{-}},E_{T}^{miss});Events", 50,0,TMath::Pi()) );
     mon.addHistogram( new TH1D( "balancedif_dataDY", ";|E_{T}^{miss}-#it{q}_{T}|/#it{q}_{T};Events", 5,0,1.0) );
 
+    //for MVA study
+    mon.addHistogram( new TH1F( "pfmetMVA_dataDY",      ";E_{T}^{miss} [GeV];Events", 100, 0, 500));
+    mon.addHistogram( new TH1F( "zptMVA_dataDY",        ";#it{p}_{T}^{Z} [GeV];Events", 100, 0, 500));
+    mon.addHistogram( new TH2F( "zptvspfmetMVA_dataDY", ";E_{T}^{miss} [GeV];#it{p}_{T}^{Z} [GeV];Events",100,0,500, 100,0,500));
+
+    //MET X-Y shift correction
+    mon.addHistogram( new TH2F( "METx_vs_nvtx",";Vertices;E_{X}^{miss} [GeV];Events",50,0,50, 200,-75,75) );
+    mon.addHistogram( new TH2F( "METy_vs_nvtx",";Vertices;E_{Y}^{miss} [GeV];Events",50,0,50, 200,-75,75) );
 
     //##############################################
     //###### open the file and get events tree #####
@@ -235,7 +271,7 @@ int main(int argc, char* argv[])
     int NumberOfDuplicated(0);
 
     //pileup reweighting
-    bool disableJERSmear(false);
+    //bool disableJERSmear(false);
     std::vector<double> dataPileupDistributionDouble = runProcess.getParameter< std::vector<double> >("datapileup");
     std::vector<float> dataPileupDistribution;
     for(unsigned int i=0; i<dataPileupDistributionDouble.size(); i++) {
@@ -254,7 +290,7 @@ int main(int argc, char* argv[])
         delete histo;
         if(dataPileupDistribution.size()==0) {
             dataPileupDistribution=mcPileupDistribution;
-            disableJERSmear=true;
+            //disableJERSmear=true;
             cout << "No PU reweighting or JER smearing will be applied" << endl;
         }
     } else mcPileupDistribution=dataPileupDistribution;
@@ -363,8 +399,9 @@ int main(int argc, char* argv[])
         //
         //MET variables
         //
-        LorentzVector metP4=phys.met[1];
-        if(use2011Id) metP4=phys.met[0];
+        //LorentzVector metP4=phys.met[1];
+	//apply X-Y shift
+        LorentzVector metP4 = METUtils::GammaJetsPfMetShiftXY(phys.met[2],isMC,ev.nvtx);
 
         //apply JER base corrections to jets (and compute associated variations on the MET variable)
         // std PF
@@ -430,10 +467,17 @@ int main(int argc, char* argv[])
         bool passMETcut(metP4.pt()>90); //Reduced MET: redMet.pt() ; PFMET: metP4.pt()
         double balance=metP4.pt()/gamma.pt();
         double balanceDif=fabs(1.-balance);
-        bool passBalanceCut(balance > 0.80 && balance < 1.20);
+        //bool passBalanceCut(balance > 0.80 && balance < 1.20);
+
+
+        double response = METUtils::response(gamma,metP4);
+        bool passResponseCut = (response>-0.5 && response<0.5);
 
         double dphiZllmet=fabs(deltaPhi(gamma.phi(),metP4.phi()));
         bool passDphiZMETcut(dphiZllmet>2.7);
+
+
+	bool passMVAstudy=(metP4.pt()>60 && dphiZllmet>0.5 && balanceDif<0.4);
 
 
         //event category
@@ -460,6 +504,16 @@ int main(int argc, char* argv[])
         if(isGammaEvent && !use2011Id) qtWeights = gammaEvHandler.getQtFitWeights(phys,tag_subcat);
         if(isGammaEvent && use2011Id)  qtWeights = gammaEvHandler.get2011QtFitWeights(phys,tag_subcat);
 
+
+
+        //for MET X-Y shift correction
+        if(passKinematics){
+                mon.fillHisto("METx_vs_nvtx",   dilCats,ev.nvtx,metP4.px(), weight);
+                mon.fillHisto("METy_vs_nvtx",   dilCats,ev.nvtx,metP4.py(), weight);
+        }
+
+
+
         //now do the control plots
         if(!passKinematics) continue;
         if(!passBveto) continue;
@@ -467,9 +521,9 @@ int main(int argc, char* argv[])
         //fill the histograms now
         for(size_t idc=0; idc<dilCats.size(); idc++) {
             LorentzVector iboson(gammaEvHandler.massiveGamma(dilCats[idc]));
-            float zmass=iboson.mass();
+            //float zmass=iboson.mass();
             //float dphi2lep = gammaEvHandler.dphimassiveGamma(dilCats[idc]);
-            float coslz_cs = gammaEvHandler.coslzmassiveGamma(dilCats[idc]);
+            //float coslz_cs = gammaEvHandler.coslzmassiveGamma(dilCats[idc]);
             //bool passdphi2l(true);
             //bool passdphi2l(cos(dphi2lep)>0);
 
@@ -481,7 +535,9 @@ int main(int argc, char* argv[])
 
 	    
             if(isGammaEvent && dilCats[idc] != "ll" && applyQtweights) {
-
+		//for systematics study
+		//iweight*=Gweights_[dilCats[idc]];   //ratio method
+		
                 if(tag_subcat=="eq0jets") {
                     if(gamma.pt()>150)	iweight*=qtWeights[dilCats[idc]];   //fit method
                     else		iweight*=Gweights_[dilCats[idc]];   //ratio method
@@ -519,10 +575,18 @@ int main(int argc, char* argv[])
                 mon.fillHisto("qtType1_dataDY",ctf, gamma.pt(),iweight,true);
                 mon.fillHisto("nvtx_dataDY", ctf, ev.nvtx, iweight);
                 mon.fillHisto("pfmet_dataDY", ctf, metP4.pt(), iweight, true);
+		mon.fillHisto("response_dataDY", ctf, response , iweight);
                 mon.fillHisto("pfmetType1_dataDY", ctf, metP4.pt(), iweight, true);
+		mon.fillHisto("pfmetType2_dataDY", ctf, metP4.pt(), iweight, true);
                 mon.fillHisto("DphiZMET_dataDY",ctf, dphiZllmet, iweight);
                 mon.fillHisto("balancedif_dataDY",ctf, balanceDif, iweight);
 
+		//for MVA study
+		if(passMVAstudy){
+			mon.fillHisto("zptMVA_dataDY", ctf, gamma.pt(), iweight);
+			mon.fillHisto("pfmetMVA_dataDY", ctf, metP4.pt(), iweight);
+			mon.fillHisto("zptvspfmetMVA_dataDY",ctf, metP4.pt(),gamma.pt(), iweight);
+		}
 
                 if(passDphiZMETcut) {
                     mon.fillHisto("eventflow_gamma", ctf,1,iweight);
@@ -530,7 +594,7 @@ int main(int argc, char* argv[])
                     if(passMETcut) {
                         mon.fillHisto("eventflow_gamma", ctf,2,iweight);
 
-                        if(passBalanceCut) {
+                        if(/*passBalanceCut*/passResponseCut) {
                             mon.fillHisto("eventflow_gamma", ctf,3,iweight);
 
                         } //passBalanceCut
@@ -550,14 +614,20 @@ int main(int argc, char* argv[])
                     double minDphi = optim_Cuts1_DphiZMET[index];
 
                     bool passLocalMETcut(metP4.pt()>minMET);
-                    bool passLocalBalanceCut=(balance>(1.-minBalance) && balance<(1.+minBalance));
+                    //bool passLocalBalanceCut=(balance>(1.-minBalance) && balance<(1.+minBalance));
+
+                    double LocalResponse = METUtils::response(gamma,metP4);
+                    bool passLocalResponseCut = (LocalResponse > -minBalance) && (LocalResponse < minBalance);
+
                     bool passLocalDphiZMETcut(dphiZllmet>minDphi);
 
-                    bool passOptimSelection(passBaseSelection && passLocalMETcut && passLocalBalanceCut && passLocalDphiZMETcut);
+                    bool passOptimSelection(passBaseSelection && passLocalMETcut && /*passLocalBalanceCut*/passLocalResponseCut && passLocalDphiZMETcut);
 
                     // fill shapes for limit setting
                     if( passOptimSelection ) {
                         mon.fillHisto(TString("mt_shapes"),ctf, index, mt_massless, iweight);
+			//mon.fillHisto(TString("Type1mt_shapes"),ctf, index, mt_massless, iweight);
+			mon.fillHisto(TString("pfmet_shapes"),ctf, index, metP4.pt(), iweight,true);
                     }
                 }
 

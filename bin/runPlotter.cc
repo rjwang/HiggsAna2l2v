@@ -42,6 +42,7 @@ int cutIndex=-1;
 string cutIndexStr="";
 double iLumi = 2007;
 double iEcm=8;
+bool isphotonSample = false;
 bool showChi2 = false;
 bool showUnc=false;
 double baseRelUnc=0.044;
@@ -418,8 +419,6 @@ void Draw2DHistogramSplitCanvas(JSONWrapper::Object& Root, std::string RootDir, 
    T->SetTextAlign(32);
    char Buffer[1024]; 
    if(isSim)	sprintf(Buffer, "CMS simulation, #it{ZH #rightarrow l^{+}l^{-}+#slash{E}_{T}}, #sqrt{s}=%.1f TeV, L=%.1f fb^{-1}", iEcm, iLumi/1000);
-   //else		sprintf(Buffer, "CMS preliminary, #it{ZH #rightarrow l^{+}l^{-}+#slash{E}_{T}}, #sqrt{s}=%.1f TeV, L=%.1f fb^{-1}", iEcm, iLumi/1000);
-   //else sprintf(Buffer, "CMS preliminary, #sqrt{s}=%.1f TeV, L=%.1f fb^{-1}", iEcm, iLumi/1000);
    else sprintf(Buffer, "CMS preliminary, #sqrt{s}=%.1f TeV, L=19.7 fb^{-1}", iEcm);
    T->AddText(Buffer);
 
@@ -482,11 +481,7 @@ void Draw2DHistogramSplitCanvas(JSONWrapper::Object& Root, std::string RootDir, 
       leg->SetFillStyle(0);  leg->SetLineColor(0);
       leg->SetTextAlign(12);
       leg->AddText(Process[i]["tag"].c_str());
-      //leg->Draw("same");
       ObjectToDelete.push_back(leg);
-//      delete leg;
-//      delete hist;
-
       T->Draw("same");
 
 
@@ -532,6 +527,8 @@ void Draw2DHistogram(JSONWrapper::Object& Root, std::string RootDir, NameAndType
    int NSampleToDraw = 0;
    for(unsigned int i=0;i<Process.size();i++){
       if(Process[i]["isinvisible"].toBool())continue;
+      std::string procName = Process[i]["tag"].c_str();
+      if(procName.find("Multijets")!=std::string::npos || procName.find("Z#rightarrow #tau#tau")!=std::string::npos) continue;
       NSampleToDraw++;
    }
    int CanvasX = 4;
@@ -541,10 +538,15 @@ void Draw2DHistogram(JSONWrapper::Object& Root, std::string RootDir, NameAndType
 
 
    std::vector<TObject*> ObjectToDelete;
+   int ipad = 0;
    for(unsigned int i=0;i<Process.size();i++){
       if(Process[i]["isinvisible"].toBool())continue;
+      std::string procName = Process[i]["tag"].c_str();
+      if(procName.find("Multijets")!=std::string::npos || procName.find("Z#rightarrow #tau#tau")!=std::string::npos) {
+		continue;
+      }
 
-      TVirtualPad* pad = c1->cd(i+1);
+      TVirtualPad* pad = c1->cd(ipad+1);
       pad->SetLogz(true);
       pad->SetTopMargin(0.13); pad->SetBottomMargin(0.15);  pad->SetRightMargin(0.15); pad->SetLeftMargin(0.15);
       if(i%CanvasX == 0) pad->SetLeftMargin(0.2); 
@@ -588,6 +590,8 @@ void Draw2DHistogram(JSONWrapper::Object& Root, std::string RootDir, NameAndType
       if(!hist)continue;
 
       SaveName = hist->GetName();
+      //std::string procName = Process[i]["tag"].c_str();
+      //if(procName.find("Multijets")!=std::string::npos || procName.find("Z#rightarrow #tau#tau")!=std::string::npos) continue;
       ObjectToDelete.push_back(hist);
       hist->GetZaxis()->SetTitle("");
       hist->SetStats(kFALSE);
@@ -600,7 +604,7 @@ void Draw2DHistogram(JSONWrapper::Object& Root, std::string RootDir, NameAndType
       leg->SetFillColor(0);
       leg->SetFillStyle(0);  leg->SetLineColor(0);
       leg->SetTextAlign(31);
-      char Buffer[1024]; sprintf(Buffer, "CMS Preliminary, #sqrt{s}=%.1f TeV, L=%.1f fb^{-1}", iEcm, iLumi/1000);
+      char Buffer[1024]; sprintf(Buffer, "CMS Preliminary, #sqrt{s}=%.1f TeV, L=19.7 fb^{-1}", iEcm);
       leg->AddText(Buffer);
       TString processName = Process[i]["tag"].c_str();
       processName += ", "+savename;
@@ -608,6 +612,7 @@ void Draw2DHistogram(JSONWrapper::Object& Root, std::string RootDir, NameAndType
       leg->AddText(processName);
       leg->Draw("same");
       ObjectToDelete.push_back(leg);
+      ipad++;
    }
    c1->cd(0);
 
@@ -740,13 +745,8 @@ void Draw1DHistogram(JSONWrapper::Object& Root, std::string RootDir, NameAndType
       hist->SetStats(kFALSE);
       hist->SetMinimum(2e-2*scaleYMin);//5e-1);//2e-2);
       //hist->SetMaximum(1E6);
-      hist->SetMaximum(hist->GetBinContent(hist->GetMaximumBin())*1.10);
+      //hist->SetMaximum(hist->GetBinContent(hist->GetMaximumBin())*1.10);
       //TString tSaveName = hist->GetName();
-      //if(tSaveName.Contains("phi_dy")) hist->SetMaximum(hist->GetBinContent(hist->GetMaximumBin())*15);
-      //if(tSaveName.Contains("nvtx")) hist->SetMaximum(hist->GetBinContent(hist->GetMaximumBin())*1e2); // this has problem, to be fixed
-      //if(tSaveName.Contains("nleptons")) hist->SetMaximum(hist->GetBinContent(hist->GetMaximumBin())*1e2);
-      //if(tSaveName.Contains("npfjets")) hist->SetMaximum(hist->GetBinContent(hist->GetMaximumBin())*1e2);
-      //if(tSaveName.Contains("npfbjets")) hist->SetMaximum(hist->GetBinContent(hist->GetMaximumBin())*1e2);
       
 
       ObjectToDelete.push_back(hist);
@@ -828,11 +828,13 @@ void Draw1DHistogram(JSONWrapper::Object& Root, std::string RootDir, NameAndType
 	 if(isDataBlind || noratio) stack->GetXaxis()->SetTitle(hist->GetXaxis()->GetTitle());
 	 name_denRelUncH = hist->GetXaxis()->GetTitle();
 
+	 TString tSaveName = hist->GetName();
 	 float binsize = hist->GetBinWidth(1);
 	 std::ostringstream strs;
 	 strs.precision(2);
 	 strs << binsize;
 	 TString binSize = strs.str();
+	 if(tSaveName.Contains("pfmet_dataDY") || tSaveName.Contains("qt_dataDY") || tSaveName.Contains("pfmetType2_dataDY")) binSize = "1";
 	 if(name_denRelUncH.Contains("multiplicity")) stack->GetYaxis()->SetTitle("Events");
 	 else{
 	 	if(name_denRelUncH.Contains("GeV") && 
@@ -843,21 +845,30 @@ void Draw1DHistogram(JSONWrapper::Object& Root, std::string RootDir, NameAndType
 
 	 stack->SetMinimum(hist->GetMinimum());
 
-	 TString tSaveName = hist->GetName();
       	 if(tSaveName.Contains("nvtx")) maximumFound*= 50;
       	 if(tSaveName.Contains("nleptons")) maximumFound*= 50; 
          if(tSaveName.Contains("npfjets")) maximumFound*= 50;
          if(tSaveName.Contains("npfbjets")) maximumFound*= 50;
 	 if(tSaveName.Contains("_WWCtrl")) maximumFound*= 50;
+	 if(tSaveName.Contains("zmassType2_WWCtrl")) maximumFound = 1e+5;
 	 if(tSaveName.Contains("Eta_raw")) maximumFound*= 40;
 	 if(tSaveName.Contains("wmt_raw")) maximumFound*= 20;
 	 if(tSaveName.Contains("pfmet_raw")) maximumFound*= 20;
 	 if(tSaveName.Contains("eleLooseFakePt")) maximumFound*= 20;
 	 if(tSaveName.Contains("eleTightFakePt")) maximumFound*= 20;
 	 if(tSaveName.Contains("FakeEta")) maximumFound*= 40;
+	 if(tSaveName.Contains("eventflow")) maximumFound*= 100;
 	 maximumFound *= scaleYMax;
 
 	 stack->SetMaximum(maximumFound);
+	 
+         if(tSaveName.Contains("pfmet")){
+                stack->SetMinimum(5e-3);
+                //if(tSaveName.Contains("eq0jets")) stack->SetMaximum(1e3);
+                //if(tSaveName.Contains("eq1jets")) stack->SetMaximum(2e4);
+         }
+
+
 	 if(noLog)
 	   {
 	     stack->SetMaximum(maximumFound);
@@ -949,6 +960,7 @@ void Draw1DHistogram(JSONWrapper::Object& Root, std::string RootDir, NameAndType
 
 
    TPaveText* T2 = new TPaveText(0.2,0.93,0.39,0.8, "NDC");
+   if(noratio) T2 = new TPaveText(0.2,0.93,0.39,0.88, "NDC");
    T2->SetFillColor(0);
    T2->SetFillStyle(0);  T2->SetLineColor(0);
    T2->SetTextAlign(22);
@@ -1319,6 +1331,12 @@ TString getChannelName(std::string SaveName){
         && SaveName.find("eq1jets") == string::npos && SaveName.find("lesq1jets") == string::npos
         && SaveName.find("geq2jets") == string::npos )  {Buffer2="#it{ee,#mu#mu, #geq 0 jets channel}";}
 
+   if(isphotonSample){
+	Buffer2.ReplaceAll("#mu#mu","#gamma");
+	Buffer2.ReplaceAll("ee","#gamma");
+	Buffer2.ReplaceAll("e#mu","#gamma");
+   }	
+
    return Buffer2;
 }
 
@@ -1514,6 +1532,10 @@ int main(int argc, char* argv[]){
    char buf[255];
    sprintf(buf, "_Index%d", cutIndex);
    cutIndexStr = buf;
+
+   TString nameJsonFile = jsonFile;
+   isphotonSample=(nameJsonFile.Contains("photon"));
+
 
    JSONWrapper::Object Root(jsonFile, true);
    GetInitialNumberOfEvents(Root,inDir,NameAndType(cutflowhisto,true, false));  //Used to get the rescale factor based on the total number of events geenrated

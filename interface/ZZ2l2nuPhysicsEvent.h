@@ -200,8 +200,9 @@ struct PhysicsEvent_t
   PhysicsObjectLeptonCollection leptons;
 
   PhysicsObjectCollection genjets, genleptons, genmet, genhiggs, gengammas;
-  PhysicsObjectCollection genneutrinos; //RENJIE
-  PhysicsObjectCollection genWIMPs; //RENJIE
+  PhysicsObjectCollection genneutrinos;
+  PhysicsObjectCollection genWIMPs;
+  PhysicsObjectCollection genUnparticles;
 };
 
 //

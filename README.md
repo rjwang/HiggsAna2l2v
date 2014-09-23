@@ -7,9 +7,9 @@ General:
 
 Prepare:
 
-	setenv SCRAM_ARCH slc5_amd64_gcc462 
-	scramv1 project CMSSW CMSSW_5_3_11
-	cd CMSSW_5_3_11/src
+	setenv SCRAM_ARCH slc6_amd64_gcc472 
+	scramv1 project CMSSW CMSSW_5_3_18
+	cd CMSSW_5_3_18/src
 	cmsenv
 
 	git cms-addpkg DataFormats/ParticleFlowCandidate

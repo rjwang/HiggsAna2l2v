@@ -147,6 +147,7 @@ double ZHphotonjetsEventHandler::par1jets_mcgqt[4] = {748.628,-6.06733,20.0528,6
 //Mono-Z, July 09, 2014 
 //combine fit and ratio as weight
 //
+/*
 double ZHphotonjetsEventHandler::par0jets_mmqt[4] = {230.801,-4.64064,-1.59745,59.1334};
 double ZHphotonjetsEventHandler::par0jets_eeqt[4] = {214.02,-5.10411,20,1.26653};
 double ZHphotonjetsEventHandler::par0jets_gqt[4] = {432.336,-5.12048,3.53363e+09,5.97489};
@@ -156,8 +157,49 @@ double ZHphotonjetsEventHandler::par1jets_mmqt[4] = {468.825,-5.38642,20,3.35};
 double ZHphotonjetsEventHandler::par1jets_eeqt[4] = {449.804,-5.26356,20,3.55473};
 double ZHphotonjetsEventHandler::par1jets_gqt[4] = {659.43,-7.50765,82.0926,62.5261};
 double ZHphotonjetsEventHandler::par1jets_mcgqt[4] = {698.496,-7.07511,53.8569,65.1831};
+*/
 
+// Mono-Z, Aug 04, 2014
+// VV backgrounds are subtracted
+/*
+double ZHphotonjetsEventHandler::par0jets_mmqt[4] = {221.221,-4.43262,-1.35128,97.8416};
+double ZHphotonjetsEventHandler::par0jets_eeqt[4] = {206.381,-5.26251,20,1.17532};
+double ZHphotonjetsEventHandler::par0jets_gqt[4] = {432.336,-5.12048,3.53363e+09,5.97489};
+double ZHphotonjetsEventHandler::par0jets_mcgqt[4] = {420.258,-5.12143,20,3.54621};
 
+double ZHphotonjetsEventHandler::par1jets_mmqt[4] = {443.872,-7.56699,212.922,49.1785};
+double ZHphotonjetsEventHandler::par1jets_eeqt[4] = {449.418,-5.26432,15,2.80591};
+double ZHphotonjetsEventHandler::par1jets_gqt[4] = {659.43,-7.50765,82.0926,62.5261};
+double ZHphotonjetsEventHandler::par1jets_mcgqt[4] = {698.496,-7.07511,53.8569,65.1831};
+*/
+
+// Mono-Z, Aug 05, 2014
+// VV backgrounds are subtracted
+/*
+double ZHphotonjetsEventHandler::par0jets_mmqt[4] = {221.221,-4.43262,-1.35128,97.8416};
+double ZHphotonjetsEventHandler::par0jets_eeqt[4] = {192.719,-5.74894,20,0.959371};
+double ZHphotonjetsEventHandler::par0jets_gqt[4] = {432.336,-5.12048,3.53363e+09,5.97489};
+double ZHphotonjetsEventHandler::par0jets_mcgqt[4] = {420.258,-5.12143,20,3.54621};
+
+double ZHphotonjetsEventHandler::par1jets_mmqt[4] = {464.793,-5.51274,15,7.84662};
+double ZHphotonjetsEventHandler::par1jets_eeqt[4] = {448.923,-5.27413,15,3.35496};
+double ZHphotonjetsEventHandler::par1jets_gqt[4] = {659.43,-7.50765,82.0926,62.5261};
+double ZHphotonjetsEventHandler::par1jets_mcgqt[4] = {698.496,-7.07511,53.8569,65.1831};
+*/
+
+// Mono-Z, Aug 17, 2014
+// VV backgrounds are subtracted, Z mass window 10GeV
+double ZHphotonjetsEventHandler::par0jets_mmqt[4] = {201.73,-5.87057,10,0.989512};
+double ZHphotonjetsEventHandler::par0jets_eeqt[4] = {191.875,-5.73781,20,0.148266};
+double ZHphotonjetsEventHandler::par0jets_gqt[4] = {432.336,-5.12048,3.53363e+09,5.97489};
+double ZHphotonjetsEventHandler::par0jets_mcgqt[4] = {420.258,-5.12143,20,3.54621};
+
+double ZHphotonjetsEventHandler::par1jets_mmqt[4] = {461.541,-5.50603,15,3.16613};
+double ZHphotonjetsEventHandler::par1jets_eeqt[4] = {445.851,-5.25844,15,3.0958};
+double ZHphotonjetsEventHandler::par1jets_gqt[4] = {659.43,-7.50765,82.0926,62.5261};
+double ZHphotonjetsEventHandler::par1jets_mcgqt[4] = {698.496,-7.07511,53.8569,65.1831};
+
+//####################################
 
 //7TeV, Nov20
 double ZHphotonjetsEventHandler::par0jets_mmqt_2011[4] = {130.696,-7.2158,20,0.587308};

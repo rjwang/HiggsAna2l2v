@@ -239,7 +239,7 @@ vector<reco::CandidatePtr> getGoodMuons(edm::Handle<edm::View<reco::Candidate> >
 		       && fabs(lepId.trkdZ)<0.5
 		       && lepId.trkValidPixelHits>0
 		       && lepId.trkLayersWithMeasurement>5);
-	  bool isHighPt = muon::isHighPtMuon(dynamic_cast<const reco::Muon &>(*muon), dynamic_cast<const reco::Vertex &> (*primVertex)); //New Version (recommended) 
+	  //bool isHighPt = muon::isHighPtMuon(dynamic_cast<const reco::Muon &>(*muon), dynamic_cast<const reco::Vertex &> (*primVertex)); //New Version (recommended) 
 	  /*
 	  bool isHighPt(isGlobal
 			&& lepId.trkMatchedStations>1
@@ -283,7 +283,7 @@ vector<reco::CandidatePtr> getGoodMuons(edm::Handle<edm::View<reco::Candidate> >
 	    | isLoose << MID_LOOSE
 	    | isSoft << MID_SOFT
 	    | isTight << MID_TIGHT
-	    | isHighPt << MID_HIGHPT
+	    //| isHighPt << MID_HIGHPT
 	    | isVBTF2011 << MID_VBTF2011
 	    | isSoftVBTF2011 << MID_SOFT2011;
 
@@ -305,7 +305,7 @@ vector<reco::CandidatePtr> getGoodMuons(edm::Handle<edm::View<reco::Candidate> >
 	      if(id=="loose" && !isLoose) continue;
 	      if(id=="soft" &&  !isSoft) continue;
 	      if(id=="tight" && !isTight) continue;
-	      if(id=="highpt" && !isHighPt) continue;
+	      //if(id=="highpt" && !isHighPt) continue;
 	    }
 	  double relIso = lepId.isoVals[REL_ISO];
 	  if(rho>0)     relIso = lepId.isoVals[RELRHOCORR_ISO];
@@ -1167,7 +1167,11 @@ std::pair<int,vector<const reco::Candidate *> > assignPhysicsChannel(edm::Handle
     {
       const reco::GenParticle & p = dynamic_cast<const reco::GenParticle &>( (*genParticles)[i] );
 
-      //cout << p.pdgId() << endl;
+      //for Graviton/Unparticle 
+      if(abs(p.pdgId())==5000039 && p.status()==1){
+	  genTree.push_back(&p);
+      }
+
       //PROMPT PHOTON COUNTING from Hgg
       if(p.status()==1 && abs(p.pdgId()==22) && p.pt()>20)
 	{
@@ -1184,9 +1188,12 @@ std::pair<int,vector<const reco::Candidate *> > assignPhysicsChannel(edm::Handle
 	  }
 	}
 
-      if( p.status()!=3) continue;
+      if(p.status()!=3) continue;
       int id_p   = abs(p.pdgId());         
-      if(id_p== filterId) { genTree.push_back(&p); isSignal=true; continue; }
+      if(id_p==filterId) { genTree.push_back(&p); isSignal=true; continue; }
+
+      //for dark matter
+      if(id_p==1009) { genTree.push_back(&p); isSignal=true; continue; }
       
       //select Z/g* or W
       bool isZg(id_p == Z || abs(id_p)==GAMMA); nZgs+=isZg;
@@ -1215,6 +1222,7 @@ std::pair<int,vector<const reco::Candidate *> > assignPhysicsChannel(edm::Handle
 	  if(id_d==12 || id_d==14 || id_d==16) { nNeutrinos++; genTree.push_back(p_d); }
 	}
     }
+
 
   //MC truth 
   int mcChannel((nElecs+nMuons+nTaus) & 0xf);
