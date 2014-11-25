@@ -1,0 +1,28 @@
+{
+    "proc":[
+	{
+	"tag":"HZZd(10)_D3",
+        "isdata":false,
+	"issignal":true,
+	"spimpose":true,
+	"color":"0",
+        "mcolor":616,
+        "lcolor":616,
+	"lstyle":3,
+	"lwidth":2,
+	"fill":0,
+	"marker":20,
+	"data":[
+	    {
+                "dtag":"MC8TeV_HZZd10D3",
+                "dset":"",
+                "aoddir":["/store/user/rewang/AODSIM/HZZd/HZZd_MZd-10GeV_mH-126GeV_8TeV_D3_evts50k/"],
+                "patdir":[""],
+                "split":1,
+	        "mctruthmode":1,
+                "xsec":6.5511e-05
+             }
+	]
+        }
+    ]	
+}
