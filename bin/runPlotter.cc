@@ -251,6 +251,7 @@ void GetInitialNumberOfEvents(JSONWrapper::Object& Root, std::string RootDir, Na
 	 if(VBFMCRescale!=0)          cnorm *= VBFMCRescale;
          //printf("VBFMCRescale for sample %s is %f\n", (Samples[j])["dtag"].toString().c_str(), VBFMCRescale );
          sampleInfo.initialNumberOfEvents = cnorm / PUCentralnnorm;
+	 //cout << "initialNumberOfEvents: " << sampleInfo.initialNumberOfEvents << endl;
          delete tmphist;
       }   
    }
@@ -658,7 +659,7 @@ void Draw1DHistogram(JSONWrapper::Object& Root, std::string RootDir, NameAndType
 
    TLegend* legA  = new TLegend();
    if(!(isDataBlind||noratio)) legA  = new TLegend(0.45,0.7,0.9,0.95, "NDC");
-   else legA = new TLegend(0.45,0.78,0.9,0.98, "NDC");
+   else legA = new TLegend(0.45,0.78-0.03,0.9,0.98-0.03, "NDC");
 
    legA->SetNColumns(3);
    THStack* stack = new THStack("MC","MC");
@@ -853,7 +854,8 @@ void Draw1DHistogram(JSONWrapper::Object& Root, std::string RootDir, NameAndType
 	 if(tSaveName.Contains("zmassType2_WWCtrl")) maximumFound = 1e+5;
 	 if(tSaveName.Contains("Eta_raw")) maximumFound*= 40;
 	 if(tSaveName.Contains("wmt_raw")) maximumFound*= 20;
-	 if(tSaveName.Contains("pfmet_raw")) maximumFound*= 20;
+	 if(tSaveName.Contains("pfmet_raw")) maximumFound*= 100;
+	 if(tSaveName.Contains("DPhiZMET_dataDY")) maximumFound*= 20;
 	 if(tSaveName.Contains("eleLooseFakePt")) maximumFound*= 20;
 	 if(tSaveName.Contains("eleTightFakePt")) maximumFound*= 20;
 	 if(tSaveName.Contains("FakeEta")) maximumFound*= 40;

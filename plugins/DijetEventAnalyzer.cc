@@ -398,6 +398,9 @@ void DijetEventAnalyzer::analyze(const edm::Event &event, const edm::EventSetup 
     ev.curAvgInstLumi=curAvgInstLumi_;
     ev.curIntegLumi=curIntegLumi_;
 
+    //for debug
+    //std :: cout << "run: " << ev.run << " lumi: " << ev.lumi << " event: " << ev.event << std::endl;
+
     //filter bits
     ev.f_bits=false;
     std::vector<std::string> filts=objConfig_["MetFilter"].getParameter<std::vector<string> >("metfilters");

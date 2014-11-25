@@ -625,7 +625,7 @@ void DileptonPlusMETEventAnalyzer::analyze(const edm::Event &event, const edm::E
 	bool veto(false);
 	for(size_t isavLep=0; isavLep<savedLeptonsP4.size(); isavLep++)
 	  {
-	    if( deltaR( savedLeptonsP4[isavLep],lep.p4)>0.1 ) continue;
+	    if( deltaR(savedLeptonsP4[isavLep],lep.p4)>0.1 ) continue;
 	    veto=true;
 	  }
 	if(veto) continue;
@@ -801,7 +801,7 @@ void DileptonPlusMETEventAnalyzer::analyze(const edm::Event &event, const edm::E
 	if(selAJetsId[ijet].customTaggers.size()>1) ev.ajn_btag2[ev.ajn] = selAJetsId[ijet].customTaggers[1];
 	if(selAJetsId[ijet].customTaggers.size()>2) ev.ajn_btag3[ev.ajn] = selAJetsId[ijet].customTaggers[2];
 	if(selAJetsId[ijet].customTaggers.size()>3) ev.ajn_btag4[ev.ajn] = selAJetsId[ijet].customTaggers[3];
-	if(selAJetsId[ijet].customTaggers.size()>4) ev.ajn_btag5[ev.ajn] = selAJetsId[ijet].customTaggers[4];
+	if(selAJetsId[ijet].customTaggers.size()>4) ev.ajn_btag5[ev.ajn] = selAJetsId[ijet].customTaggers[4]; // this is original selAJetsId[ijet].csv
 	if(selAJetsId[ijet].customTaggers.size()>5) ev.ajn_btag6[ev.ajn] = selAJetsId[ijet].customTaggers[5];
 	if(selAJetsId[ijet].customTaggers.size()>6) ev.ajn_btag7[ev.ajn] = selAJetsId[ijet].customTaggers[6];
 	if(selAJetsId[ijet].customTaggers.size()>7) ev.ajn_btag8[ev.ajn] = selAJetsId[ijet].customTaggers[7];

@@ -132,7 +132,7 @@ int main(int argc, char* argv[])
     if(runOptimization) {
 
         for(double met=60; met<=160; met+=10) { // 60,70,80,90,100,110,120,130,140,150,160
-            for(double balance=0.1; balance<=0.5; balance+=0.05) { //0.1,0.15,0.2,0.25,0.3,0.35,0.4,0.45,0.5
+            for(double balance=0.2; balance<=0.2; balance+=0.05) { // 0.1, 0.15, 0.2, 0.25, 0.3
                 for(double dphi=2.7; dphi<2.8; dphi+=0.1) { // 2.7
                     optim_Cuts1_MET.push_back(met);
                     optim_Cuts1_Balance.push_back(balance);
@@ -467,11 +467,11 @@ int main(int argc, char* argv[])
         bool passMETcut(metP4.pt()>90); //Reduced MET: redMet.pt() ; PFMET: metP4.pt()
         double balance=metP4.pt()/gamma.pt();
         double balanceDif=fabs(1.-balance);
-        //bool passBalanceCut(balance > 0.80 && balance < 1.20);
+        bool passBalanceCut(balance > 0.80 && balance < 1.20);
 
 
         double response = METUtils::response(gamma,metP4);
-        bool passResponseCut = (response>-0.5 && response<0.5);
+        bool passResponseCut = (response>-1 && response<1);
 
         double dphiZllmet=fabs(deltaPhi(gamma.phi(),metP4.phi()));
         bool passDphiZMETcut(dphiZllmet>2.7);
@@ -594,7 +594,7 @@ int main(int argc, char* argv[])
                     if(passMETcut) {
                         mon.fillHisto("eventflow_gamma", ctf,2,iweight);
 
-                        if(/*passBalanceCut*/passResponseCut) {
+                        if( passBalanceCut && passResponseCut) {
                             mon.fillHisto("eventflow_gamma", ctf,3,iweight);
 
                         } //passBalanceCut
@@ -606,7 +606,7 @@ int main(int argc, char* argv[])
                 //### for shape analysis and optimization
                 //##############################
 
-                bool passBaseSelection( passKinematics && passMultiplicityVetoes && passBveto );
+                bool passBaseSelection( passKinematics && passMultiplicityVetoes && passBveto && passResponseCut);
                 for(unsigned int index=0; index<nOptims; index++) {
 
                     double minMET = optim_Cuts1_MET[index];
@@ -614,14 +614,12 @@ int main(int argc, char* argv[])
                     double minDphi = optim_Cuts1_DphiZMET[index];
 
                     bool passLocalMETcut(metP4.pt()>minMET);
-                    //bool passLocalBalanceCut=(balance>(1.-minBalance) && balance<(1.+minBalance));
-
-                    double LocalResponse = METUtils::response(gamma,metP4);
-                    bool passLocalResponseCut = (LocalResponse > -minBalance) && (LocalResponse < minBalance);
-
+                    bool passLocalBalanceCut=(balance>(1.-minBalance) && balance<(1.+minBalance));
                     bool passLocalDphiZMETcut(dphiZllmet>minDphi);
 
-                    bool passOptimSelection(passBaseSelection && passLocalMETcut && /*passLocalBalanceCut*/passLocalResponseCut && passLocalDphiZMETcut);
+                    //double LocalResponse = METUtils::response(gamma,metP4);
+                    //bool passLocalResponseCut = (LocalResponse > -minBalance) && (LocalResponse < minBalance);
+                    bool passOptimSelection(passBaseSelection && passLocalMETcut && passLocalBalanceCut && passLocalDphiZMETcut);
 
                     // fill shapes for limit setting
                     if( passOptimSelection ) {

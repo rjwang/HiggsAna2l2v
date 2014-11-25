@@ -4,7 +4,7 @@
 /** \class ZHUtils
  *  No description available.
  *
- *  \author R.-J. Wang 
+ *  \author R.-J. Wang
  */
 
 #include <iostream>
@@ -34,45 +34,52 @@ typedef ROOT::Math::LorentzVector<ROOT::Math::PxPyPzE4D<double> > LorentzVector;
 typedef std::vector<LorentzVector> LorentzVectorCollection;
 
 
-class ZHUtils
-{
- public:
+class ZHUtils {
+public:
 //namespace ZHUtils{
 
-  ZHUtils(const edm::ParameterSet &runProcess);
-  double Collins_Soper(const LorentzVector& lepton1, const LorentzVector& lepton2); 
-  float weightNLOEWKzh(float pt);
-  float weightNLOEWKzz(float pt);
-  float weightNLOEWKwz(float pt);
-  //float weightNLOEWKwplusz(float pt);
-  //float weightNLOEWKwminuz(float pt); 
+    ZHUtils(const edm::ParameterSet &runProcess);
+    double Collins_Soper(const LorentzVector& lepton1, const LorentzVector& lepton2);
+    float weightNLOEWKzh(float pt);
+    float weightNLOEWKzz(float pt);
+    float weightNLOEWKwz(float pt);
+    //float weightNLOEWKwplusz(float pt);
+    //float weightNLOEWKwminuz(float pt);
 
-  double GetNLOZHWeight(const PhysicsEvent_t& phys);
-  double GetNLOZZWeight(const PhysicsEvent_t& phys);
-  double GetNLOWZWeight(const PhysicsEvent_t& phys);
-
-
-  //void ZHEventHandler(const edm::ParameterSet &runProcess);
-  std::map<TString,float> getWeights(double ValtoWeight, TString wgtName);
-  double get2DWeights(double Val_x, double Val_y, TString wgtName, TString cat);
+    double GetNLOZHWeight(const PhysicsEvent_t& phys);
+    double GetNLOZZWeight(const PhysicsEvent_t& phys);
+    double GetNLOWZWeight(const PhysicsEvent_t& phys);
 
 
-  // prompt rate and fake rate
-  void get_frFile(const edm::ParameterSet &runProcess);
-  double promptRate(int pdgid, double pt, double abseta);
-  double fakeRate(int pdgid, double pt, double abseta, TString key);
+    //dynamical reweighting for QCD NLO ZZ and WZ
+    //from Michael Brodski <brodski@physik.rwth-aachen.de>
+    //Oct 30, 2014
+    double ZZQCDNLOkfactor(float gen_z_pt /*generator MET*/);
+    double WZQCDNLOkfactor(float gen_nu_pt /*generator MET*/);
+    double GetQCDNLOZZweight(const PhysicsEvent_t& phys);
+    double GetQCDNLOWZweight(const PhysicsEvent_t& phys);
 
-  double getN_PFweight(int TL_type, LorentzVector lep1, int id1, LorentzVector lep2, int id2, TString key);
-  double getN_FPweight(int TL_type, LorentzVector lep1, int id1, LorentzVector lep2, int id2, TString key);
-  double getN_FFweight(int TL_type, LorentzVector lep1, int id1, LorentzVector lep2, int id2, TString key);
+    //void ZHEventHandler(const edm::ParameterSet &runProcess);
+    std::map<TString,float> getWeights(double ValtoWeight, TString wgtName);
+    double get2DWeights(double Val_x, double Val_y, TString wgtName, TString cat);
 
-  ~ZHUtils();
 
- private:
-  std::map<TString, std::map<TString,TGraph *> > wgtsH_;
-  std::map<TString, std::map<TString,TH2F *> > wgts2DH_;
+    // prompt rate and fake rate
+    void get_frFile(const edm::ParameterSet &runProcess);
+    double promptRate(int pdgid, double pt, double abseta);
+    double fakeRate(int pdgid, double pt, double abseta, TString key);
 
-  std::map<TString, TH1F *> fakerate1DH_;
+    double getN_PFweight(int TL_type, LorentzVector lep1, int id1, LorentzVector lep2, int id2, TString key);
+    double getN_FPweight(int TL_type, LorentzVector lep1, int id1, LorentzVector lep2, int id2, TString key);
+    double getN_FFweight(int TL_type, LorentzVector lep1, int id1, LorentzVector lep2, int id2, TString key);
+
+    ~ZHUtils();
+
+private:
+    std::map<TString, std::map<TString,TGraph *> > wgtsH_;
+    std::map<TString, std::map<TString,TH2F *> > wgts2DH_;
+
+    std::map<TString, TH1F *> fakerate1DH_;
 
 };
 #endif

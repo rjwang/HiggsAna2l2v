@@ -783,7 +783,7 @@ vector<CandidatePtr> getGoodJets(edm::Handle<edm::View<reco::Candidate> > &hJet,
 	jetId.ensferr=0;
 	//jetId.tche=jet->bDiscriminator("trackCountingHighEffBJetTags");
 	//jetId.tchp=jet->bDiscriminator("trackCountingHighPurBJetTags");
-	//jetId.csv=jet->bDiscriminator("combinedSecondaryVertexBJetTags");
+	jetId.csv=jet->bDiscriminator("combinedSecondaryVertexBJetTags");
 	//jetId.ssvhe=jet->bDiscriminator("simpleSecondaryVertexHighEffBJetTags");
 	//jetId.ssvhp=jet->bDiscriminator("simpleSecondaryVertexHighPurBJetTags");
 	//jetId.jp=jet->bDiscriminator("jetProbabilityBJetTags");

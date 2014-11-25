@@ -96,7 +96,7 @@ void ZHUtils::get_frFile(const edm::ParameterSet &runProcess)
             for(size_t itag=0; itag<tagNames.size(); itag++) {
                 for(size_t ivar=0; ivar<nvarsToInclude; ivar++) {
                     TString key = tagNames[itag]+"FakePt_syst"+varNames[ivar];
-		    cout << "key: " << key << endl;
+                    cout << "key: " << key << endl;
                     TH1F *h = (TH1F *) fr_File->Get(key);
                     h->SetDirectory(0); //THIS IS IMPORTANT FOR TH1 Weight File!!!
                     fakerate1DH_[key] = h;
@@ -108,8 +108,6 @@ void ZHUtils::get_frFile(const edm::ParameterSet &runProcess)
         cout << "[ZHUtils] close file: " << frFile << endl;
     }
 }
-
-
 
 double ZHUtils::Collins_Soper(const LorentzVector& lepton1, const LorentzVector& lepton2)
 {
@@ -259,6 +257,132 @@ double ZHUtils::GetNLOWZWeight(const PhysicsEvent_t& phys)
 
     return weight;
 }
+
+// from Michael Brodski <brodski@physik.rwth-aachen.de>
+// Oct 30, 2014
+double ZHUtils::ZZQCDNLOkfactor(float gen_z_pt /*generator MET*/)
+{
+    double kfactor = 0.;
+    double ZZ_kFactors[]= {0.0,
+                           0.94326764345169067,
+                           1.0035196542739868,
+                           1.1098935604095459,
+                           1.2901004552841187,
+                           1.1905548572540283,
+                           1.3430054187774658,
+                           1.1620302200317383,
+                           1.3074016571044922,
+                           1.2638260126113892,
+                           1.2879478931427002,
+                           1.196311354637146,
+                           1.2901802062988281,
+                           1.2089201211929321,
+                           1.1979459524154663,
+                           1.110659122467041,
+                           1.1369823217391968,
+                           1.1524343490600586,
+                           1.1048606634140015,
+                           1.1464763879776001,
+                           1.093919038772583,
+                           1.0052757263183594,
+                           0.98668587207794189,
+                           1.0232065916061401,
+                           1.0102578401565552,
+                           0.99546754360198975,
+                           1.0504124164581299,
+                           0.89631515741348267,
+                           0.88606923818588257,
+                           1.0205018520355225,
+                          };
+
+    //5-GeV binning, divide by 5
+    if(gen_z_pt<150.) {
+        int binnumber = (int)gen_z_pt/5;
+        kfactor = ZZ_kFactors[binnumber];
+    } else { //fitted linear for the k-factor
+        kfactor= 0.990098 - 0.000781857*gen_z_pt;
+    }
+
+    return kfactor;
+}
+
+double ZHUtils::GetQCDNLOZZweight(const PhysicsEvent_t& phys)
+{
+    double weight = 1.0;
+    double pt_zvv = (phys.genneutrinos[0]+phys.genneutrinos[1]).pt();
+    weight = ZZQCDNLOkfactor(pt_zvv);
+    return weight;
+}
+
+double ZHUtils::WZQCDNLOkfactor(float gen_nu_pt /*generator MET*/)
+{
+    double kfactor = 0.;
+    //reweight bin-for-bin below 200Gev, then use an extrapolated linear function
+    double WZ_kFactors[]= {0.0,
+                           1.9187283515930176,
+                           1.851645827293396,
+                           1.8116303682327271,
+                           1.8450329303741455,
+                           1.8722785711288452,
+                           2.0393874645233154,
+                           1.9451465606689453,
+                           1.7974948883056641,
+                           1.5585530996322632,
+                           1.4086459875106812,
+                           1.3027514219284058,
+                           1.2167214155197144,
+                           1.1457395553588867,
+                           1.1231216192245483,
+                           1.0461404323577881,
+                           1.0161194801330566,
+                           0.9654882550239563,
+                           0.92649304866790771,
+                           0.91419690847396851,
+                           0.86213141679763794,
+                           0.85179990530014038,
+                           0.84018367528915405,
+                           0.80480223894119263,
+                           0.8126557469367981,
+                           0.81011945009231567,
+                           0.75017786026000977,
+                           0.76554232835769653,
+                           0.71625840663909912,
+                           0.74609845876693726,
+                           0.74994057416915894,
+                           0.7460666298866272,
+                           0.74263542890548706,
+                           0.72279000282287598,
+                           0.74116051197052002,
+                           0.74059844017028809,
+                           0.73111110925674438,
+                           0.7415471076965332,
+                           0.71208411455154419,
+                           0.70913481712341309,
+                           0.73165619373321533
+                          };
+    //5-GeV binning, divide by 5
+    if(gen_nu_pt<200.) {
+        int binnumber = (int)gen_nu_pt/5;
+        kfactor = WZ_kFactors[binnumber];
+    } else { //fitted linear for the k-factor
+        kfactor= 0.763757 - 0.000217464*gen_nu_pt;
+    }
+
+    return kfactor;
+}
+
+double ZHUtils::GetQCDNLOWZweight(const PhysicsEvent_t& phys)
+{
+    double weight = 1.0;
+    int Nneutrinos = phys.genneutrinos.size();
+    if( Nneutrinos==1) {
+        double vpt = phys.genneutrinos[0].pt();
+        weight = WZQCDNLOkfactor(vpt);
+    }
+    return weight;
+}
+
+
 
 
 std::map<TString,float> ZHUtils::getWeights(double ValtoWeight, TString wgtName)
@@ -412,7 +536,7 @@ double ZHUtils::fakeRate(int pdgid, double pt, double abseta, TString key)
     double fake_rate = 0.;
     TString tag;
     if(pdgid==11) tag="ele"+key;
-    else if(pdgid==13) tag="mu"+key; 
+    else if(pdgid==13) tag="mu"+key;
 
     TH1F* fr_h = fakerate1DH_[tag];
     if(fr_h==0) cout << "cannot find hist: " << tag << endl;
@@ -443,7 +567,7 @@ double ZHUtils::fakeRate(int pdgid, double pt, double abseta, TString key)
         else           fake_rate = 0.101818;
     }
     */
-    
+
     return fake_rate;
 
 }
@@ -486,7 +610,6 @@ double ZHUtils::getN_FPweight(int TL_type, LorentzVector lep1, int id1, LorentzV
     return weight;
 }
 
-
 double ZHUtils::getN_FFweight(int TL_type, LorentzVector lep1, int id1, LorentzVector lep2, int id2, TString key)
 {
     double p_1 = promptRate( id1, lep1.pt(), fabs(lep1.eta()) );
@@ -504,6 +627,7 @@ double ZHUtils::getN_FFweight(int TL_type, LorentzVector lep1, int id1, LorentzV
 
     return weight;
 }
+
 
 /*
    float weightNLOEWKzz(float pt)

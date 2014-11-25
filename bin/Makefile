@@ -1,4 +1,4 @@
 all:
-	scramv1 b -j 20
+	@scramv1 b -j 8
 clean:
-	scramv1 b clean
+	@scramv1 b clean

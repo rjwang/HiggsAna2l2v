@@ -12,7 +12,10 @@
  <bin name="run2014_WIMPAnalysis" file="run2014_WIMPAnalysis.cc"></bin>
  <bin name="run2014_GammaPlusJets" file="run2014_GammaPlusJets.cc"></bin>
  <bin name="runLimits" file="runLimits.cc"></bin>
+ <bin name="runLimitsBSM" file="runLimitsBSM.cc"></bin>
  <bin name="computePDFvariations" file="computePDFvariations.cc"></bin>
+
+ <bin name="run2014_WIMPAnalysis_Bebug" file="run2014_WIMPAnalysis_Bebug.cc"></bin>
 
 </environment>
 <Flags CXXFLAGS="-g -std=c++0x"/>

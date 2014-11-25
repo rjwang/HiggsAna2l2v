@@ -4,6 +4,9 @@
  *  $Date: 2013/03/03 14:58:03 $
  *  $Revision: 1.16 $
  *  \author G. Cerminara & D. Trocino & P. Silva & L. Quertenmont
+ *
+ *  $Data: 2013: Debug JER smearing Renjie Wang
+ $         2014: update JER, JES correction
  */
 
 #include "CMGTools/HiggsAna2l2v/interface/METUtils.h"
@@ -397,13 +400,14 @@ LorentzVector redMET(RedMetType Type, const LorentzVector& theLepton1, double si
   }
 
 
-  //
+  //Nov. 20, 2014 update for 8TeV scale factors
   PhysicsObject_Jet smearedJet(const PhysicsObject_Jet &origJet, double genJetPt, int mode)
   {
     if(genJetPt<=0) return origJet;
 
     //smearing factors are described in https://twiki.cern.ch/twiki/bin/view/CMS/JetResolution
     double eta=fabs(origJet.eta());
+    /*
     double ptSF(1.0), ptSF_err(0.06);
     if(eta<0.5)                  { ptSF=1.052; ptSF_err=sqrt(pow(0.012,2)+pow(0.5*(0.062+0.061),2)); }
     else if(eta>=0.5 && eta<1.1) { ptSF=1.057; ptSF_err=sqrt(pow(0.012,2)+pow(0.5*(0.056+0.055),2)); }
@@ -413,6 +417,21 @@ LorentzVector redMET(RedMetType Type, const LorentzVector& theLepton1, double si
 
     if(mode==1) ptSF += ptSF_err;
     if(mode==2) ptSF -= ptSF_err;
+    */
+
+    //https://twiki.cern.ch/twiki/bin/viewauth/CMS/JetResolution#JER_Scaling_factors_and_Uncertai
+    double ptSF(1.0), ptSF_up(1.0), ptSF_down(1.0);
+    if(eta<0.5)                  { ptSF=1.079; ptSF_up=1.105; ptSF_down=1.053; }
+    else if(eta>=0.5 && eta<1.1) { ptSF=1.099; ptSF_up=1.127; ptSF_down=1.071; }
+    else if(eta>=1.1 && eta<1.7) { ptSF=1.121; ptSF_up=1.150; ptSF_down=1.092; }
+    else if(eta>=1.7 && eta<2.3) { ptSF=1.208; ptSF_up=1.254; ptSF_down=1.162; }
+    else if(eta>=2.3 && eta<2.8) { ptSF=1.254; ptSF_up=1.316; ptSF_down=1.192; }
+    else if(eta>=2.8 && eta<3.2) { ptSF=1.395; ptSF_up=1.458; ptSF_down=1.332; }
+    else if(eta>=3.2 && eta<5.0) { ptSF=1.056; ptSF_up=1.247; ptSF_down=0.865; }
+
+    if(mode==1) ptSF = ptSF_up;
+    if(mode==2) ptSF = ptSF_down;
+
     ptSF=max(0.,(genJetPt+ptSF*(origJet.pt()-genJetPt)))/origJet.pt();                      //deterministic version
     //ptSF=max(0.,(genJetPt+gRandom->Gaus(ptSF,ptSF_err)*(origJet.pt()-genJetPt)))/origJet.pt();  //deterministic version
     if( ptSF<=0 /*|| isnan(ptSF)*/ ) return origJet;
@@ -495,7 +514,7 @@ LorentzVector redMET(RedMetType Type, const LorentzVector& theLepton1, double si
 	  {
 	    unclustDiff=(met+clusteredFlux);
 	    double varSign=(ivar==UMET_UP ? 1.0 : -1.0);
-	    unclustDiff *= (varSign*0.10);
+	    unclustDiff *= (varSign*0.10); //10% variation of residule recoil 
 	  }
 
 	//add new met

@@ -37,11 +37,16 @@
 
 using namespace std;
 double NonResonnantSyst = 0.25; //0.1;//0.25;
-double WWtopSyst_ee0jet = 0.20; 
-double WWtopSyst_ee1jet = 0.78;
-double WWtopSyst_mm0jet = 0.16;
-double WWtopSyst_mm1jet = 0.32;
+
+double WWtopSyst_ee0jet = 0.; 
+double WWtopSyst_ee1jet = 0.;
+double WWtopSyst_eelesq1jet = 0.;
+double WWtopSyst_mm0jet = 0.;
+double WWtopSyst_mm1jet = 0.;
+double WWtopSyst_mmlesq1jet = 0.;
+
 double GammaJetSyst = 0.7;//1.0; //0.5;//0.5, 1.0;
+double ZjetsExtropSyst = 0.6;
 double WjetsSyst_ee = 0.146;
 double WjetsSyst_mm = 0.229;
 
@@ -158,7 +163,7 @@ std::vector<TString> buildDataCard(TString atgcpar,Int_t mass, TString histo="fi
 void doBackgroundSubtraction(std::vector<TString>& selCh,TString ctrlCh,map<TString, Shape_t> &allShapes, TString mainHisto, TString sideBandHisto, TString url, JSONWrapper::Object &Root, bool isMCclosureTest);
 void dodataDrivenWWtW(std::vector<TString>& selCh,TString ctrlCh,map<TString, Shape_t> &allShapes, TString mainHisto,bool isMCclosureTest);
 void doWjetsBackground(std::vector<TString>& selCh,map<TString, Shape_t> &allShapes, TString mainHisto);
-void doDYextrapolation(std::vector<TString>& selCh,map<TString, Shape_t> &allShapes, TString mainHisto);
+void doDYextrapolation(std::vector<TString>& selCh,map<TString, Shape_t> &allShapes,TString mainHisto,TString DY_EXTRAPOL_SHAPES,float DY_EXTRAPOL,bool isleftCR);
 void doQCDBackground(std::vector<TString>& selCh,map<TString, Shape_t> &allShapes, TString mainHisto);
 void doDYReplacement(std::vector<TString>& selCh,TString ctrlCh,map<TString, Shape_t>& allShapes, TString mainHisto, TString metHistoForRescale);
 void doWZSubtraction(std::vector<TString>& selCh,TString ctrlCh,map<TString, Shape_t>& allShapes, TString mainHisto, TString sideBandHisto);
@@ -193,6 +198,10 @@ double shapeMax = 9999;
 double shapeMinVBF = 0;
 double shapeMaxVBF = 9999;
 bool doInterf = false;
+
+float DYMET_EXTRAPOL = 9999;
+float DYRESP_EXTRAPOL = 9999;
+float DYDPHI_EXTRAPOL = 9999;
 
 int indexvbf = -1;
 int indexcut   = -1, indexcutL=-1, indexcutR=-1;
@@ -326,6 +335,9 @@ int main(int argc, char* argv[])
         else if(arg.find("--subWZ")    !=string::npos) { subWZ=true; printf("WZ will be estimated from 3rd lepton SB\n");}
         else if(arg.find("--DDRescale")!=string::npos && i+1<argc)  { sscanf(argv[i+1],"%lf",&DDRescale); i++;}
         else if(arg.find("--MCRescale")!=string::npos && i+1<argc)  {sscanf(argv[i+1],"%lf",&MCRescale); i++;}
+	else if(arg.find("--metEXTRAPOL") !=string::npos && i+1<argc)  {sscanf(argv[i+1],"%f",&DYMET_EXTRAPOL);i++;printf("DYMET_EXTRAPOL = %f\n", DYMET_EXTRAPOL);}
+	else if(arg.find("--respEXTRAPOL") !=string::npos && i+1<argc)  {sscanf(argv[i+1],"%f",&DYRESP_EXTRAPOL);i++;printf("DYRESP_EXTRAPOL = %f\n", DYRESP_EXTRAPOL);}
+	else if(arg.find("--dphiEXTRAPOL") !=string::npos && i+1<argc)  {sscanf(argv[i+1],"%f",&DYDPHI_EXTRAPOL);i++;printf("DYDPHI_EXTRAPOL = %f\n", DYDPHI_EXTRAPOL);}
         else if(arg.find("--HWW")      !=string::npos) { skipWW=false;printf("HWW = True\n");}
         else if(arg.find("--skipGGH")  !=string::npos) { skipGGH=true;printf("skipGGH = True\n");}
         else if(arg.find("--skipQQH")  !=string::npos) { skipQQH=true;printf("skipQQH = True\n");}
@@ -482,7 +494,8 @@ Shape_t getShapeFromFile(TFile* inF, TString ch, TString shapeName, int cutBin, 
                 hshape->SetMarkerStyle(marker);
                 hshape->SetLineStyle(lstyle);
             } else {
-                if(!histoName.Contains("FR_WjetCtrl") && !histoName.Contains("FR_QCDCtrl") && !histoName.Contains("pfmet_minus_shapes")) 
+                if(!histoName.Contains("FR_WjetCtrl") && !histoName.Contains("FR_QCDCtrl") 
+			&& !histoName.Contains("minus_shapes") && !histoName.Contains("_NRBctrl") && !histoName.Contains("_NRBsyst")) 
 			printf("Histo %s does not exist for syst:%s\n", histoName.Data(), varName.Data());
                 continue;
             }
@@ -636,8 +649,11 @@ Shape_t getShapeFromFile(TFile* inF, TString ch, TString shapeName, int cutBin, 
                 if(atgcCorrVect.size()==0) continue;
                 if(x==0 || x==shape.signal[k]->GetNbinsX()+1) continue;
                 if(atgcCorrVect[x-1]<0.) continue;
-                atgcShiftVec[x-1] = atgcCorrVect[x-1] - shape.signal[k]->GetBinContent(x); // before changing, save the difference (the syst plots will be shifted by the same amount)
-                shape.signal[k]->SetBinContent(x, atgcCorrVect[x-1]); // replace the content of the bin with the expected value for the extrapolated point
+                atgcShiftVec[x-1] = atgcCorrVect[x-1] - shape.signal[k]->GetBinContent(x); 
+		// before changing, save the difference (the syst plots will be shifted by the same amount)
+                
+		shape.signal[k]->SetBinContent(x, atgcCorrVect[x-1]); 
+		// replace the content of the bin with the expected value for the extrapolated point
             }
             if(atgcShiftVec.size()>0) atgcShiftMap[atgcCorrIdx] = atgcShiftVec;
         }
@@ -658,7 +674,8 @@ Shape_t getShapeFromFile(TFile* inF, TString ch, TString shapeName, int cutBin, 
                     if(signSysts[jsys].second->GetBinContent(x)<0)signSysts[jsys].second->SetBinContent(x,0.0);
                     if(atgcShiftMap.count(atgcCorrIdx)==0) continue;
                     if(x==0 || x==shape.signal[k]->GetNbinsX()+1) continue;
-                    signSysts[jsys].second->SetBinContent( x, signSysts[jsys].second->GetBinContent(x) + atgcShiftMap[atgcCorrIdx][x-1] ); // apply to the syst plots the same shift used for the main distribution
+                    signSysts[jsys].second->SetBinContent( x, signSysts[jsys].second->GetBinContent(x) + atgcShiftMap[atgcCorrIdx][x-1] ); 
+		    // apply to the syst plots the same shift used for the main distribution
                 }
             }
         }
@@ -868,7 +885,7 @@ void showShape(std::vector<TString>& selCh ,map<TString, Shape_t>& allShapes, TS
                                 if(kt->first.Contains("_zz_") && !it->first.Contains("ZZ")) continue;
                                 if(kt->first.Contains("_wz_") && !it->first.Contains("WZ")) continue;
                                 if(kt->first.Contains("_zlldata_") && !it->first.Contains("Z#rightarrow ll (data)")) continue;
-                                if(kt->first.Contains("_topwwwjetsdata_") && !it->first.Contains("Top/WW/W+Jets  (data)")) continue;
+                                if(kt->first.Contains("_topwwztautaudata_") && !it->first.Contains("Top/WW/Ztautau (data)")) continue;
 
                                 ErrShape.push_back(kt->second);
                             }
@@ -1483,8 +1500,10 @@ void getYieldsFromShape(std::vector<TString> ch, const map<TString, Shape_t> &al
 
     YIELDS_T ee0jet_Yields;
     YIELDS_T ee1jet_Yields;
+    YIELDS_T eelesq1jet_Yields;
     YIELDS_T mm0jet_Yields;
     YIELDS_T mm1jet_Yields;
+    YIELDS_T mmlesq1jet_Yields;
 
     TH1* h;
     Double_t valerr, val;// syst;
@@ -1498,6 +1517,9 @@ void getYieldsFromShape(std::vector<TString> ch, const map<TString, Shape_t> &al
 
             //nbckgs
             size_t nbckg=allShapes.find(ch[ich]+AnalysisBins[b]+shName)->second.bckg.size();
+	    double sum_allbkgs(0.);
+	    double err_allbkgs(0.); 
+
             for(size_t ibckg=0; ibckg<nbckg; ibckg++) {
                 TH1* h=allShapes.find(ch[ich]+AnalysisBins[b]+shName)->second.bckg[ibckg];
                 TString procTitle(h->GetTitle());
@@ -1512,33 +1534,38 @@ void getYieldsFromShape(std::vector<TString> ch, const map<TString, Shape_t> &al
 		if(procTitle.Contains("ZZ#rightarrow 2l2#nu")){
 			fortableYields.ZZ = val;
 			fortableYields.ZZ_StatErr = valerr; 	
+			sum_allbkgs += val; err_allbkgs += valerr*valerr;
 		}
 		else if(procTitle.Contains("WZ#rightarrow 3l#nu")){
                         fortableYields.WZ = val;
                         fortableYields.WZ_StatErr = valerr;
+			sum_allbkgs += val; err_allbkgs += valerr*valerr;
 		}
 		else if(procTitle.Contains("Z+jets (data)")){
                         fortableYields.Zjets = val;
                         fortableYields.Zjets_StatErr = valerr;
+			sum_allbkgs += val; err_allbkgs += valerr*valerr;
 		}
-		else if(procTitle.Contains("Top/WW/W+Jets (data)")){
+		else if(procTitle.Contains("Top/WW/Ztautau (data)")){
                         fortableYields.WWtop = val;
                         fortableYields.WWtop_StatErr = valerr;
+			sum_allbkgs += val; err_allbkgs += valerr*valerr;
 		}
-		else if(procTitle.Contains("Wjets(data)")){
+		else if(procTitle.Contains("Wjets (data)")){
                         fortableYields.Wjets = val;
                         fortableYields.Wjets_StatErr = valerr;
+			sum_allbkgs += val; err_allbkgs += valerr*valerr;
 		}
             } //nbckgs END!
 
 
             //total bckg
-            h=allShapes.find(ch[ich]+AnalysisBins[b]+shName)->second.totalBckg;
-            val = h->IntegralAndError(1,h->GetXaxis()->GetNbins(),valerr);
+            ////h=allShapes.find(ch[ich]+AnalysisBins[b]+shName)->second.totalBckg;
+            ////val = h->IntegralAndError(1,h->GetXaxis()->GetNbins(),valerr);
             //syst = h->GetBinError(0)<=0 ? -1 : h->GetBinError(0);
 
-	    fortableYields.totBkg = val;
-	    fortableYields.totBkg_StatErr = valerr; 
+	    fortableYields.totBkg = sum_allbkgs;
+	    fortableYields.totBkg_StatErr = sqrt(err_allbkgs); 
 
             //signal
             size_t nsig=allShapes.find(ch[ich]+AnalysisBins[b]+shName)->second.signal.size();
@@ -1598,13 +1625,15 @@ void getYieldsFromShape(std::vector<TString> ch, const map<TString, Shape_t> &al
             fortableYields.Data = val;
             fortableYields.Data_StatErr = valerr;
 
-	    if(YieldsLabel.Contains("eeeq0jets")) ee0jet_Yields = fortableYields;
-	    if(YieldsLabel.Contains("eeeq1jets")) ee1jet_Yields = fortableYields;
-	    if(YieldsLabel.Contains("mumueq0jets")) mm0jet_Yields = fortableYields;
-	    if(YieldsLabel.Contains("mumueq1jets")) mm1jet_Yields = fortableYields;
+	    if(YieldsLabel.Contains("eeeq0jets")) 	ee0jet_Yields = fortableYields;
+	    if(YieldsLabel.Contains("eeeq1jets")) 	ee1jet_Yields = fortableYields;
+	    if(YieldsLabel.Contains("eelesq1jets")) 	eelesq1jet_Yields = fortableYields;
+	    if(YieldsLabel.Contains("mumueq0jets")) 	mm0jet_Yields = fortableYields;
+	    if(YieldsLabel.Contains("mumueq1jets")) 	mm1jet_Yields = fortableYields;
+	    if(YieldsLabel.Contains("mumulesq1jets")) 	mmlesq1jet_Yields = fortableYields;
 
-        }
-    }
+        }//end channel
+    }// end analysis bin
 
     //print out yields table
 
@@ -1648,7 +1677,7 @@ void getYieldsFromShape(std::vector<TString> ch, const map<TString, Shape_t> &al
 				,mm1jet_Yields.ZZ, mm1jet_Yields.ZZ_StatErr
 	   );
     fprintf(pFile,"%40s & %.2f $\\pm$ %.2f & %.2f $\\pm$ %.2f & %.2f $\\pm$ %.2f & %.2f $\\pm$ %.2f \\\\\n"
-				,"Top/WW"
+				,"Top/WW/$Z\\to\\tau^+\\tau^-$"
 				,ee0jet_Yields.WWtop, ee0jet_Yields.WWtop_StatErr
 				,mm0jet_Yields.WWtop, mm0jet_Yields.WWtop_StatErr
 				,ee1jet_Yields.WWtop, ee1jet_Yields.WWtop_StatErr
@@ -1687,11 +1716,78 @@ void getYieldsFromShape(std::vector<TString> ch, const map<TString, Shape_t> &al
     fprintf(pFile,"\\end{center}\n");
     fprintf(pFile,"\\end{table}\n");
     fprintf(pFile,"\n");
-
-
-
-
     fclose(pFile);
+
+
+    // printout <= 0,1 jet 
+    pFile = fopen("Yields_lesq1jet.tex","w");
+    fprintf(pFile,"\n");
+    fprintf(pFile,"\\begin{table}[h!]\n");
+    fprintf(pFile,"\\begin{center}\n");
+    fprintf(pFile,"\\begin{tabular}{c|c|c}\n");
+    fprintf(pFile,"\\hline\\hline\n");
+    fprintf(pFile,"Process & $ee$ & $\\mu\\mu$ \\\\\n");
+    fprintf(pFile,"\\hline\n");
+    fprintf(pFile,"%40s & %.3f $\\pm$ %.3f & %.3f $\\pm$ %.3f \\\\\n"
+				,"Signal"
+				,eelesq1jet_Yields.Sig, eelesq1jet_Yields.Sig_StatErr
+				,mmlesq1jet_Yields.Sig, mmlesq1jet_Yields.Sig_StatErr
+	   );
+
+    fprintf(pFile,"\\hline\n");
+    fprintf(pFile,"%40s & %.2f $\\pm$ %.2f & %.2f $\\pm$ %.2f \\\\\n"
+				,"$Z/\\gamma^*\\rightarrow\\ell^+\\ell^-$"
+				,eelesq1jet_Yields.Zjets, eelesq1jet_Yields.Zjets_StatErr
+				,mmlesq1jet_Yields.Zjets, mmlesq1jet_Yields.Zjets_StatErr
+	   );
+    fprintf(pFile,"%40s & %.2f $\\pm$ %.2f & %.2f $\\pm$ %.2f \\\\\n"
+				,"$WZ\\rightarrow 3\\ell\\nu$"
+				,eelesq1jet_Yields.WZ, eelesq1jet_Yields.WZ_StatErr
+				,mmlesq1jet_Yields.WZ, mmlesq1jet_Yields.WZ_StatErr
+	   );
+    fprintf(pFile,"%40s & %.2f $\\pm$ %.2f & %.2f $\\pm$ %.2f \\\\\n"
+				,"$ZZ\\rightarrow 2\\ell2\\nu$"
+				,eelesq1jet_Yields.ZZ, eelesq1jet_Yields.ZZ_StatErr
+				,mmlesq1jet_Yields.ZZ, mmlesq1jet_Yields.ZZ_StatErr
+	   );
+    fprintf(pFile,"%40s & %.2f $\\pm$ %.2f & %.2f $\\pm$ %.2f \\\\\n"
+				,"Top/WW/$Z\\to\\tau^+\\tau^-$"
+				,eelesq1jet_Yields.WWtop, eelesq1jet_Yields.WWtop_StatErr
+				,mmlesq1jet_Yields.WWtop, mmlesq1jet_Yields.WWtop_StatErr
+	   );
+
+
+    fprintf(pFile,"%40s & %.2f $\\pm$ %.2f & %.2f $\\pm$ %.2f \\\\\n"
+				,"W+jets"
+				,eelesq1jet_Yields.Wjets, eelesq1jet_Yields.Wjets_StatErr
+				,mmlesq1jet_Yields.Wjets, mmlesq1jet_Yields.Wjets_StatErr
+	   );
+    fprintf(pFile,"\\hline\n");
+    fprintf(pFile,"%40s & %.2f $\\pm$ %.2f & %.2f $\\pm$ %.2f \\\\\n"
+				,"total bkg."
+				,eelesq1jet_Yields.totBkg, eelesq1jet_Yields.totBkg_StatErr
+				,mmlesq1jet_Yields.totBkg, mmlesq1jet_Yields.totBkg_StatErr
+	   );
+
+    fprintf(pFile,"\\hline\n");
+    if(isdataBlinded){
+    	fprintf(pFile,"%40s & %s & %s \\\\\n","Data","-","-");
+    }else{
+    	fprintf(pFile,"%40s & %.0f & %.0f \\\\\n","Data",eelesq1jet_Yields.Data,mmlesq1jet_Yields.Data);
+    }
+    fprintf(pFile,"\\hline\n");
+    fprintf(pFile,"\\hline\n");
+
+    fprintf(pFile,"\\end{tabular}\n");
+    fprintf(pFile,"\\caption{Observed(blinded) yields, pre-fit background estimates and signal predictions.}\n");
+    fprintf(pFile,"\\label{tab:seltable}\n");
+    fprintf(pFile,"\\end{center}\n");
+    fprintf(pFile,"\\end{table}\n");
+    fprintf(pFile,"\n");
+    fclose(pFile);
+
+
+
     cout << "########################## getYieldsFromShape ##########################" << endl;
     cout << endl;
 }
@@ -1812,21 +1908,21 @@ std::vector<TString>  buildDataCard(TString atgcpar, Int_t mass, TString histo, 
         fprintf(pFile, "Observation %f\n",dci.obs[RateKey_t("obs",dci.ch[i-1])]);
         fprintf(pFile, "-------------------------------\n");
 
-        fprintf(pFile,"%45s ", "bin");
+        fprintf(pFile,"%55s ", "bin");
         for(size_t j=1; j<=dci.procs.size(); j++) {
             if(dci.rates.find(RateKey_t(dci.procs[j-1],dci.ch[i-1]))==dci.rates.end()) continue;
             fprintf(pFile,"%6i ", 1);
         }
         fprintf(pFile,"\n");
 
-        fprintf(pFile,"%45s ", "process");
+        fprintf(pFile,"%55s ", "process");
         for(size_t j=1; j<=dci.procs.size(); j++) {
             if(dci.rates.find(RateKey_t(dci.procs[j-1],dci.ch[i-1]))==dci.rates.end()) continue;
             fprintf(pFile,"%6s ", (postfix+dci.procs[j-1]).Data());
         }
         fprintf(pFile,"\n");
 
-        fprintf(pFile,"%45s ", "process");
+        fprintf(pFile,"%55s ", "process");
         int procCtr(1-dci.nsignalproc);
         for(size_t j=1; j<=dci.procs.size(); j++) {
             if(dci.rates.find(RateKey_t(dci.procs[j-1],dci.ch[i-1]))==dci.rates.end()) continue;
@@ -1835,7 +1931,7 @@ std::vector<TString>  buildDataCard(TString atgcpar, Int_t mass, TString histo, 
         }
         fprintf(pFile,"\n");
 
-        fprintf(pFile,"%45s ", "rate");
+        fprintf(pFile,"%55s ", "rate");
         for(size_t j=1; j<=dci.procs.size(); j++) {
             if(dci.rates.find(RateKey_t(dci.procs[j-1],dci.ch[i-1]))==dci.rates.end()) continue;
             fprintf(pFile,"%6f ", dci.rates[RateKey_t(dci.procs[j-1],dci.ch[i-1])] );
@@ -1850,7 +1946,7 @@ std::vector<TString>  buildDataCard(TString atgcpar, Int_t mass, TString histo, 
         bool isSyst;
         if(runSystematics) {
             if(systpostfix.Contains('8')) {
-                fprintf(pFile,"%35s %10s ", "lumi_8TeV", "lnN");
+                fprintf(pFile,"%45s %10s ", "lumi_8TeV", "lnN");
                 for(size_t j=1; j<=dci.procs.size(); j++) {
                     if(dci.rates.find(RateKey_t(dci.procs[j-1],dci.ch[i-1]))==dci.rates.end()) continue;
                     if(!dci.procs[j-1].Contains("EM") && !dci.procs[j-1].Contains("Zjets") && !dci.procs[j-1].Contains("Wjets")) {
@@ -1861,7 +1957,7 @@ std::vector<TString>  buildDataCard(TString atgcpar, Int_t mass, TString histo, 
                 }
                 fprintf(pFile,"\n");
             } else {
-                fprintf(pFile,"%35s %10s ", "lumi_7TeV", "lnN");
+                fprintf(pFile,"%45s %10s ", "lumi_7TeV", "lnN");
                 for(size_t j=1; j<=dci.procs.size(); j++) {
                     if(dci.rates.find(RateKey_t(dci.procs[j-1],dci.ch[i-1]))==dci.rates.end()) continue;
 		    if(!dci.procs[j-1].Contains("EM") && !dci.procs[j-1].Contains("Zjets")) {
@@ -1873,7 +1969,7 @@ std::vector<TString>  buildDataCard(TString atgcpar, Int_t mass, TString histo, 
                 fprintf(pFile,"\n");
             }/*
             if(systpostfix.Contains('8')) {
-                fprintf(pFile,"%35s %10s ", "accept_8TeV", "lnN");
+                fprintf(pFile,"%45s %10s ", "accept_8TeV", "lnN");
                 for(size_t j=1; j<=dci.procs.size(); j++) {
                     if(dci.rates.find(RateKey_t(dci.procs[j-1],dci.ch[i-1]))==dci.rates.end()) continue;
                     if(!dci.procs[j-1].Contains("EM") && !dci.procs[j-1].Contains("Zjets")) {
@@ -1884,7 +1980,7 @@ std::vector<TString>  buildDataCard(TString atgcpar, Int_t mass, TString histo, 
                 }
                 fprintf(pFile,"\n");
             } else {
-                fprintf(pFile,"%35s %10s ", "accept_7TeV", "lnN");
+                fprintf(pFile,"%45s %10s ", "accept_7TeV", "lnN");
                 for(size_t j=1; j<=dci.procs.size(); j++) {
                     if(dci.rates.find(RateKey_t(dci.procs[j-1],dci.ch[i-1]))==dci.rates.end()) continue;
                     if(!dci.procs[j-1].Contains("EM") && !dci.procs[j-1].Contains("Zjets")) {
@@ -1896,7 +1992,7 @@ std::vector<TString>  buildDataCard(TString atgcpar, Int_t mass, TString histo, 
                 fprintf(pFile,"\n");
             } */
             if(sysSherpa != 1.) {
-                fprintf(pFile,"%35s %10s ", "sherpa_kin_syst", "lnN");
+                fprintf(pFile,"%45s %10s ", "sherpa_kin_syst", "lnN");
                 for(size_t j=1; j<=dci.procs.size(); j++) {
                     if(dci.rates.find(RateKey_t(dci.procs[j-1],dci.ch[i-1]))==dci.rates.end()) continue;
                     if(dci.procs[j-1].Contains("zz2l2nu") && dci.procs[j-1].Contains("_") ) {
@@ -1909,7 +2005,7 @@ std::vector<TString>  buildDataCard(TString atgcpar, Int_t mass, TString histo, 
             }
 
 //         if(mass>0){
-//         fprintf(pFile,"%35s %10s ", "theoryUncXS_HighMH", "lnN");
+//         fprintf(pFile,"%45s %10s ", "theoryUncXS_HighMH", "lnN");
 //         for(size_t j=1; j<=dci.procs.size(); j++){ if(dci.rates.find(RateKey_t(dci.procs[j-1],dci.ch[i-1]))==dci.rates.end()) continue;
 //            if((int)j<=dci.nsignalproc){fprintf(pFile,"%6f ",std::min(1.0+1.5*pow((mass/1000.0),3),2.0));}else{fprintf(pFile,"%6s ","-");}
 //         }fprintf(pFile,"\n");
@@ -1917,7 +2013,7 @@ std::vector<TString>  buildDataCard(TString atgcpar, Int_t mass, TString histo, 
 
             //Id+Trigger efficiencies combined
             if(dci.ch[i-1].Contains("ee")) {
-                fprintf(pFile,"%35s %10s ", "CMS_eff_e", "lnN");
+                fprintf(pFile,"%45s %10s ", "CMS_eff_e", "lnN");
                 for(size_t j=1; j<=dci.procs.size(); j++) {
                     if(dci.rates.find(RateKey_t(dci.procs[j-1],dci.ch[i-1]))==dci.rates.end()) continue;
                     if(!dci.procs[j-1].Contains("EM") && !dci.procs[j-1].Contains("Zjets") && !dci.procs[j-1].Contains("Wjets")) {
@@ -1928,7 +2024,7 @@ std::vector<TString>  buildDataCard(TString atgcpar, Int_t mass, TString histo, 
                 }
                 fprintf(pFile,"\n");
             } else {
-                fprintf(pFile,"%35s %10s ", "CMS_eff_m", "lnN");
+                fprintf(pFile,"%45s %10s ", "CMS_eff_m", "lnN");
                 for(size_t j=1; j<=dci.procs.size(); j++) {
                     if(dci.rates.find(RateKey_t(dci.procs[j-1],dci.ch[i-1]))==dci.rates.end()) continue;
                     if(!dci.procs[j-1].Contains("EM") && !dci.procs[j-1].Contains("Zjets") && !dci.procs[j-1].Contains("Wjets")) {
@@ -1945,7 +2041,7 @@ std::vector<TString>  buildDataCard(TString atgcpar, Int_t mass, TString histo, 
 //# temporily take values from Guillelmo
 /*
             if(systpostfix.Contains('8')) {
-                fprintf(pFile,"%35s %10s ", "CMS_zllwimps_EM_8TeV", "lnN");
+                fprintf(pFile,"%45s %10s ", "CMS_zllwimps_EM_8TeV", "lnN");
                 for(size_t j=1; j<=dci.procs.size(); j++) {
                     if(dci.rates.find(RateKey_t(dci.procs[j-1],dci.ch[i-1]))==dci.rates.end()) continue;
                     if(dci.procs[j-1].Contains("EM")) {
@@ -1960,7 +2056,7 @@ std::vector<TString>  buildDataCard(TString atgcpar, Int_t mass, TString histo, 
                 }
                 fprintf(pFile,"\n");
             } else {
-                fprintf(pFile,"%35s %10s ", "CMS_zllwimps_EM_7TeV", "lnN");
+                fprintf(pFile,"%45s %10s ", "CMS_zllwimps_EM_7TeV", "lnN");
                 for(size_t j=1; j<=dci.procs.size(); j++) {
                     if(dci.rates.find(RateKey_t(dci.procs[j-1],dci.ch[i-1]))==dci.rates.end()) continue;
                     if(dci.procs[j-1].Contains("EM")) {
@@ -1979,13 +2075,39 @@ std::vector<TString>  buildDataCard(TString atgcpar, Int_t mass, TString histo, 
 //##############################
 	    
 
+	    //k-factor  Nov 6,2014
+	    fprintf(pFile,"%45s %10s ", "CMS_zllwimps_WZ_kfactor", "lnN");
+                for(size_t j=1; j<=dci.procs.size(); j++) {
+                    if(dci.rates.find(RateKey_t(dci.procs[j-1],dci.ch[i-1]))==dci.rates.end()) continue;
+                    if(dci.procs[j-1].Contains("WZ")) {
+                        fprintf(pFile,"%6f ",1.25);
+                    } else {
+                        fprintf(pFile,"%6s ","-");
+                    }
+                }
+             fprintf(pFile,"\n");	
+
+	    fprintf(pFile,"%45s %10s ", "CMS_zllwimps_ZZ_kfactor", "lnN");
+                for(size_t j=1; j<=dci.procs.size(); j++) {
+                    if(dci.rates.find(RateKey_t(dci.procs[j-1],dci.ch[i-1]))==dci.rates.end()) continue;
+                    if(dci.procs[j-1].Contains("ZZ")) {
+                        fprintf(pFile,"%6f ",1.25);
+                    } else {
+                        fprintf(pFile,"%6s ","-");
+                    }
+                }
+             fprintf(pFile,"\n");	
+
+
+
+	     
 
 
 
             //Oct 30, 2013
 
             if(dci.ch[i-1].Contains("mumueq0jets")) {
-                fprintf(pFile,"%35s %10s ", "CMS_zllwimps_WZ3l", "lnN");
+                fprintf(pFile,"%45s %10s ", "CMS_zllwimps_WZ3l", "lnN");
                 for(size_t j=1; j<=dci.procs.size(); j++) {
                     if(dci.rates.find(RateKey_t(dci.procs[j-1],dci.ch[i-1]))==dci.rates.end()) continue;
                     if(dci.procs[j-1].Contains("WZ")) {
@@ -1997,8 +2119,8 @@ std::vector<TString>  buildDataCard(TString atgcpar, Int_t mass, TString histo, 
                 fprintf(pFile,"\n");
             }
 
-            if(dci.ch[i-1].Contains("mumueq1jets")) {
-                fprintf(pFile,"%35s %10s ", "CMS_zllwimps_WZ3l", "lnN");
+            if(dci.ch[i-1].Contains("mumueq1jets") || dci.ch[i-1].Contains("mumulesq1jets")) {
+                fprintf(pFile,"%45s %10s ", "CMS_zllwimps_WZ3l", "lnN");
                 for(size_t j=1; j<=dci.procs.size(); j++) {
                     if(dci.rates.find(RateKey_t(dci.procs[j-1],dci.ch[i-1]))==dci.rates.end()) continue;
                     if(dci.procs[j-1].Contains("WZ")) {
@@ -2014,7 +2136,7 @@ std::vector<TString>  buildDataCard(TString atgcpar, Int_t mass, TString histo, 
 
 
             if(dci.ch[i-1].Contains("eeeq0jets")) {
-                fprintf(pFile,"%35s %10s ", "CMS_zllwimps_WZ3l", "lnN");
+                fprintf(pFile,"%45s %10s ", "CMS_zllwimps_WZ3l", "lnN");
                 for(size_t j=1; j<=dci.procs.size(); j++) {
                     if(dci.rates.find(RateKey_t(dci.procs[j-1],dci.ch[i-1]))==dci.rates.end()) continue;
                     if(dci.procs[j-1].Contains("WZ")) {
@@ -2026,8 +2148,8 @@ std::vector<TString>  buildDataCard(TString atgcpar, Int_t mass, TString histo, 
                 fprintf(pFile,"\n");
             }
 
-            if(dci.ch[i-1].Contains("eeeq1jets")) {
-                fprintf(pFile,"%35s %10s ", "CMS_zllwimps_WZ3l", "lnN");
+            if(dci.ch[i-1].Contains("eeeq1jets") || dci.ch[i-1].Contains("eelesq1jets")) {
+                fprintf(pFile,"%45s %10s ", "CMS_zllwimps_WZ3l", "lnN");
                 for(size_t j=1; j<=dci.procs.size(); j++) {
                     if(dci.rates.find(RateKey_t(dci.procs[j-1],dci.ch[i-1]))==dci.rates.end()) continue;
                     if(dci.procs[j-1].Contains("WZ")) {
@@ -2043,12 +2165,12 @@ std::vector<TString>  buildDataCard(TString atgcpar, Int_t mass, TString histo, 
 
             // Scale-e and scale-mu replaced by shape-unncertainty "les"
 //          if(dci.ch[i-1].Contains("ee")){
-//             fprintf(pFile,"%35s %10s ", "CMS_scale_e", "lnN");
+//             fprintf(pFile,"%45s %10s ", "CMS_scale_e", "lnN");
 //             for(size_t j=1; j<=dci.procs.size(); j++){ if(dci.rates.find(RateKey_t(dci.procs[j-1],dci.ch[i-1]))==dci.rates.end()) continue;
 //                if(!dci.procs[j-1].Contains("data")){fprintf(pFile,"%6f ",1.0+normSysts["CMS_scale_e"]);}else{fprintf(pFile,"%6s ","-");}
 //             }fprintf(pFile,"\n");
 //          }else{
-//             fprintf(pFile,"%35s %10s ", "CMS_scale_m", "lnN");
+//             fprintf(pFile,"%45s %10s ", "CMS_scale_m", "lnN");
 //             for(size_t j=1; j<=dci.procs.size(); j++){ if(dci.rates.find(RateKey_t(dci.procs[j-1],dci.ch[i-1]))==dci.rates.end()) continue;
 //                if(!dci.procs[j-1].Contains("data")){fprintf(pFile,"%6f ",1.0+normSysts["CMS_scale_m"]);}else{fprintf(pFile,"%6s ","-");}
 //             }fprintf(pFile,"\n");
@@ -2057,7 +2179,7 @@ std::vector<TString>  buildDataCard(TString atgcpar, Int_t mass, TString histo, 
 /*
             if(mass>0) {
 
-                fprintf(pFile,"%35s %10s ", "UEPS", "lnN");
+                fprintf(pFile,"%45s %10s ", "UEPS", "lnN");
                 for(size_t j=1; j<=dci.procs.size(); j++) {
                     if(dci.rates.find(RateKey_t(dci.procs[j-1],dci.ch[i-1]))==dci.rates.end()) continue;
                     if(dci.procs[j-1].Contains("ZH")) {
@@ -2075,7 +2197,7 @@ std::vector<TString>  buildDataCard(TString atgcpar, Int_t mass, TString histo, 
             // RJ, for count and cut
             ///////////////////////////////////////////////
 
-            fprintf(pFile,"%35s %10s ", "QCDscale_VV", "lnN");
+            fprintf(pFile,"%45s %10s ", "QCDscale_VV", "lnN");
             for(size_t j=1; j<=dci.procs.size(); j++) {
                 if(dci.rates.find(RateKey_t(dci.procs[j-1],dci.ch[i-1]))==dci.rates.end()) continue;
                 if(dci.procs[j-1].BeginsWith("ZZ")) {
@@ -2096,21 +2218,71 @@ std::vector<TString>  buildDataCard(TString atgcpar, Int_t mass, TString histo, 
             }
             fprintf(pFile,"\n");
 
-
-            fprintf(pFile,"%35s %10s ", "QCDscale_DM", "lnN");
+/*
+            fprintf(pFile,"%45s %10s ", "QCDscale_DM", "lnN");
             for(size_t j=1; j<=dci.procs.size(); j++) {
                 if(dci.rates.find(RateKey_t(dci.procs[j-1],dci.ch[i-1]))==dci.rates.end()) continue;
                 if(dci.procs[j-1].BeginsWith("D5") || dci.procs[j-1].BeginsWith("D8") 
 			|| dci.procs[j-1].BeginsWith("C3") || dci.procs[j-1].BeginsWith("D9") ) {
+		    cout << "QCDscale_DM " << dci.procs[j-1] << " mass: " << mass << endl;
                     fprintf(pFile,"%6f ",1.054);
                 } else {
                     fprintf(pFile,"%6s ","-");
                 }
             }
             fprintf(pFile,"\n");
+*/
+
+            fprintf(pFile,"%45s %10s ", "QCDscale_DM", "lnN");
+            for(size_t j=1; j<=dci.procs.size(); j++) {
+                if(dci.rates.find(RateKey_t(dci.procs[j-1],dci.ch[i-1]))==dci.rates.end()) continue;
+                if(dci.procs[j-1].BeginsWith("D5")){
+                    if(mass==1) 	fprintf(pFile,"%6f ",1.0520);
+		    if(mass==10) 	fprintf(pFile,"%6f ",1.0525);
+		    if(mass==100) 	fprintf(pFile,"%6f ",1.0532);
+		    if(mass==200) 	fprintf(pFile,"%6f ",1.0537);
+		    if(mass==300) 	fprintf(pFile,"%6f ",1.0543);
+		    if(mass==500) 	fprintf(pFile,"%6f ",1.0552);
+		    if(mass==1000) 	fprintf(pFile,"%6f ",1.0570);
+		}
+		else if(dci.procs[j-1].BeginsWith("D8")){
+                    if(mass==1)         fprintf(pFile,"%6f ",1.0525);
+                    if(mass==10)        fprintf(pFile,"%6f ",1.0527);
+                    if(mass==100)       fprintf(pFile,"%6f ",1.0528);
+                    if(mass==200)       fprintf(pFile,"%6f ",1.0543);
+                    if(mass==300)       fprintf(pFile,"%6f ",1.0546);
+                    if(mass==500)       fprintf(pFile,"%6f ",1.0557);
+                    if(mass==1000)      fprintf(pFile,"%6f ",1.0564);
+                } 
+		else if(dci.procs[j-1].BeginsWith("D9")){
+                    if(mass==1)         fprintf(pFile,"%6f ",1.0551);
+                    if(mass==10)        fprintf(pFile,"%6f ",1.0555);
+                    if(mass==100)       fprintf(pFile,"%6f ",1.0558);
+                    if(mass==200)       fprintf(pFile,"%6f ",1.0559);
+                    if(mass==300)       fprintf(pFile,"%6f ",1.0567);
+                    if(mass==500)       fprintf(pFile,"%6f ",1.0573);
+                    if(mass==1000)      fprintf(pFile,"%6f ",1.0572);		
+                } 
+		else if(dci.procs[j-1].BeginsWith("C3")){
+                    if(mass==1)         fprintf(pFile,"%6f ",1.0516);
+                    if(mass==10)        fprintf(pFile,"%6f ",1.0526);
+                    if(mass==100)       fprintf(pFile,"%6f ",1.0535);
+                    if(mass==200)       fprintf(pFile,"%6f ",1.0542);
+                    if(mass==300)       fprintf(pFile,"%6f ",1.0552);
+                    if(mass==500)       fprintf(pFile,"%6f ",1.0561);
+                    if(mass==1000)      fprintf(pFile,"%6f ",1.0561);
+                } 
+		else {
+                    fprintf(pFile,"%6s ","-");
+                }
+            }
+            fprintf(pFile,"\n");
 
 
-            fprintf(pFile,"%35s %10s ", "QCDscale_UnPart", "lnN");
+
+
+
+            fprintf(pFile,"%45s %10s ", "QCDscale_UnPart", "lnN");
             for(size_t j=1; j<=dci.procs.size(); j++) {
                 if(dci.rates.find(RateKey_t(dci.procs[j-1],dci.ch[i-1]))==dci.rates.end()) continue;
                 if     (dci.procs[j-1].BeginsWith("UnPart1p01") ) fprintf(pFile,"%6f ",normSysts["QCDscale_UnPart1p01"]);
@@ -2140,7 +2312,7 @@ std::vector<TString>  buildDataCard(TString atgcpar, Int_t mass, TString histo, 
 
 
 	    /*
-            fprintf(pFile,"%35s %10s ", "QCDscale_VH", "lnN");
+            fprintf(pFile,"%45s %10s ", "QCDscale_VH", "lnN");
             for(size_t j=1; j<=dci.procs.size(); j++) {
                 if(dci.rates.find(RateKey_t(dci.procs[j-1],dci.ch[i-1]))==dci.rates.end()) continue;
                 if(dci.procs[j-1].BeginsWith("ZH")) {
@@ -2166,8 +2338,8 @@ std::vector<TString>  buildDataCard(TString atgcpar, Int_t mass, TString histo, 
 
             /*
             	 if(dci.ch[i-1].Contains("ee"))
-                     	fprintf(pFile,"%35s %10s ", "scale_e", "lnN");
-            	 else fprintf(pFile,"%35s %10s ", "scale_mu", "lnN");
+                     	fprintf(pFile,"%45s %10s ", "scale_e", "lnN");
+            	 else fprintf(pFile,"%45s %10s ", "scale_mu", "lnN");
                      for(size_t j=1; j<=dci.procs.size(); j++) { if(dci.rates.find(RateKey_t(dci.procs[j-1],dci.ch[i-1]))==dci.rates.end()) continue;
             	          if(dci.procs[j-1].BeginsWith("ZH")){if(systpostfix.Contains('8')){fprintf(pFile,"%6f ",1.01);}else{fprintf(pFile,"%6f ",1.01);}}
             		  else if(dci.procs[j-1].BeginsWith("zz")){if(systpostfix.Contains('8')){fprintf(pFile,"%6f ",1.01);}else{fprintf(pFile,"%6f ",1.01);}}
@@ -2179,7 +2351,7 @@ std::vector<TString>  buildDataCard(TString atgcpar, Int_t mass, TString histo, 
 
 //RJ May 17
             /*
-                     fprintf(pFile,"%35s %10s ", "jes", "lnN");
+                     fprintf(pFile,"%45s %10s ", "jes", "lnN");
                      for(size_t j=1; j<=dci.procs.size(); j++) { if(dci.rates.find(RateKey_t(dci.procs[j-1],dci.ch[i-1]))==dci.rates.end()) continue;
             	          if(dci.procs[j-1].BeginsWith("ZH")){if(systpostfix.Contains('8')){fprintf(pFile,"%6f ",1.02);}else{fprintf(pFile,"%6f ",1.02);}}
             		  else if(dci.procs[j-1].BeginsWith("zz")){if(systpostfix.Contains('8')){fprintf(pFile,"%6f ",1.02);}else{fprintf(pFile,"%6f ",1.02);}}
@@ -2190,7 +2362,7 @@ std::vector<TString>  buildDataCard(TString atgcpar, Int_t mass, TString histo, 
 
             /*
             	//remove it if use data-driven DY sample
-                     fprintf(pFile,"%35s %10s ", "err_zll", "lnN");
+                     fprintf(pFile,"%45s %10s ", "err_zll", "lnN");
                      for(size_t j=1; j<=dci.procs.size(); j++) { if(dci.rates.find(RateKey_t(dci.procs[j-1],dci.ch[i-1]))==dci.rates.end()) continue;
             	          if(dci.procs[j-1].BeginsWith("zll")){if(systpostfix.Contains('8')){fprintf(pFile,"%6f ",2.0);}else{fprintf(pFile,"%6f ",2.0);}}
             		  else {fprintf(pFile,"%6s ","-");}
@@ -2201,13 +2373,13 @@ std::vector<TString>  buildDataCard(TString atgcpar, Int_t mass, TString histo, 
 
             ///////////////////////////////////////////////
             /*
-                fprintf(pFile,"%35s %10s ", "XSec_sys_WW", "lnN");
+                fprintf(pFile,"%45s %10s ", "XSec_sys_WW", "lnN");
                 for(size_t j=1; j<=dci.procs.size(); j++){ if(dci.rates.find(RateKey_t(dci.procs[j-1],dci.ch[i-1]))==dci.rates.end()) continue;
                    if(dci.procs[j-1].BeginsWith("ww")){if(systpostfix.Contains('8')){fprintf(pFile,"%6f ",1.097);}else{fprintf(pFile,"%6f ",1.097);}
                    }else{fprintf(pFile,"%6s ","-");}
                 }fprintf(pFile,"\n");
 
-                fprintf(pFile,"%35s %10s ", "XSec_sys_WZ", "lnN");
+                fprintf(pFile,"%45s %10s ", "XSec_sys_WZ", "lnN");
                 for(size_t j=1; j<=dci.procs.size(); j++){ if(dci.rates.find(RateKey_t(dci.procs[j-1],dci.ch[i-1]))==dci.rates.end()) continue;
                    if(dci.procs[j-1].BeginsWith("wz")){if(systpostfix.Contains('8')){fprintf(pFile,"%6f ",1.056);}else{fprintf(pFile,"%6f ",1.056);}
                    }else{fprintf(pFile,"%6s ","-");}
@@ -2222,7 +2394,7 @@ std::vector<TString>  buildDataCard(TString atgcpar, Int_t mass, TString histo, 
 
                 isSyst=false;
                 if(it->first.Contains("_sys_") || it->first.Contains("_interpol_")) {
-                    sprintf(sFile,"%35s %10s ", it->first.Data(), "lnN");
+                    sprintf(sFile,"%45s %10s ", it->first.Data(), "lnN");
                     for(size_t j=1; j<=dci.procs.size(); j++) {
                         if(dci.rates.find(RateKey_t(dci.procs[j-1],dci.ch[i-1]))==dci.rates.end()) continue;
                         if(it->second.find(RateKey_t(dci.procs[j-1],dci.ch[i-1])) != it->second.end()) {
@@ -2242,11 +2414,11 @@ std::vector<TString>  buildDataCard(TString atgcpar, Int_t mass, TString histo, 
                 } else {
                     if(shape) {
                         if(it->first.Contains("CMS_zllwimps_les") && dci.ch[i-1].Contains("ee")) {
-                            sprintf(sFile,"%35s %10s ", "CMS_p_scale_e", "shape");
+                            sprintf(sFile,"%45s %10s ", "CMS_p_scale_e", "shape");
                         } else
-                            sprintf(sFile,"%35s %10s ", it->first.Data(), "shape");
+                            sprintf(sFile,"%45s %10s ", it->first.Data(), "shape");
                     } else {
-                        sprintf(sFile,"%35s %10s ", it->first.Data(), "lnN");
+                        sprintf(sFile,"%45s %10s ", it->first.Data(), "lnN");
                     }
                     for(size_t j=1; j<=dci.procs.size(); j++) {
                         if(dci.rates.find(RateKey_t(dci.procs[j-1],dci.ch[i-1]))==dci.rates.end()) continue;
@@ -2277,8 +2449,9 @@ std::vector<TString>  buildDataCard(TString atgcpar, Int_t mass, TString histo, 
 
 
 
-            fprintf(pFile,"%35s %10s ", "pdf_qqbar", "lnN");
+            fprintf(pFile,"%45s %10s ", "pdf_qqbar", "lnN");
             for(size_t j=1; j<=dci.procs.size(); j++) {
+		//cout << "pdf_qqbar: dci.procs[j-1] " << dci.procs[j-1] << endl;
                 if(dci.rates.find(RateKey_t(dci.procs[j-1],dci.ch[i-1]))==dci.rates.end()) continue;
                 if(dci.procs[j-1].BeginsWith("ZH")) {
                     if(systpostfix.Contains('8')) {
@@ -2300,7 +2473,8 @@ std::vector<TString>  buildDataCard(TString atgcpar, Int_t mass, TString histo, 
                     }
                 } else if(dci.procs[j-1].BeginsWith("D5") || dci.procs[j-1].BeginsWith("D8")
                                 || dci.procs[j-1].BeginsWith("C3") || dci.procs[j-1].BeginsWith("D9") 
-				|| dci.procs[j-1].BeginsWith("UnPart")) {
+				|| dci.procs[j-1].BeginsWith("UnPart") 
+				|| dci.procs[j-1].BeginsWith("MSDMVg1p0mx50") ) {
                     fprintf(pFile,"%6f ",normSysts["CMS_zllwimps_pdf"]); //convert shape -> normalization
                 } else {
                     fprintf(pFile,"%6s ","-");
@@ -2377,8 +2551,11 @@ DataCardInputs convertHistosForLimits(TString atgcpar,Int_t mass,TString histo,T
     if(subNRB2012)		sh.push_back(histo+"BTagSB");
     if(subWZ)			sh.push_back(histo+"_3rdLepton");
     sh.push_back("FR_WjetCtrl_"+histo);
+    sh.push_back(histo+"_NRBsyst");
     sh.push_back("FR_QCDCtrl_mt_shapes");
     sh.push_back("pfmet_minus_shapes");
+    sh.push_back("balancedif_minus_shapes");
+    sh.push_back("dphizmet_minus_shapes");
     const size_t nsh=sh.size();
     for(size_t i=0; i<nch; i++) {
         for(size_t b=0; b<AnalysisBins.size(); b++) {
@@ -2420,27 +2597,36 @@ DataCardInputs convertHistosForLimits(TString atgcpar,Int_t mass,TString histo,T
     //non-resonant background estimation
     //estimateNonResonantBackground(selCh,"emu",allShapes,"nonresbckg_ctrl");
 
+    // estimate jet induced background
+    doWjetsBackground(selCh,allShapes,histo); // W+jets -> Wjets (data) 
+    //doQCDBackground(selCh,allShapes,histo);
 
 
-    // Mono-Z analysis (new) 
+
+    // Mono-Z analysis (new)   Top/WW/Ztautau (data) 
+    //MC closure test, adding systematics
+    dodataDrivenWWtW(selCh,"emu",allShapes,histo,true); 
     //new data-driven WW/tW/Ztautau background
     dodataDrivenWWtW(selCh,"emu",allShapes,histo,false);
-    //MC closure test
-    //dodataDrivenWWtW(selCh,"emu",allShapes,histo,true);
+
+
 
     //remove the non-resonant background from data
     //if(subNRB2011 || subNRB2012)doBackgroundSubtraction(selCh,"emu",allShapes,histo,histo+"_NRBctrl", url, Root, false);
-
-    doWjetsBackground(selCh,allShapes,histo);
-    //doQCDBackground(selCh,allShapes,histo);
-
+    //MC closure test
+    //if(subNRB2011 || subNRB2012)doBackgroundSubtraction(selCh,"emu",allShapes,histo,histo+"_NRBsyst", url, Root, true);
     //replace WZ by its estimate from 3rd Lepton SB
-    if(subWZ)doWZSubtraction(selCh,"emu",allShapes,histo,histo+"_3rdLepton");
+    //if(subWZ)doWZSubtraction(selCh,"emu",allShapes,histo,histo+"_3rdLepton");
 
-    doDYextrapolation(selCh,allShapes,histo);
+
+    // MC Z+jets -> DYExtrapolation
+    doDYextrapolation(selCh,allShapes,histo,"pfmet_minus_shapes", DYMET_EXTRAPOL, true);
+    //doDYextrapolation(selCh,allShapes,histo,"balancedif_minus_shapes", DYRESP_EXTRAPOL, false);
+    //doDYextrapolation(selCh,allShapes,histo,"dphizmet_minus_shapes", DYDPHI_EXTRAPOL, true);
 
     //replace Z+Jet background by Gamma+Jet estimates
-    if(subDY)doDYReplacement(selCh,"gamma",allShapes,histo,"met_met");
+    ////if(subDY)doDYReplacement(selCh,"gamma",allShapes,histo,"met_met");
+    /////
     //if(subDY)doDYReplacement(selCh,"gamma",allShapes,histo,"met_redMet");
 
     //replace data by total MC background
@@ -2455,7 +2641,8 @@ DataCardInputs convertHistosForLimits(TString atgcpar,Int_t mass,TString histo,T
 
 
     //print event yields from the mt shapes
-    if(!fast)getYieldsFromShape(selCh,allShapes,histo,true); //blind data
+    //if(!fast)getYieldsFromShape(selCh,allShapes,histo,true); //blind data
+    if(!fast)getYieldsFromShape(selCh,allShapes,histo,false); //unblind data
 
     if(!fast)getEffFromShape(selCh,allShapes,histo);
 
@@ -2505,6 +2692,12 @@ DataCardInputs convertHistosForLimits(TString atgcpar,Int_t mass,TString histo,T
 		if(proc.Contains("Unpart")){
 			if(mass>0 && !proc.Contains("Unpart("+massStr+")"))continue;
 		}
+
+		if(proc.Contains("MSDMVg(1.0)mx(50)")){
+			if(mass>0 && !proc.Contains("MSDMVg(1.0)mx(50)M("+massStr+")"))continue;
+		}
+
+
 
                 if(mass>0 && proc.Contains("ggH") && proc.Contains("ZZ"))proc = "ggHZZ2l2v";
                 else if(mass>0 && proc.Contains("qqH") && proc.Contains("ZZ"))proc = "qqHZZ2l2v";
@@ -2752,12 +2945,18 @@ void convertHistosForLimits_core(DataCardInputs& dci, TString& proc, TString& bi
     proc.ReplaceAll("unpart200","UnPart2p00");
     proc.ReplaceAll("unpart220","UnPart2p20");
     
+    proc.ReplaceAll("msdmvg10mx50m100","MSDMVg1p0mx50");
+    proc.ReplaceAll("msdmvg10mx50m200","MSDMVg1p0mx50");
+    proc.ReplaceAll("msdmvg10mx50m300","MSDMVg1p0mx50");
+    proc.ReplaceAll("msdmvg10mx50m500","MSDMVg1p0mx50");
+    proc.ReplaceAll("msdmvg10mx50m1000","MSDMVg1p0mx50");
+    proc.ReplaceAll("msdmvg10mx50m5000","MSDMVg1p0mx50");
 
   
     proc.ReplaceAll("zz2l2nu","ZZ");
     proc.ReplaceAll("wz3lnu","WZ");
     proc.ReplaceAll("zjetsdata","Zjets");
-    proc.ReplaceAll("topwwwjetsdata","EM");
+    proc.ReplaceAll("topwwztautaudata","EM");
     proc.ReplaceAll("wjetsdata","Wjets");
      
 
@@ -2825,6 +3024,7 @@ void convertHistosForLimits_core(DataCardInputs& dci, TString& proc, TString& bi
                 TString zjetsch="";
                 if(ch.Contains("eq0jets")) zjetsch="_eq0jets";
                 if(ch.Contains("eq1jets")) zjetsch="_eq1jets";
+		if(ch.Contains("lesq1jets")) zjetsch="_lesq1jets";
 
                 if(hshape->Integral()>0) {
                     hshape->SetName(proc+syst);
@@ -2836,8 +3036,8 @@ void convertHistosForLimits_core(DataCardInputs& dci, TString& proc, TString& bi
                         statdown=(TH1 *)hshape->Clone(proc+"_stat"+ch+proc+"Down");
                     }
                     if(proc.Contains("Zjets")) {
-                        statup=(TH1 *)hshape->Clone(proc+"_stat"+zjetsch+proc+"Up");
-                        statdown=(TH1 *)hshape->Clone(proc+"_stat"+zjetsch+proc+"Down");
+                        statup=(TH1 *)hshape->Clone(proc+"_stat"+ch+zjetsch+proc+"Up");
+                        statdown=(TH1 *)hshape->Clone(proc+"_stat"+ch+zjetsch+proc+"Down");
                     }
 
                     for(int ibin=1; ibin<=statup->GetXaxis()->GetNbins(); ibin++) {
@@ -2863,8 +3063,8 @@ void convertHistosForLimits_core(DataCardInputs& dci, TString& proc, TString& bi
                         statdown->Write(proc+postfix+"_CMS_zllwimps_stat_"+ch+"_"+proc+systpostfix+"Down");
                     }
                     else if(proc.Contains("Zjets")) {
-                        statup  ->Write(proc+postfix+"_CMS_zllwimps_stat"+zjetsch+"_"+proc+systpostfix+"Up");
-                        statdown->Write(proc+postfix+"_CMS_zllwimps_stat"+zjetsch+"_"+proc+systpostfix+"Down");
+                        statup  ->Write(proc+postfix+"_CMS_zllwimps_stat_"+ch+"_"+proc+systpostfix+"Up");
+                        statdown->Write(proc+postfix+"_CMS_zllwimps_stat_"+ch+"_"+proc+systpostfix+"Down");
                     }
 		    else {
                         statup  ->Write(proc+postfix+"_CMS_zllwimps_stat_"+ch+"_"+proc+systpostfix+"Up");
@@ -2877,7 +3077,7 @@ void convertHistosForLimits_core(DataCardInputs& dci, TString& proc, TString& bi
 			     //cout << "removing EM stat" << endl;
                              dci.systs["CMS_zllwimps_stat_"+ch+"_"+proc+systpostfix][RateKey_t(proc,ch)]=1.0;
                         else if(proc.Contains("Zjets"))
-                             dci.systs["CMS_zllwimps_stat"+zjetsch+"_"+proc+systpostfix][RateKey_t(proc,ch)]=1.0;
+                             dci.systs["CMS_zllwimps_stat_"+ch+"_"+proc+systpostfix][RateKey_t(proc,ch)]=1.0;
                         else
                             dci.systs["CMS_zllwimps_stat_"+ch+"_"+proc+systpostfix][RateKey_t(proc,ch)]=1.0;
                     } else {
@@ -2885,7 +3085,7 @@ void convertHistosForLimits_core(DataCardInputs& dci, TString& proc, TString& bi
   			    //cout << "removing EM stat" << endl;
                             dci.systs["CMS_zllwimps_stat_"+ch+"_"+proc+systpostfix][RateKey_t(proc,ch)]=(statup->Integral()/hshapes[0]->Integral());
 			else if(proc.Contains("Zjets"))
-			    dci.systs["CMS_zllwimps_stat"+zjetsch+"_"+proc+systpostfix][RateKey_t(proc,ch)]=(statup->Integral()/hshapes[0]->Integral());
+			    dci.systs["CMS_zllwimps_stat_"+ch+"_"+proc+systpostfix][RateKey_t(proc,ch)]=(statup->Integral()/hshapes[0]->Integral());
                         else
                             dci.systs["CMS_zllwimps_stat_"+ch+"_"+proc+systpostfix][RateKey_t(proc,ch)]=(statup->Integral()/hshapes[0]->Integral());
                     }
@@ -2975,7 +3175,7 @@ void convertHistosForLimits_core(DataCardInputs& dci, TString& proc, TString& bi
 
 
 			if(saveBins.size()>0){
-                            if(proc=="topwwwjetsdata"){
+                            if(proc=="topwwztautaudata"){
                                 statup  ->Write(proc+postfix+"_CMS_zllwimps_stat_"+proc+systpostfix+"_BinRestUp");
                                 statdown->Write(proc+postfix+"_CMS_zllwimps_stat_"+proc+systpostfix+"_BinRestDown");
                             }else{
@@ -2984,11 +3184,11 @@ void convertHistosForLimits_core(DataCardInputs& dci, TString& proc, TString& bi
                             }
 
                             if(shape) {
-                                if(proc=="topwwwjetsdata") dci.systs["CMS_zllwimps_stat_"+proc+systpostfix+"_BinRest"][RateKey_t(proc,ch)]=1.0;
+                                if(proc=="topwwztautaudata") dci.systs["CMS_zllwimps_stat_"+proc+systpostfix+"_BinRest"][RateKey_t(proc,ch)]=1.0;
                                 else dci.systs["CMS_zllwimps_stat_"+ch+"_"+proc+systpostfix+"_BinRest"][RateKey_t(proc,ch)]=1.0;
 
                             }else{
-                                if(proc=="topwwwjetsdata") dci.systs["CMS_zllwimps_stat_"+proc+systpostfix+"_BinRest"][RateKey_t(proc,ch)]=(statup->Integral()/hshapes[0]->Integral());
+                                if(proc=="topwwztautaudata") dci.systs["CMS_zllwimps_stat_"+proc+systpostfix+"_BinRest"][RateKey_t(proc,ch)]=(statup->Integral()/hshapes[0]->Integral());
                                 else dci.systs["CMS_zllwimps_stat_"+ch+"_"+proc+systpostfix+"_BinRest"][RateKey_t(proc,ch)]=(statup->Integral()/hshapes[0]->Integral());
                             }
 			}
@@ -3014,10 +3214,10 @@ void convertHistosForLimits_core(DataCardInputs& dci, TString& proc, TString& bi
                             //dci.systs["CMS_zllwimps_sys_"+bin+"_"+proc+systpostfix][RateKey_t(proc,ch)]=systUncertainty;
 
 			    TString wjetsch="";
-                	    if(ch.Contains("eeeq")) wjetsch="ee";
-                	    if(ch.Contains("mumueq")) wjetsch="mumu";
+                	    if(ch.Contains("ee")) wjetsch="ee";
+                	    if(ch.Contains("mumu")) wjetsch="mumu";
 			
-			    if(proc.Contains("EM")) dci.systs["CMS_zllwimps_sys_"+ch+"_"+proc+systpostfix][RateKey_t(proc,ch)]=systUncertainty;
+			    if(proc.Contains("EM") || proc.Contains("Zjets")) dci.systs["CMS_zllwimps_sys_"+ch+"_"+proc+systpostfix][RateKey_t(proc,ch)]=systUncertainty;
 			    else if(proc.Contains("Wjets")) dci.systs["CMS_zllwimps_sys_"+wjetsch+"_"+proc+systpostfix][RateKey_t(proc,ch)]=systUncertainty;
 			    else dci.systs["CMS_zllwimps_sys_"+proc+systpostfix][RateKey_t(proc,ch)]=systUncertainty;
                     }
@@ -3081,18 +3281,17 @@ void convertHistosForLimits_core(DataCardInputs& dci, TString& proc, TString& bi
     
 }//convertHistosForLimits_core END
 
-void doDYextrapolation(std::vector<TString>& selCh,map<TString, Shape_t>& allShapes, TString mainHisto)
+void doDYextrapolation(std::vector<TString>& selCh,map<TString, Shape_t>& allShapes, TString mainHisto, TString DY_EXTRAPOL_SHAPES, float DY_EXTRAPOL, bool isleftCR)
 {
     cout << "\n#################### doDYextrapolation #######################\n" << endl;
     for(size_t b=0; b<AnalysisBins.size(); b++) {
 	for(size_t i=0; i<selCh.size(); i++) {
 
-
 		THStack *stack = new THStack("stack","stack");
 
-		Shape_t& shapeChan = allShapes.find(selCh[i]+AnalysisBins[b]+"pfmet_minus_shapes")->second;
+		Shape_t& shapeChan = allShapes.find(selCh[i]+AnalysisBins[b]+DY_EXTRAPOL_SHAPES)->second;
 		TH1* hChan_data=shapeChan.data;
-		cout << "DY extrapolation shapes: " << selCh[i]+AnalysisBins[b]+"_pfmet_minus_shapes" << endl;
+		cout << "DY extrapolation shapes: " << selCh[i]+AnalysisBins[b]+"_"+DY_EXTRAPOL_SHAPES << endl;
 		cout << "Bins: " << hChan_data->GetXaxis()->GetNbins() << endl;
 
 		TH1* hChan_MCnonDY = (TH1*)shapeChan.totalBckg->Clone("hChan_totMCnonDY");
@@ -3118,7 +3317,7 @@ void doDYextrapolation(std::vector<TString>& selCh,map<TString, Shape_t>& allSha
 		int total_bin=hChan_MCnonDY->GetXaxis()->GetNbins();
 		for(int bin=0; bin<=hChan_MCnonDY->GetXaxis()->GetNbins()+1; bin++) {
 			double lowedge = hChan_MCnonDY->GetBinLowEdge(bin);
-			if(lowedge>=65) { 
+			if(lowedge >= DY_EXTRAPOL) { 
 			    thre_bin = bin;
 			    break;
 			}
@@ -3131,21 +3330,26 @@ void doDYextrapolation(std::vector<TString>& selCh,map<TString, Shape_t>& allSha
     		double subt_err2_CR(0.);
     		double zjet_err2_SR(0.),zjet_err2_CR(0.);
 
-		data_CR = hChan_data	->IntegralAndError(0,thre_bin-1,data_err2_CR);
-		subt_CR = hChan_MCnonDY	->IntegralAndError(0,thre_bin-1,subt_err2_CR); 
-		zjet_CR = hChan_MCDY	->IntegralAndError(0,thre_bin-1,zjet_err2_CR);
-
-		//data_SR = hChan_data	->IntegralAndError(thre_bin,total_bin+1,data_err2_SR);
-		//subt_SR = hChan_MCnonDY	->IntegralAndError(thre_bin,total_bin+1,subt_err2_SR); 
-		zjet_SR = hChan_MCDY	->IntegralAndError(thre_bin,total_bin+1,zjet_err2_SR);
+		if(isleftCR){
+			data_CR = hChan_data	->IntegralAndError(0,thre_bin-1,data_err2_CR);
+			subt_CR = hChan_MCnonDY	->IntegralAndError(0,thre_bin-1,subt_err2_CR); 
+			zjet_CR = hChan_MCDY	->IntegralAndError(0,thre_bin-1,zjet_err2_CR);
+			zjet_SR = hChan_MCDY	->IntegralAndError(thre_bin,total_bin+1,zjet_err2_SR);
+		}
+		else{
+			data_CR = hChan_data	->IntegralAndError(thre_bin,total_bin+1,data_err2_CR);
+			subt_CR = hChan_MCnonDY	->IntegralAndError(thre_bin,total_bin+1,subt_err2_CR); 
+			zjet_CR = hChan_MCDY	->IntegralAndError(thre_bin,total_bin+1,zjet_err2_CR);
+			zjet_SR = hChan_MCDY	->IntegralAndError(0,thre_bin-1,zjet_err2_SR);
+		}
 
 		double sf=(data_CR-subt_CR)/zjet_CR;
+		if(sf<0) sf=1;
 		double zjet_Est = sf*zjet_SR;
 		cout << "sf: " << sf << "\t" << "Est: " << zjet_Est << "\t" << "MC: " << zjet_SR << endl;
 
 		hChan_MCDY->Scale(sf);
 		stack->Add(hChan_MCDY,"HIST");
-
 
 
 		TCanvas *c = new TCanvas("c", "c", 700, 700);
@@ -3162,10 +3366,10 @@ void doDYextrapolation(std::vector<TString>& selCh,map<TString, Shape_t>& allSha
 
 		stack->SetMinimum(5e-3);
 		stack->GetXaxis()->SetTitle(hChan_data->GetXaxis()->GetTitle());
-		//stack->GetYaxis()->SetTitle("#it{m}_{T} [GeV]");
+		stack->GetYaxis()->SetTitle("Events");
 		
-		c->SaveAs(selCh[i]+AnalysisBins[b]+"pfmet_DYextrapolation.pdf");
-		c->SaveAs(selCh[i]+AnalysisBins[b]+"pfmet_DYextrapolation.png");
+		c->SaveAs(selCh[i]+AnalysisBins[b]+"_"+DY_EXTRAPOL_SHAPES+"_DYEXTRAPOL.pdf");
+		c->SaveAs(selCh[i]+AnalysisBins[b]+"_"+DY_EXTRAPOL_SHAPES+"_DYEXTRAPOL.png");
 		delete c;
 
 		
@@ -3177,15 +3381,32 @@ void doDYextrapolation(std::vector<TString>& selCh,map<TString, Shape_t>& allSha
                     TString proc(shapeChan_SI.bckg[ibckg]->GetTitle());
                     if(proc.Contains("Z+jets")){
                         hChan_DATADY=(TH1*)shapeChan_SI.bckg[ibckg]->Clone("hChan_DATADY");
-			hChan_DATADY->SetTitle("DY_Test");
+			hChan_DATADY->SetTitle("Z+jets (data)");
                         //hChan_DATADY->Reset();
+			//remove MC Z+jets
+			shapeChan_SI.bckg.erase(shapeChan_SI.bckg.begin()+ibckg);
+			ibckg--;
 		    }
 		}
 		
-		cout << "DY MC: " << hChan_DATADY->Integral() << endl;
+	
+		//update  Oct 31
+		TString tag_dy = selCh[i]+AnalysisBins[b];
+		if(tag_dy=="eelesq1jets") sf = 1.49205;
+		else if(tag_dy=="mumulesq1jets") sf = 1.46399;
+		else sf = 1.;
+
+		cout << "Scale Factor: " << sf << " DY MC: " << hChan_DATADY->Integral() << endl;
 		hChan_DATADY->Scale(sf);
+
+		//assign Systematics
+		if(tag_dy=="eelesq1jets") hChan_DATADY->SetBinError(0, 0.193361*hChan_DATADY->Integral());
+		if(tag_dy=="mumulesq1jets") hChan_DATADY->SetBinError(0, 0.48201*hChan_DATADY->Integral());
+
 		cout << "DY Extrapolation: " << hChan_DATADY->Integral() << endl;
 		shapeChan_SI.bckg.push_back(hChan_DATADY);
+
+		cout << "\n";
 
 
 	}
@@ -3212,8 +3433,8 @@ void doWjetsBackground(std::vector<TString>& selCh,map<TString, Shape_t>& allSha
 			<< val_hChan_data << endl;
 
             TH1* h_Wjet = NULL;
-            h_Wjet = (TH1*)hChan_data->Clone("Wjets(data)");
-            h_Wjet->SetTitle("Wjets(data)");
+            h_Wjet = (TH1*)hChan_data->Clone("Wjets (data)");
+            h_Wjet->SetTitle("Wjets (data)");
 
             //remove mc Wjet estimation
             for(size_t ibckg=0; ibckg<shapeChan_SI.bckg.size(); ibckg++) {
@@ -3307,10 +3528,11 @@ void doQCDBackground(std::vector<TString>& selCh,map<TString, Shape_t>& allShape
 void dodataDrivenWWtW(std::vector<TString>& selCh,TString ctrlCh,map<TString, Shape_t>& allShapes, TString mainHisto, bool isMCclosureTest)
 {
 
-    cout << "\n#################### dodataDrivenWWtW #######################\n" << endl;
-    
+    if(isMCclosureTest) cout << "\n############ dodataDrivenWWtW (MCclosureTest) ###############\n" << endl; 
+    else 		cout << "\n#################### dodataDrivenWWtW #######################\n" << endl;
     FILE* pFile = NULL;
-    pFile = fopen("DataDrivenWWtW.tex","w");
+    if(isMCclosureTest) pFile = fopen("DataDrivenWWtW_MCclosureTest.tex","w");
+    else 		pFile = fopen("DataDrivenWWtW.tex","w");
     fprintf(pFile,"\n\n\n");
     fprintf(pFile,"\\setlength{\\tabcolsep}{2pt}\n");
     fprintf(pFile,"\\begin{table}[ht!]\n");
@@ -3480,10 +3702,24 @@ void dodataDrivenWWtW(std::vector<TString>& selCh,TString ctrlCh,map<TString, Sh
                                 + pow(N_data_em-N_mcsubtr_em,2)*(pow(Err_data_ee/N_data_ee,2)+pow(Err_data_mm/N_data_mm,2))*(N_data_mm/(16*N_data_ee)) );
 
 
-
 		
 	cout << "N_est_ee: " << N_est_ee << "\t" 
 		<< "N_est_mm: " << N_est_mm << endl;
+
+	if(isMCclosureTest){
+		double sysEE = fabs(N_est_ee-N_mc_ee)/N_mc_ee;
+		double sysMM = fabs(N_est_mm-N_mc_mm)/N_mc_mm;
+
+		cout << "AnalysisBins: " << AnalysisBins[b] << " sysEE: " << sysEE << "\t" << "sysMM: " << sysMM << endl;
+
+		if(AnalysisBins[b] == "eq0jets") { WWtopSyst_ee0jet = sysEE; WWtopSyst_mm0jet = sysMM; }
+		if(AnalysisBins[b] == "eq1jets") { WWtopSyst_ee1jet = sysEE; WWtopSyst_mm1jet = sysMM; }
+		if(AnalysisBins[b] == "lesq1jets") { WWtopSyst_eelesq1jet = sysEE; WWtopSyst_mmlesq1jet = sysMM; }
+	}
+
+
+
+
 
 	if(isMCclosureTest) {
             fprintf(pFile,"%s & %.2f $\\pm$ %.2f & %.2f $\\pm$ %.2f & %.2f $\\pm$ %.2f & %.2f $\\pm$ %.2f & %.2f $\\pm$ %.2f & %.2f $\\pm$ %.2f & %.2f $\\pm$ %.2f & %.2f $\\pm$ %.2f & %.2f $\\pm$ %.2f  \\\\ \n",
@@ -3514,6 +3750,7 @@ void dodataDrivenWWtW(std::vector<TString>& selCh,TString ctrlCh,map<TString, Sh
 
 
 
+	if(!isMCclosureTest){
 	//add data-driven backgrounds
         for(size_t i=0; i<selCh.size(); i++) {
 	    TString labelChan = selCh[i]+AnalysisBins[b];
@@ -3539,8 +3776,8 @@ void dodataDrivenWWtW(std::vector<TString>& selCh,TString ctrlCh,map<TString, Sh
             }
 
             TH1* NonResonant = NULL;
-            NonResonant = (TH1*)hChan_MCNRB->Clone("Top/WW/W+Jets (data)");
-            NonResonant->SetTitle("Top/WW/W+Jets (data)");
+            NonResonant = (TH1*)hChan_MCNRB->Clone("Top/WW/Ztautau (data)");
+            NonResonant->SetTitle("Top/WW/Ztautau (data)");
             //add the background estimate
 
 	    double dataDrivenScale(1.0); 
@@ -3571,6 +3808,8 @@ void dodataDrivenWWtW(std::vector<TString>& selCh,TString ctrlCh,map<TString, Sh
 	    if(labelChan.Contains("mumueq0jets")) 	Syst_WWTop = WWtopSyst_mm0jet;
 	    if(labelChan.Contains("eeeq1jets")) 	Syst_WWTop = WWtopSyst_ee1jet;
 	    if(labelChan.Contains("mumueq1jets")) 	Syst_WWTop = WWtopSyst_mm1jet;
+	    if(labelChan.Contains("eelesq1jets")) 	Syst_WWTop = WWtopSyst_eelesq1jet;
+	    if(labelChan.Contains("mumulesq1jets")) 	Syst_WWTop = WWtopSyst_mmlesq1jet;
 
 
 	    cout << "labelchan: " << labelChan << " >>> Adding syst: " << Syst_WWTop << endl;
@@ -3579,6 +3818,9 @@ void dodataDrivenWWtW(std::vector<TString>& selCh,TString ctrlCh,map<TString, Sh
 
             shapeChan_SI.bckg.push_back(NonResonant);
 	}
+	}
+
+	cout << "\n\n";
 
 
     } //0jet, 1jet END
@@ -3592,10 +3834,11 @@ void dodataDrivenWWtW(std::vector<TString>& selCh,TString ctrlCh,map<TString, Sh
     fprintf(pFile,"\\end{table}\n");
     fprintf(pFile,"\n\n\n");
     fclose(pFile);
-    cout << "\n#################### dodataDrivenWWtW #######################\n" << endl;
+    if(isMCclosureTest) cout << "\n############ dodataDrivenWWtW (MCclosureTest) ###############\n" << endl; 
+    else 		cout << "\n#################### dodataDrivenWWtW #######################\n" << endl;
 }
 
-
+//
 void doBackgroundSubtraction(std::vector<TString>& selCh,TString ctrlCh,map<TString, Shape_t>& allShapes, TString mainHisto, TString sideBandHisto, TString url, JSONWrapper::Object &Root, bool isMCclosureTest)
 {
 
@@ -3627,10 +3870,13 @@ void doBackgroundSubtraction(std::vector<TString>& selCh,TString ctrlCh,map<TStr
 
             Shape_t& shapeCtrl_SB = allShapes.find(ctrlCh+AnalysisBins[b]+sideBandHisto)->second;
             TH1* hCtrl_SB=shapeCtrl_SB.data;
+
             Shape_t& shapeCtrl_SI = allShapes.find(ctrlCh+AnalysisBins[b]+mainHisto)->second;
             TH1* hCtrl_SI=shapeCtrl_SI.data;
+
             Shape_t& shapeChan_SB = allShapes.find(selCh[i]+AnalysisBins[b]+sideBandHisto)->second;
             TH1* hChan_SB=shapeChan_SB.data;
+
             Shape_t& shapeChan_SI = allShapes.find(selCh[i]+AnalysisBins[b]+mainHisto)->second;
 
 
@@ -3669,19 +3915,40 @@ void doBackgroundSubtraction(std::vector<TString>& selCh,TString ctrlCh,map<TStr
                 }
             }
 
-
             double alpha=0 ,alpha_err=0;
+
+	    // >= 1 b-jets 
             if(hCtrl_SB->GetBinContent(5)>0) {
 		//new for monoZ analysis
 		alpha = (hChan_SB->GetBinContent(5)-tosubtrChan_SB->GetBinContent(5))/(hCtrl_SB->GetBinContent(5)-tosubtrCtrl_SB->GetBinContent(5));
 		double err1 = sqrt(pow(hChan_SB->GetBinError(5),2)+pow(tosubtrChan_SB->GetBinError(5),2));
 		double err2 = sqrt(pow(hCtrl_SB->GetBinError(5),2)+pow(tosubtrCtrl_SB->GetBinError(5),2));	
-		alpha_err = alpha * sqrt(pow(err1/(hChan_SB->GetBinContent(5)-tosubtrChan_SB->GetBinContent(5)),2)+pow(err2/(hCtrl_SB->GetBinContent(5)-tosubtrCtrl_SB->GetBinContent(5)),2));
-		cout << "alpha: " << alpha << endl;
-		//old method
-		//alpha     = hChan_SB->GetBinContent(5) / hCtrl_SB->GetBinContent(5);
-                //alpha_err = ( fabs( hChan_SB->GetBinContent(5) * hCtrl_SB->GetBinError(5) ) + fabs(hChan_SB->GetBinError(5) * hCtrl_SB->GetBinContent(5) )  ) / pow(hCtrl_SB->GetBinContent(5), 2);
+		alpha_err = alpha * sqrt(pow(err1/(hChan_SB->GetBinContent(5)-tosubtrChan_SB->GetBinContent(5)),2)
+				   	 + pow(err2/(hCtrl_SB->GetBinContent(5)-tosubtrCtrl_SB->GetBinContent(5)),2));
+		cout << "alpha: " << alpha << " +/- " << alpha_err << endl;
             }
+
+	    // =0 b-jets
+	    int BinPosition = 2;
+	    double alpha_bveto=0 ,alpha_bveto_err=0;
+            if(hCtrl_SB->GetBinContent(BinPosition)>0) {
+		alpha_bveto = (hChan_SB->GetBinContent(BinPosition)-tosubtrChan_SB->GetBinContent(BinPosition))
+			/(hCtrl_SB->GetBinContent(BinPosition)-tosubtrCtrl_SB->GetBinContent(BinPosition));
+		double err1 = sqrt(pow(hChan_SB->GetBinError(BinPosition),2)+pow(tosubtrChan_SB->GetBinError(BinPosition),2));
+		double err2 = sqrt(pow(hCtrl_SB->GetBinError(BinPosition),2)+pow(tosubtrCtrl_SB->GetBinError(BinPosition),2));	
+		alpha_bveto_err = alpha_bveto * sqrt(pow(err1/(hChan_SB->GetBinContent(BinPosition)-tosubtrChan_SB->GetBinContent(BinPosition)),2)
+					 + pow(err2/(hCtrl_SB->GetBinContent(BinPosition)-tosubtrCtrl_SB->GetBinContent(BinPosition)),2));
+		cout << "alpha_bveto: " << alpha_bveto << " +/- " << alpha_bveto_err << endl;
+            }
+
+	    cout << "<--------- Alpha systematics --------->" << endl;
+	    double syst_alpha = fabs(alpha_bveto-alpha)/alpha;
+	    double syst_alpha_err = pow(alpha_bveto_err/alpha_bveto,2);
+	    	   syst_alpha_err += pow(alpha_err/alpha,2);
+	    syst_alpha_err = sqrt(syst_alpha_err);
+            cout << "syst_alpha: " << syst_alpha*100. << " +/- " << syst_alpha*100.*syst_alpha_err << " (%)"<< endl;
+	    cout << "<--------- Alpha systematics --------->" << endl;
+
 
 
             Lalph1 += string(" &") + toLatexRounded(alpha,alpha_err);
@@ -3712,7 +3979,9 @@ void doBackgroundSubtraction(std::vector<TString>& selCh,TString ctrlCh,map<TStr
                 TString proc(shapeCtrl_SI.bckg[ibckg]->GetTitle());
                 if(proc.Contains("ZZ#rightarrow 2l2#nu") ||
                         proc.Contains("WZ#rightarrow 3l#nu") ||
-                        proc.Contains("Z+jets") )
+                        proc.Contains("Z+jets") ||
+			proc.Contains("W+jets") 
+		  )
                 {
                     emu_mcnonNRB->Add(shapeCtrl_SI.bckg[ibckg], 1);
                 }
@@ -3767,7 +4036,6 @@ void doBackgroundSubtraction(std::vector<TString>& selCh,TString ctrlCh,map<TStr
 			|| proc.Contains("Single top")
 			|| proc.Contains("WW#rightarrow l#nul#nu")
 			|| proc.Contains("Z#rightarrow #tau#tau") 
-			//|| proc.Contains("W+jets") 
 		)
 		{ 
                     MCNRB->Add(shapeChan_SI.bckg[ibckg], 1);

@@ -49,6 +49,7 @@ runProcess = cms.PSet(
     runOptimization = cms.bool(@runOptimization),
     weightsFile = cms.vstring(@weightsFile),	 
     fakeRateFile = cms.vstring("${CMSSW_BASE}/src/CMGTools/HiggsAna2l2v/data/fr_pt.root"),
+    BtagEffFiles = cms.vstring("${CMSSW_BASE}/src/CMGTools/HiggsAna2l2v/data/BTagEff.root"),
 #    hqtWeightsFile = cms.vstring(
 #	"${CMSSW_BASE}/src/CMGTools/HtoZZ2l2nu/data/HiggsQtWeights.root",
 #	"${CMSSW_BASE}/src/CMGTools/HtoZZ2l2nu/data/LineShapes.root",
@@ -60,7 +61,8 @@ runProcess = cms.PSet(
     ptResolFileName = cms.string("${CMSSW_RELEASE_BASE}/src/CondFormats/JetMETObjects/data/Spring10_PtResolution_AK5PF.txt"),
     phiResolFileName = cms.string("${CMSSW_RELEASE_BASE}/src/CondFormats/JetMETObjects/data/Spring10_PhiResolution_AK5PF.txt"),
     etaResolFileName = cms.string("${CMSSW_RELEASE_BASE}/src/CondFormats/JetMETObjects/data/Spring10_EtaResolution_AK5PF.txt"),
-    jesUncFileName = cms.string("${CMSSW_BASE}/src/CMGTools/HiggsAna2l2v/data/GR_R_42_V23_AK5PFchs_Uncertainty.txt"),
+    #jesUncFileName = cms.string("${CMSSW_BASE}/src/CMGTools/HiggsAna2l2v/data/GR_R_42_V23_AK5PFchs_Uncertainty.txt"),
+    jesUncFileName = cms.string("${CMSSW_BASE}/src/CMGTools/HiggsAna2l2v/data/Summer13_V5_MC_Uncertainty_AK5PFchs.txt"),
     #datapileup = datapileup_683_2012,
     datapileup = datapileupToUse,
     useMVA = cms.bool(@useMVA),	
